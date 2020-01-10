@@ -151,8 +151,8 @@ class MySystem(LinuxX86System):
 
         # Create an L1 instruction and data caches and an MMU cache
         # The MMU cache caches accesses from the inst and data TLBs
-        self.cpu.icache = L1ICache()# ERROR self._opts)
-        self.cpu.dcache = L1DCache()# ERRORself._opts)
+        self.cpu.icache = L1ICache(self._opts)
+        self.cpu.dcache = L1DCache(self._opts)
 
         # Connect the instruction, data, and MMU caches to the CPU
         self.cpu.icache.connectCPU(self.cpu)
