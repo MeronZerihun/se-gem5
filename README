@@ -1,3 +1,55 @@
+# EMTD gem5 #
+
+This repo houses the modifications made to gem5 to support simulating EMTD-compliant hardware. 
+
+##Building Gem5
+
+If building on an OS with gcc version 6+ (cough, Ubuntu 18.04) (note that you must have gcc v5 installed as well to force it to use it):
+
+```bash
+scons CC=gcc-5 CXX=g++-5 -j<num_build_threads> build/RISCV/gem5.opt
+```
+
+If building on an older OS with gcc version < 6 already installed:
+
+```bash
+scons -j<num_build_threads> build/RISCV/gem5.opt
+```
+
+##Running FS 
+#Add file using mount
+To run benchmarks in full system mode, the benchmark files must be on the disk image. You can mount the disk using the following command:
+```sudo mount -o loop,offset=32256 linux-x86.img temp-mount-dir
+```
+
+After the disk is mounted, you can copy files to it and the unmount using the following commands:
+```bash
+sudo cp bmk-file temp-mount-dir/desired-dir
+```
+
+```bash
+sudo unmoung temp-mount-dir
+```
+
+#Run a benchmark in full system mode
+To execute a benchmark in full system mode, create an .rcS file containing the terminal commands to execute that benchmark:
+```bash
+./desired-dir/bmk
+/sbin/m5 exit # Terminates simulator 
+```
+
+This .rcS file is passed to the gem5 simulator using the --script flag:
+```bash
+~/path-to-gem5/clean-gem5/build/X86/gem5.opt ~/path-to-gem5/clean-gem5/configs/fs/test-fs/run.py --script run.rcS
+```
+
+On exit, the stats file is written and the console output is be saved to a .device file in m5out. 
+
+
+
+
+## Original README Contents
+
 This is the gem5 simulator.
 
 The main website can be found at http://www.gem5.org
