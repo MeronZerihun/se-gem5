@@ -2,7 +2,7 @@
 
 This repo houses the modifications made to gem5 to support simulating EMTD-compliant hardware. 
 
-##Building Gem5
+## Building Gem5
 
 If building on an OS with gcc version 6+ (cough, Ubuntu 18.04) (note that you must have gcc v5 installed as well to force it to use it):
 
@@ -16,10 +16,11 @@ If building on an older OS with gcc version < 6 already installed:
 scons -j<num_build_threads> build/RISCV/gem5.opt
 ```
 
-##Running FS 
-#Add file using mount
+## Running FS 
+# Add file using mount
 To run benchmarks in full system mode, the benchmark files must be on the disk image. You can mount the disk using the following command:
-```sudo mount -o loop,offset=32256 linux-x86.img temp-mount-dir
+```bash
+sudo mount -o loop,offset=32256 linux-x86.img temp-mount-dir
 ```
 
 After the disk is mounted, you can copy files to it and the unmount using the following commands:
@@ -31,7 +32,7 @@ sudo cp bmk-file temp-mount-dir/desired-dir
 sudo unmoung temp-mount-dir
 ```
 
-#Run a benchmark in full system mode
+# Run a benchmark in full system mode
 To execute a benchmark in full system mode, create an .rcS file containing the terminal commands to execute that benchmark:
 ```bash
 ./desired-dir/bmk
