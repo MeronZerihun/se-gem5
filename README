@@ -17,7 +17,7 @@ scons -j<num_build_threads> build/RISCV/gem5.opt
 ```
 
 ## Running FS 
-# Add file using mount
+### Add file using mount
 To run benchmarks in full system mode, the benchmark files must be on the disk image. You can mount the disk using the following command:
 ```bash
 sudo mount -o loop,offset=32256 linux-x86.img temp-mount-dir
@@ -32,11 +32,11 @@ sudo cp bmk-file temp-mount-dir/desired-dir
 sudo unmoung temp-mount-dir
 ```
 
-# Run a benchmark in full system mode
+### Run a benchmark in full system mode
 To execute a benchmark in full system mode, create an .rcS file containing the terminal commands to execute that benchmark:
 ```bash
 ./desired-dir/bmk
-/sbin/m5 exit # Terminates simulator 
+/sbin/m5 exit      # Terminates simulator 
 ```
 
 This .rcS file is passed to the gem5 simulator using the --script flag:
