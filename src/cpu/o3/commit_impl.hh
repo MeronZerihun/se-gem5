@@ -83,6 +83,7 @@ DefaultCommit<Impl>::processTrapEvent(ThreadID tid)
 template <class Impl>
 DefaultCommit<Impl>::DefaultCommit(O3CPU *_cpu, DerivO3CPUParams *params)
     : commitPolicy(params->smtCommitPolicy),
+      metadata(params->metadata),
       cpu(_cpu),
       iewToCommitDelay(params->iewToCommitDelay),
       commitToIEWDelay(params->commitToIEWDelay),
@@ -1300,6 +1301,12 @@ DefaultCommit<Impl>::commitHead(const DynInstPtr &head_inst, unsigned inst_num)
     DPRINTF(Commit,
             "[tid:%i] [sn:%llu] Committing instruction with PC %s\n",
             tid, head_inst->seqNum, head_inst->pcState());
+    
+    /* EMTD */
+    assert(head_inst->staticInst);
+    metadata->propagate_result_tag_o3(thread[tid]->tc, head_inst->staticInst, head_inst->pc.instAddr(), head_inst->traceData);
+    /* END OF EMTD*/
+    
     if (head_inst->traceData) {
         head_inst->traceData->setFetchSeq(head_inst->seqNum);
         head_inst->traceData->setCPSeq(thread[tid]->numOp);

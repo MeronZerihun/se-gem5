@@ -52,6 +52,9 @@
 using Enums::OpClass;
 using Enums::No_OpClass;
 
+// BEGIN EMTD
+static const OpClass DDASJalrOp = Enums::DDASJalr;
+// END EMTD
 static const OpClass IntAluOp = Enums::IntAlu;
 static const OpClass IntMultOp = Enums::IntMult;
 static const OpClass IntDivOp = Enums::IntDiv;

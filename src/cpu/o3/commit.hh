@@ -52,6 +52,8 @@
 #include "cpu/timebuf.hh"
 #include "enums/CommitPolicy.hh"
 #include "sim/probe/probe.hh"
+//EMTD
+#include "emtd/Metadata.hh"
 
 struct DerivO3CPUParams;
 
@@ -356,6 +358,9 @@ class DefaultCommit
   public:
     /** ROB interface. */
     ROB *rob;
+
+    /** EMTD metadata object */
+    Metadata *metadata;
 
   private:
     /** Pointer to O3CPU. */

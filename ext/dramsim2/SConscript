@@ -69,6 +69,8 @@ DRAMFile('MultiChannelMemorySystem.cpp')
 DRAMFile('Rank.cpp')
 DRAMFile('SimulatorObject.cpp')
 DRAMFile('Transaction.cpp')
+DRAMFile('tag_cache.cpp')
+DRAMFile('simple_tag_cache.cpp')
 
 # DRAMSim2 violates some of the warning flags used by gem5, so
 # we explicitly disable them here

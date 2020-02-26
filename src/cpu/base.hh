@@ -603,7 +603,8 @@ class BaseCPU : public ClockedObject
     Stats::Scalar numCycles;
     Stats::Scalar numWorkItemsStarted;
     Stats::Scalar numWorkItemsCompleted;
-
+    int max_ins_any_thread = 0; //EMTD
+    
   private:
     std::vector<AddressMonitor> addressMonitor;
 

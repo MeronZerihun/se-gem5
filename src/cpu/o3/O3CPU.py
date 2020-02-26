@@ -74,6 +74,10 @@ class DerivO3CPU(BaseCPU):
     def support_take_over(cls):
         return True
 
+    #EMTD
+    metadata = Param.Metadata("EMTD metadata object")
+    #END EMTD
+
     activity = Param.Unsigned(0, "Initial count")
 
     cacheStorePorts = Param.Unsigned(200, "Cache Ports. "

@@ -1,0 +1,150 @@
+0	initializing
+== Loading device model file './ini/DDR3_micron_64M_8B_x4_sg15.ini' == 
+== Loading system model file './system.ini' == 
+===== MemorySystem 0 =====
+CH. 0 TOTAL_STORAGE : 16384MB | 4 Ranks | 16 Devices per rank
+0	initializing_tagged
+0	initializing
+== Loading device model file './ini/DDR3_micron_64M_8B_x4_sg15.ini' == 
+== Loading system model file './system.ini' == 
+===== MemorySystem 0 =====
+CH. 0 TOTAL_STORAGE : 16384MB | 4 Ranks | 16 Devices per rank
+0	initializing_tagged
+dramsim_test main()
+-----MEM1------
+0	processing_tagged_transaction	0x10000
+0	accepted
+0	processing_date_req
+0	tag_request	0x40000800
+0	processing_tagged_transaction	0x110000
+0	accepted
+0	processing_date_req
+0	tag_request	0x40008800
+writing vis file to ./results/example_app/DDR3_micron_64M_8B_x4_sg15/16GB.1Ch.4R.scheme2.open_page.32TQ.32CQ.RtB.pRank.vis
+DRAMSim2 Clock Frequency =1Hz, CPU Clock Frequency=1Hz
+1	new_cache_miss	0x40000800
+1	processing_tagged_transaction	0x40000800
+1	accepted
+2	Cache->DRAM	0x40000800
+2	new_cache_miss	0x40008800
+2	processing_tagged_transaction	0x40008800
+2	accepted
+3	Cache->DRAM	0x40008800
+5	processing_tagged_transaction	0x9000
+5	accepted
+5	processing_date_req
+5	tag_request	0x40000480
+6	new_cache_miss	0x40000480
+6	processing_tagged_transaction	0x40000480
+6	accepted
+7	Cache->DRAM	0x40000480
+27	response	0x10000
+27	DRAM_data_response	0x10000
+[Callback] write complete: 0 0x9000 cycle=31
+37	response	0x40000480
+37	DRAM_tag_response	0x40000480
+38	DRAM_Cache_resp	0x40000480
+38	DRAM->Cache	0x40000480
+38	cache_write_done	0x40000480
+76	response	0x110000
+76	DRAM_data_response	0x110000
+110	response	0x40000800
+110	DRAM_tag_response	0x40000800
+111	DRAM_Cache_resp	0x40000800
+111	DRAM->Cache	0x40000800
+111	cache_schedule	113
+[Callback] read complete: 0 0x10000 cycle=113
+114	response	0x40008800
+114	DRAM_tag_response	0x40008800
+115	DRAM_Cache_resp	0x40008800
+115	DRAM->Cache	0x40008800
+115	cache_schedule	117
+[Callback] read complete: 0 0x110000 cycle=117
+205	processing_tagged_transaction	0x20000
+205	accepted
+205	processing_date_req
+205	tag_request	0x40001000
+205	processing_tagged_transaction	0x120000
+205	accepted
+205	processing_date_req
+205	tag_request	0x40009000
+206	new_cache_miss	0x40001000
+206	processing_tagged_transaction	0x40001000
+206	accepted
+207	Cache->DRAM	0x40001000
+207	new_cache_miss	0x40009000
+207	processing_tagged_transaction	0x40009000
+207	accepted
+208	Cache->DRAM	0x40009000
+210	processing_tagged_transaction	0x9000
+210	accepted
+210	processing_date_req
+210	tag_request	0x40000480
+211	cache_hit	0x40000480 in way 0
+211	cache_write_done	0x40000480
+234	response	0x20000
+234	DRAM_data_response	0x20000
+[Callback] write complete: 0 0x9000 cycle=238
+283	response	0x120000
+283	DRAM_data_response	0x120000
+317	response	0x40001000
+317	DRAM_tag_response	0x40001000
+318	DRAM_Cache_resp	0x40001000
+318	DRAM->Cache	0x40001000
+318	cache_schedule	320
+[Callback] read complete: 0 0x20000 cycle=320
+321	response	0x40009000
+321	DRAM_tag_response	0x40009000
+322	DRAM_Cache_resp	0x40009000
+322	DRAM->Cache	0x40009000
+322	cache_schedule	324
+[Callback] read complete: 0 0x120000 cycle=324
+-----MEM2------
+0	processing_tagged_transaction	0x30000
+0	accepted
+0	processing_date_req
+0	tag_request	0x40001800
+0	processing_tagged_transaction	0x130000
+0	accepted
+0	processing_date_req
+0	tag_request	0x40009800
+writing vis file to ./results/example_app/DDR3_micron_64M_8B_x4_sg15/16GB.1Ch.4R.scheme2.open_page.32TQ.32CQ.RtB.pRank.vis
+DRAMSim2 Clock Frequency =1Hz, CPU Clock Frequency=1Hz
+1	new_cache_miss	0x40001800
+1	processing_tagged_transaction	0x40001800
+1	accepted
+2	Cache->DRAM	0x40001800
+2	new_cache_miss	0x40009800
+2	processing_tagged_transaction	0x40009800
+2	accepted
+3	Cache->DRAM	0x40009800
+5	processing_tagged_transaction	0x9000
+5	accepted
+5	processing_date_req
+5	tag_request	0x40000480
+6	new_cache_miss	0x40000480
+6	processing_tagged_transaction	0x40000480
+6	accepted
+7	Cache->DRAM	0x40000480
+27	response	0x30000
+27	DRAM_data_response	0x30000
+[Callback] write complete: 0 0x9000 cycle=31
+37	response	0x40000480
+37	DRAM_tag_response	0x40000480
+38	DRAM_Cache_resp	0x40000480
+38	DRAM->Cache	0x40000480
+38	cache_write_done	0x40000480
+76	response	0x130000
+76	DRAM_data_response	0x130000
+110	response	0x40001800
+110	DRAM_tag_response	0x40001800
+111	DRAM_Cache_resp	0x40001800
+111	DRAM->Cache	0x40001800
+111	cache_schedule	113
+[Callback] read complete: 0 0x30000 cycle=113
+114	response	0x40009800
+114	DRAM_tag_response	0x40009800
+115	DRAM_Cache_resp	0x40009800
+115	DRAM->Cache	0x40009800
+115	cache_schedule	117
+[Callback] read complete: 0 0x130000 cycle=117

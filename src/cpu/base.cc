@@ -288,6 +288,10 @@ BaseCPU::init()
             scheduleInstStop(tid, params()->max_insts_any_thread, cause);
     }
 
+    /* BEGIN EMTD */
+    max_ins_any_thread = params()->max_insts_any_thread;
+    /* END EMTD */
+
     // Set up instruction-count-based termination events for SimPoints
     // Typically, there are more than one action points.
     // Simulation.py is responsible to take the necessary actions upon

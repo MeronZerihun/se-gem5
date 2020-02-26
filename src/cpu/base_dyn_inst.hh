@@ -173,6 +173,7 @@ class BaseDynInst : public ExecContext, public RefCounted
      */
     std::queue<InstResult> instResult;
 
+  public:
     /** PC state for this instruction. */
     TheISA::PCState pc;
 

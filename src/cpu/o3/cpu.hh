@@ -179,6 +179,9 @@ class FullO3CPU : public BaseO3CPU
      */
     void drainSanityCheck() const;
 
+  //EMTD
+  public:
+  //END EMTD :: Note: Function prev called isDrained()
     /** Check if a system is in a drained state. */
     bool isCpuDrained() const;
 
@@ -289,6 +292,10 @@ class FullO3CPU : public BaseO3CPU
     /** Starts draining the CPU's pipeline of all instructions in
      * order to stop all memory accesses. */
     DrainState drain() override;
+
+    //EMTD
+    void churn_drain();
+    //END EMTD
 
     /** Resumes execution after a drain. */
     void drainResume() override;
@@ -568,9 +575,17 @@ class FullO3CPU : public BaseO3CPU
     /** The issue/execute/writeback stages. */
     typename CPUPolicy::IEW iew;
 
+  //EMTD
+  public:
+  //END EMTD
     /** The commit stage. */
     typename CPUPolicy::Commit commit;
 
+  //EMTD
+    bool start_churn_drain;
+
+  protected:
+  //END EMTD
     /** The rename mode of the vector registers */
     Enums::VecRegRenameMode vecMode;
 

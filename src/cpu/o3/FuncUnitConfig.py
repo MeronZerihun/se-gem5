@@ -44,6 +44,14 @@ from m5.params import *
 
 from m5.objects.FuncUnit import *
 
+
+#### BEGIN EMTD
+class DDASJalr(FUDesc):
+    opList = [ OpDesc(opClass='DDASJalr', opLat=2, pipelined=False)]
+    count = 1
+#### END EMTD
+
+
 class IntALU(FUDesc):
     opList = [ OpDesc(opClass='IntAlu') ]
     count = 6

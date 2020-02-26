@@ -1,0 +1,6 @@
+Import('*')
+
+SimObject('Churn.py')
+Source('churn.cc')
+
+DebugFlag('Churn')

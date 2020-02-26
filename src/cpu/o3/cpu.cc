@@ -108,6 +108,7 @@ FullO3CPU<Impl>::FullO3CPU(DerivO3CPUParams *params)
       rename(this, params),
       iew(this, params),
       commit(this, params),
+      //start_churn_drain(false), EMTD
 
       /* It is mandatory that all SMT threads use the same renaming mode as
        * they are sharing registers and rename */
@@ -583,6 +584,17 @@ FullO3CPU<Impl>::tick()
         updateThreadPriority();
 
     tryDrain();
+
+    //EMTD
+    /*if(start_churn_drain){
+        start_churn_drain=false;
+    	DPRINTF(O3CPU, "EMTD-- before drain\n");
+    	drain();
+	DPRINTF(O3CPU, "EMTD-- after drain\n");
+        //return;
+    }*/
+    //END EMTD
+
 }
 
 template <class Impl>
@@ -1012,6 +1024,15 @@ FullO3CPU<Impl>::drain()
         return DrainState::Drained;
     }
 }
+
+//EMTD
+template <class Impl>
+void
+FullO3CPU<Impl>::churn_drain()
+{
+    start_churn_drain = true;
+}
+//END EMTD:: Note, this shouldn't be needed when churn is off
 
 template <class Impl>
 bool
