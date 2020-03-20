@@ -76,8 +76,9 @@ typedef struct {
 // Define enum for tag types 
 enum Emtd_tag: uint8_t {
 	DATA 		= 0,
-	CODE_PTR	= 1,
+	CIPHERTEXT	= 1,
 	UNTAGGED	= 2,
+	CODE_PTR	= 3,
 	Count
 };
 
@@ -147,7 +148,7 @@ public:
     bool is_churning;
 private:
 	// Some nice string representations of tags
-	std::array <std::string,5> EMTD_TAG_NAMES {{"DATA(0)", "CODE_PTR(1)", "UNTAGGED(2)"}};
+	std::array <std::string,5> EMTD_TAG_NAMES {{"DATA(0)", "CIPHERTEXT(1)", "UNTAGGED(2)"}};
 	std::map<memaddr_t, Emtd_tag> memory_tags;			// Current state of memory tags
 														// NOTE: Register's hold their own tags (in regfile)
 	std::map<memaddr_t, Emtd_tag> insns_consts_tags;	// Used to find tag of destination register in insns

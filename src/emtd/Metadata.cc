@@ -427,6 +427,10 @@ void Metadata::propagate_result_tag(Minor::MinorDynInstPtr inst) {
         /*** Loads: Take the tag from memory and override the RD tag
              Invalid Op: Address being used (RS1) is a non-ptr type
         ***/
+	if (RS1_TAG == CIPHERTEXT || RS2_TAG == CIPHERTEXT){
+	    DPRINTF(emtd, "Source operands are ciphertexts\n");
+	}
+
     	if(Ops.is_memory_load_op(opc)){
             // Write the resulting tag into RD
             WRITE_RD_TAG(get_mem_tag(get_mem_addr(inst)));
