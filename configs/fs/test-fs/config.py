@@ -11,3 +11,5 @@ L2_cache_size='256kB'
 churn_sleep_cycles=125e6
 clock_rate='2.5GHz'
 
+systemWidth=4
+

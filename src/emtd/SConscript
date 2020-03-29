@@ -6,3 +6,4 @@ Source('emtd_riscv_op_groups.cc')
 
 DebugFlag('emtd')
 DebugFlag('emtd_warning')
+DebugFlag('priv')

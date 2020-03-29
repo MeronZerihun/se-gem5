@@ -79,7 +79,7 @@ class MySystem(LinuxX86System):
    
         # Change this path to point to the kernel you want to use
         # Kernel from http://www.m5sim.org/dist/current/x86/x86-system.tar.bz2
-        self.kernel = '/home/lbiernac/test-sim/full-system-images/x86/binaries/x86_64-vmlinux-2.6.22.9'
+        self.kernel = '/home/lbiernac/privacy/full-system-images/x86/binaries/x86_64-vmlinux-2.6.22.9'
 
         # Options specified on the kernel command line
         # - earlyprintk=ttyS0: Enables the kernel output to be directed to the 
@@ -97,7 +97,7 @@ class MySystem(LinuxX86System):
         # The first disk is the root disk. The second could be used for swap
         # or anything else.
         # Disks from http://www.m5sim.org/dist/current/x86/x86-system.tar.bz2
-        self.setDiskImage('/home/lbiernac/test-sim/full-system-images/x86/disks/linux-x86.img')
+        self.setDiskImage('/home/lbiernac/privacy/full-system-images/x86/disks/linux-x86.img')
     
         # Create the CPU for our system.
         self.createCPU()
@@ -136,9 +136,15 @@ class MySystem(LinuxX86System):
         # Note: If you use multiple CPUs, then the BIOS config needs to be
         #       updated as well.
 
-        self.cpu = AtomicSimpleCPU()
-        self.mem_mode = 'atomic'
+        self.cpu = DerivO3CPU(fetchWidth = systemWidth, decodeWidth = systemWidth, renameWidth = systemWidth, dispatchWidth = systemWidth, issueWidth = systemWidth, commitWidth = systemWidth, squashWidth = systemWidth)
+	self.mem_mode = 'timing'
+
         self.cpu.createThreads()
+	self.metadata = Metadata()
+	self.metadata.filename = 'main.metadata.bin'
+	self.metadata.progname = 'mcf'
+	self.metadata.libc_start = 0x00012c48
+	self.cpu.metadata = self.metadata
 
 
 
