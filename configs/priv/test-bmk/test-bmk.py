@@ -47,6 +47,7 @@ from m5.objects import *
 
 # Add the common scripts to our path
 m5.util.addToPath('../../../')
+m5.util.addToPath('../')
 
 # import the caches which we made
 from caches import *
@@ -66,7 +67,7 @@ isa = str(m5.defines.buildEnv['TARGET_ISA']).lower()
 # Default to running 'hello', use the compiled ISA to find the binary
 #binary = 'tests/test-progs/hello/bin/' + isa + '/linux/hello'
 binary = ['main']
-# input_file = ['-I./lib', 'checkspam.pl', '2500', '5', '25', '11', '150', '1', '1', '1', '1']
+input_file = [''] #['-I./lib', 'checkspam.pl', '2500', '5', '25', '11', '150', '1', '1', '1', '1']
 output_file = 'main.out'
 
 # Check if there was a binary passed in via the command line and error if
@@ -146,12 +147,12 @@ system.mem_ctrl.port = system.membus.master
 
 
 
-system.churn = Churn()
-system.churn.cache  = ChurnCache(opts)
-system.churn.mem_side = system.churn.cache.cpu_side
-system.churn.cache.mem_side = system.l2bus.slave
-system.churn.churnSleepCycles = churn_sleep_cycles
-system.churn.cpu = system.cpu
+#system.churn = Churn()
+#system.churn.cache  = ChurnCache(opts)
+#system.churn.mem_side = system.churn.cache.cpu_side
+#system.churn.cache.mem_side = system.l2bus.slave
+#system.churn.churnSleepCycles = churn_sleep_cycles
+#system.churn.cpu = system.cpu
 
 # Create a process for a simple "Hello World" application
 process = Process()

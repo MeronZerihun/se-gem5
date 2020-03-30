@@ -91,3 +91,4 @@ dramenv.Library('dramsim2', [dramenv.SharedObject(f) for f in dram_files])
 main.Prepend(CPPPATH=Dir('.'))
 main.Append(LIBS=['dramsim2'])
 main.Prepend(LIBPATH=[Dir('.')])
+

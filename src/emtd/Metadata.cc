@@ -318,6 +318,9 @@ void Metadata::clear_mem_range_tags(memaddr_t bound1, memaddr_t bound2) {
 
 // Populates both the memory_tags and insns_consts_tags maps
 void Metadata::load_metadata_binary(const char* filename) {
+	
+	DPRINTF(priv, "Loading metadata binary...\n");
+
 	// Open the metadata binary file
 	int metafile_descriptor = open(filename, O_RDONLY);
 	// Get file statistics (for its size)
@@ -335,6 +338,8 @@ void Metadata::load_metadata_binary(const char* filename) {
 	size_t num_meta_entries = metafile_size / sizeof(Emtd_MetadataEntry);
 	assert(num_meta_entries > 0);
 
+	DPRINTF(priv, "Found %d metadata entries...\n", num_meta_entries);
+
 	// Parse through the metadata file
 	auto meta_entries = (Emtd_MetadataEntry*)buf;
 	for (unsigned i = 0; i < num_meta_entries; i++) {
@@ -343,12 +348,14 @@ void Metadata::load_metadata_binary(const char* filename) {
 		Emtd_tag entry_tag = convert_tagbyte_to_tag(meta_entries[i].tagbyte);
 		Emtd_tag_type entry_tag_type = convert_tagbyte_to_tag_type(meta_entries[i].tagbyte);
 
-        if (entry_tag_type == DATA_SEG) {
+                if (entry_tag_type == DATA_SEG) {
 		    // Tag representing a global variable in the data segment. Add to the *memory_tags* map
-			memory_tags[entry_start_addr] = entry_tag;
+		    DPRINTF(priv, "Found global variable at 0x%x in data segment with tag %d\n", entry_start_addr, entry_tag);
+		    memory_tags[entry_start_addr] = entry_tag;
 		} else if (entry_tag_type == INSN_CONST) {
 		    // Tag representing the result of an instruction loading in a constant. Add to *insns_consts_tags* map
-			insns_consts_tags[entry_start_addr] = entry_tag;
+		    insns_consts_tags[entry_start_addr] = entry_tag;
+		    DPRINTF(priv, "Found instruction loading a constant\n");	    
 		}
 	}
 
