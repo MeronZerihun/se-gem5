@@ -175,6 +175,10 @@ void Metadata::set_reg_tag(RegId regIdx, Emtd_tag newtag){
     if (!regIdx.isZeroReg()){
         reg_tags[regIdx] = newtag;
     }
+    if (newtag == CIPHERTEXT){
+        DPRINTF(priv, "REG :: R%d tagged as %s\n", regIdx.flatIndex(), EMTD_TAG_NAMES[newtag]);
+    }
+
 }
 
 // Get a status tag for register
@@ -189,9 +193,6 @@ Emtd_status_tag Metadata::get_reg_tag_status(RegId regIdx){
 void Metadata::set_reg_tag_status(RegId regIdx, Emtd_status_tag tag){
     if (!regIdx.isZeroReg()){
         reg_tags_status[regIdx] = tag;
-    }
-    if (tag == CIPHERTEXT){
-        DPRINTF(priv, "REG 0x%x :: Reg %d tagged as %s\n", regIdx.flatIndex(), EMTD_TAG_NAMES[newtag]);
     }
 }
 
@@ -322,12 +323,12 @@ void Metadata::load_metadata_binary(const char *filename){
 
             // Insert the first code element into *memory_tags* map
             memory_tags[entry_start_addr] = entry_tag;
-            DPRINTF(priv, "Tagging global variable at 0x%x with tag %d\n", entry_start_addr, entry_tag);
+            DPRINTF(priv, "Tagging global variable at 0x%x with tag %s\n", entry_start_addr, EMTD_TAG_NAMES[entry_tag]);
 
             // Populate rest of the code entries
             for (memaddr_t idx = entry_start_addr; idx < entry_end_addr; idx += EMTD_CODE_TAG_GRANULARITY){
                 memory_tags[idx] = entry_tag;
-                DPRINTF(priv, "Tagging global variable at 0x%x with tag %d\n", idx, entry_tag);
+                DPRINTF(priv, "Tagging global variable at 0x%x with tag %s\n", idx, EMTD_TAG_NAMES[entry_tag]);
             }
 
             // Increment loop to skip next entry (already processed as the code end tag)
@@ -380,7 +381,7 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
             set_reg_tag(RD, rd_tag);
 
             if(rd_tag == CIPHERTEXT){
-                DPRINTF(priv, "LOAD from 0x%x with tag %d\n", mem_addr, rd_tag);
+                DPRINTF(priv, "LOAD from 0x%x with tag %s\n", mem_addr, EMTD_TAG_NAMES[rd_tag]);
 		set_reg_tag(RD, rd_tag);
             }
             DPRINTF(emtd, "0x%lu: Wrote tag %s to register %x\n", pc, EMTD_TAG_NAMES[get_mem_tag(get_mem_addr(inst, traceData))], RD.index());
