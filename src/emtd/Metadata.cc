@@ -366,112 +366,94 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
         //       Always propagate ciphertext tag to dest reg
 
 
-        /*if (RS1_TAG == CIPHERTEXT || RS2_TAG == CIPHERTEXT){
-            DPRINTF(priv, "Source operands are ciphertexts\n");
-        }*/
 
         /*** Loads: Take the tag from memory and override the RD tag
-             Invalid Op: Address being used (RS1) is a ciphertext type
+        **** Invalid Op: Address being used (RS1) is a ciphertext type
         ***/
         if (Ops.is_memory_load_op(opc))
         {
+            // Check Invalid Op
+            // TODO
+
             // Write the resulting tag into RD
             Addr mem_addr = get_mem_addr(inst, traceData);
             Emtd_tag rd_tag = get_mem_tag(mem_addr);
             set_reg_tag(RD, rd_tag);
 
             if(rd_tag == CIPHERTEXT){
-                DPRINTF(priv, "LOAD from 0x%x with tag %s\n", mem_addr, EMTD_TAG_NAMES[rd_tag]);
-		set_reg_tag(RD, rd_tag);
+                DPRINTF(priv, "OP :: LOAD from 0x%x with tag %s\n", mem_addr, EMTD_TAG_NAMES[rd_tag]);
             }
-            DPRINTF(emtd, "0x%lu: Wrote tag %s to register %x\n", pc, EMTD_TAG_NAMES[get_mem_tag(get_mem_addr(inst, traceData))], RD.index());
-            DPRINTF(emtd, "ADDR LOADED FROM: 0x%x\n", get_mem_addr(inst, traceData));
+            DPRINTF(emtd, "0x%lu: Wrote tag %s to register %x\n", pc, EMTD_TAG_NAMES[rd_tag], RD.index());
         }
 
         /*** Stores: Take the tag of RS2 (reg being stored) and override the tag in memory
-             Invalid Op: Address being used (RS1) is a ciphertext type 
+        **** Invalid Op: Address being used (RS1) is a ciphertext type 
         ***/
         else if (Ops.is_memory_store_op(opc))
         {
+            // Check Invalid Op
+            // TODO
+
             // Write tag from RS2 into memory
             Addr mem_addr = get_mem_addr(inst, traceData);
-            set_mem_tag(mem_addr, get_reg_tag(RS2));
-            if (get_reg_tag(RS2) == CODE_PTR)
-            {
+            Emtd_tag rs2_tag = get_reg_tag((RS2));
+            set_mem_tag(mem_addr, rs2_tag);
 
+            if(rd_tag == CIPHERTEXT){
+                DPRINTF(priv, "OP :: Store to 0x%x with tag %s\n", mem_addr, EMTD_TAG_NAMES[rs2_tag]);
             }
-
-            DPRINTF(emtd, "0x%x: Wrote tag %s to memory 0x%x\n", pc, EMTD_TAG_NAMES[get_reg_tag(RS2)], get_mem_addr(inst, traceData));
+            DPRINTF(emtd, "0x%x: Wrote tag %s to memory 0x%x\n", pc, EMTD_TAG_NAMES[rs2_tag], mem_addr);
         }
 
         /*** REG Arithmetic: Check tags of RS1 and RS2 for RD tag
-                 Invalid Ops: Check the header file. This depends on the source tags
-            ***/
-        else if (Ops.is_reg_arith_op(opc))
+        **** Invalid Ops: Check the header file. This depends on the source tags
+        ***/
+        else if (Ops.is_reg_arith_op(opc) || Ops.is_cmp_op(opc))
         {
-            // Outlawing any arithmetic on code pointers (this is actually C-standard)
-            if (get_reg_tag(RS1) == CODE_PTR || get_reg_tag(RS2) == CODE_PTR)
-            {
-                sprintf(warn1, "0x%lu\n", pc);
-                sprintf(warn2, "EMTD CHECK: Policy Violated on REG ARITH. Operand is CODE_PTR(3) %s.\n", opc.c_str());
-                //DPRINTF(emtd_warning, "RS1 Tag: %s \tRS2 Tag: %s\n", EMTD_TAG_NAMES[RS1_TAG], EMTD_TAG_NAMES[RS2_TAG]);
-                set_reg_tag(RD, DATA);
-                set_reg_tag_status(RD, CLEAN);
-                //throw EMTD_INVALIDOP;
-                //record_violation(pc, std::string(warn2), std::string(warn1));
+            // Check Invalid Op
+            // TODO
+
+            if (get_reg_tag(RS1) == CIPHERTEXT || get_reg_tag(RS2) == CIPHERTEXT){
+                set_reg_tag(RD, CIPHERTEXT);
+                // set_reg_tag_status(RD, CLEAN);
+                DPRINTF(priv, "OP :: R%d <-- R%d op R%d with tag %s\n", RD.index(), RS1.index(), RS2.index(), EMTD_TAG_NAMES[CIPHERTEXT]);
+                DPRINTF(emtd, "0x%x: Wrote tag %s to register %x\n", pc, EMTD_TAG_NAMES[CIPHERTEXT], RD.index());
             }
-            // All other ops should generate a DATA tag
-            else
-            {
+            else {
                 set_reg_tag(RD, DATA);
-                set_reg_tag_status(RD, CLEAN);
+                // set_reg_tag_status(RD, CLEAN);
                 DPRINTF(emtd, "0x%x: Wrote tag %s to register %x\n", pc, EMTD_TAG_NAMES[DATA], RD.index());
             }
+
             //check if the stack pointer is changing
-            //assert(d_inst->traceData);
-            //check_stack_pointer(d_inst->traceData->getThread());
             check_stack_pointer(tc);
         }
 
         /*** IMMED Arithmetic: Moves the tag of RS1 into RD
-                 Invalid Op: Still can't use CODE as an operand
-            ***/
+        **** Invalid Op: Still can't use CODE as an operand
+        ***/
         else if (Ops.is_immed_arith_op(opc))
         {
+            // Check Invalid Op
+            // TODO
+
             set_reg_tag(RD, get_reg_tag(RS1));
-            set_reg_tag_status(RD, get_reg_tag_status(RS1));
+            // set_reg_tag_status(RD, get_reg_tag_status(RS1));
 
             DPRINTF(emtd, "0x%lu: Wrote tag %s to register %x\n", pc, EMTD_TAG_NAMES[get_reg_tag(RS1)], RD.index());
+            
             //check if the stack pointer is changing
-            //assert(d_inst->traceData);
-            //check_stack_pointer(d_inst->traceData->getThread());
             check_stack_pointer(tc);
         }
 
-        /*** Compare operations: RD is always DATA
-                 Invalid Ops: CODE better not be an operand... that's just wrong >_>
-            ***/
-        else if (Ops.is_cmp_op(opc))
-        {
-            // Restricting compares to within the same domain, BUT, compares to ZERO register are allowed
-            // ALSO: immediate-operand based compares must be allowed.
-            set_reg_tag(RD, DATA);
-            set_reg_tag_status(RD, CLEAN);
-            DPRINTF(emtd, "0x%lu: Wrote tag %s to register %x\n", pc, EMTD_TAG_NAMES[DATA], RD.index());
-        }
-
         /*** Jumps: Move tag of NPC into RD (saves a return addr)
-                 Invalid Op: Address being used (RS1 for JALR only...) is not a CODE_PTR
-            ***/
+        **** Invalid Op: Address being used (RS1 for JALR only...) is not a CODE_PTR
+        ***/
         else if (Ops.is_jump_op(opc))
         {
-            if (opc == "jalr" && get_reg_tag(RS1) != CODE_PTR)
-            {
-                sprintf(warn1, "0x%lu\n", pc);
-                sprintf(warn2, "EMTD CHECK: Policy Violated on JALR. Tag should be CODE_PTR(3), got %s.\n", EMTD_TAG_NAMES[get_reg_tag(RS1)].c_str());
-                //throw EMTD_INVALIDOP;
-                //record_violation(pc, std::string(warn2), std::string(warn1));
-            }
+            // Check Invalid Op
+            // TODO
+
 
             // STACK FRAME HANDLING
             // Function Call? Save SP
@@ -496,15 +478,15 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
         }
 
         /*** Branches: Nothing happens here. The resulting PC is made by get_next_pc_tag later in execution
-                 Invalid Op: Using CODE as an operand
-            ***/
+        **** Invalid Op: Using CODE as an operand
+        ***/
         else if (Ops.is_branch_op(opc))
         {
             // Invalid using CODE as an operand
         }
 
         /*** All Else: If there is an RD (not the ZERO register), assign a DATA tag
-            ***/
+        ***/
         else
         {
             set_reg_tag(RD, DATA);
