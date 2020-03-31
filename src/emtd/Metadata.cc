@@ -346,9 +346,31 @@ void Metadata::load_metadata_binary(const char* filename) {
 		// Get entry's starting address and tag
 		memaddr_t entry_start_addr = convert_byte_array_to_addr(meta_entries[i].startaddr);
 		Emtd_tag entry_tag = convert_tagbyte_to_tag(meta_entries[i].tagbyte);
-		Emtd_tag_type entry_tag_type = convert_tagbyte_to_tag_type(meta_entries[i].tagbyte);
+		//Emtd_tag_type entry_tag_type = convert_tagbyte_to_tag_type(meta_entries[i].tagbyte);
 
-                if (entry_tag_type == DATA_SEG) {
+		if (entry_tag == CIPHERTEXT){
+		    // If it's a ciphertext tag, it's a start addr
+		    // Assert the next entry is the ciphertexts' end addr
+		    assert(convert_tagbyte_to_tag(meta_entries[i+1].tagbyte) == CIPHERTEXT);
+		    memaddr_t entry_end_addr = convert_byte_array_to_addr(meta_entries[i+1].startaddr);
+		
+		    // Insert the first code element into *memory_tags* map
+		    memory_tags[entry_start_addr] = entry_tag;
+		    DPRINTF(priv, "Tagging global variable at 0x%x with tag %d\n", entry_start_addr, entry_tag);
+
+		    // Populate rest of the code entries 
+   		    for (memaddr_t idx = entry_start_addr; idx < entry_end_addr; idx += EMTD_CODE_TAG_GRANULARITY) {
+			memory_tags[idx] = entry_tag;
+                        DPRINTF(priv, "Tagging global variable at 0x%x with tag %d\n", idx, entry_tag);
+		    }
+
+		    // Increment loop to skip next entry (already processed as the code end tag)
+		    i++;
+		}
+		else {
+		    assert(entry_tag == DATA);
+		}
+                /*if (entry_tag_type == DATA_SEG) {
 		    // Tag representing a global variable in the data segment. Add to the *memory_tags* map
 		    DPRINTF(priv, "Found global variable at 0x%x in data segment with tag %d\n", entry_start_addr, entry_tag);
 		    memory_tags[entry_start_addr] = entry_tag;
@@ -356,7 +378,7 @@ void Metadata::load_metadata_binary(const char* filename) {
 		    // Tag representing the result of an instruction loading in a constant. Add to *insns_consts_tags* map
 		    insns_consts_tags[entry_start_addr] = entry_tag;
 		    DPRINTF(priv, "Found instruction loading a constant\n");	    
-		}
+		}*/
 	}
 
 	// Unmap the metafile (clear memory, yay!)
@@ -401,158 +423,6 @@ uint64_t Metadata::get_reg_value(Minor::MinorDynInstPtr inst, RegId regIdx) {
     return inst->traceData->getThread()->readIntReg(regIdx.index());
 }
 
-// Check header for propagation policies being implemented here
-// This function must modify either the RD_TAG or a tag in the memory_tags map
-void Metadata::propagate_result_tag(Minor::MinorDynInstPtr inst) {
-
-	RISCVOps Ops;
-    // Check for a valid rd_tag being set, meaning, we have an OVERRIDE TAG
-	StaticInstPtr sI = inst->staticInst;
-    Emtd_tag rdTag = get_insn_const_tag(inst->pc.instAddr());
-    if (rdTag != UNTAGGED) {
-        // See if this is a store. If so, tag needs to go into the memory_tags map
-        if(sI->isStore()){
- 			set_mem_tag(get_mem_addr(inst), rdTag);
-        }
-        else{
-        	RegId regIdx = sI->destRegIdx(0); //get destination register index
-           	set_reg_tag(regIdx, rdTag);
-        }
-        // We are done here
-        return;
-    }
-
-    // Save the $sp IF this is the insn coming *after* a function call
-    // if (next_insn_save_sp) save_sp(inst);
-
-    std::string opc = inst->staticInst->getName();
-
-    try {
-        // So, not an insn loading a constant eh? Let's go through the policies then...
-	    char warn1 [100];
-	    char warn2 [100];
-
-        /*** Loads: Take the tag from memory and override the RD tag
-             Invalid Op: Address being used (RS1) is a non-ptr type
-        ***/
-	if (RS1_TAG == CIPHERTEXT || RS2_TAG == CIPHERTEXT){
-	    DPRINTF(priv, "Source operands are ciphertexts\n");
-	}
-
-    	if(Ops.is_memory_load_op(opc)){
-            // Write the resulting tag into RD
-            WRITE_RD_TAG(get_mem_tag(get_mem_addr(inst)));
-            DPRINTF(emtd, "0x%lu: Wrote tag %s to register %x\n", inst->pc.instAddr(), EMTD_TAG_NAMES[get_mem_tag(get_mem_addr(inst))], inst->staticInst->destRegIdx(0).index());
-            DPRINTF(emtd, "ADDR LOADED FROM: 0x%x\n", get_mem_addr(inst)); 
-        }
-
-        /*** Stores: Take the tag of RS2 (reg being stored) and override the tag in memory
-             Invalid Op: Address being used (RS1) is a non-ptr type OR value being stored is CODE
-        ***/
-        else if(Ops.is_memory_store_op(opc)){
-            // Write tag from RS2 into memory
-            WRITE_MEM_TAG(get_mem_addr(inst), RS2_TAG);
-            DPRINTF(emtd, "0x%x: Wrote tag %s to memory 0x%x\n", inst->pc.instAddr(), EMTD_TAG_NAMES[RS2_TAG], get_mem_addr(inst));
-        }
-
-        /*** REG Arithmetic: Check tags of RS1 and RS2 for RD tag
-             Invalid Ops: Check the header file. This depends on the source tags
-        ***/
-        else if(Ops.is_reg_arith_op(opc)){
-            // Outlawing any arithmetic on code pointers (this is actually C-standard)
-            if (RS1_TAG == CODE_PTR || RS2_TAG == CODE_PTR) {
-                sprintf(warn1, "0x%lu\n", inst->pc.instAddr());
-                sprintf(warn2, "EMTD CHECK: Policy Violated on REG ARITH. Operand is CODE_PTR(3) %s.\n", opc.c_str());
-                //DPRINTF(emtd_warning, "RS1 Tag: %s \tRS2 Tag: %s\n", EMTD_TAG_NAMES[RS1_TAG], EMTD_TAG_NAMES[RS2_TAG]);
-                WRITE_RD_TAG(DATA);
-                //throw EMTD_INVALIDOP;
-	            record_violation(inst->pc.instAddr(), std::string(warn2), std::string(warn1));
-	        }
-            // All other ops should generate a DATA tag
-            else {
-                WRITE_RD_TAG(DATA);
-                DPRINTF(emtd, "0x%x: Wrote tag %s to register %x\n", inst->pc.instAddr(), EMTD_TAG_NAMES[DATA], inst->staticInst->destRegIdx(0).index());
-            }
-            //check if the stack pointer is changing 
-            assert(inst->traceData);
-            check_stack_pointer(inst->traceData->getThread());
-        }
-
-        /*** IMMED Arithmetic: Moves the tag of RS1 into RD
-             Invalid Op: Still can't use CODE as an operand
-        ***/
-        else if(Ops.is_immed_arith_op(opc)){
-            WRITE_RD_TAG(RS1_TAG);
-            DPRINTF(emtd, "0x%lu: Wrote tag %s to register %x\n", inst->pc.instAddr(), EMTD_TAG_NAMES[RS1_TAG], inst->staticInst->destRegIdx(0).index());
-            //check if the stack pointer is changing 
-            assert(inst->traceData);
-            check_stack_pointer(inst->traceData->getThread());
-        }
-
-        /*** Compare operations: RD is always DATA
-             Invalid Ops: CODE better not be an operand... that's just wrong >_>
-        ***/
-        else if(Ops.is_cmp_op(opc)){
-            // Restricting compares to within the same domain, BUT, compares to ZERO register are allowed
-            // ALSO: immediate-operand based compares must be allowed.
-            if ((RS1_TAG != RS2_TAG) && (opc != "slti" && opc != "sltiu") && (!RS1_IDX.isZeroReg() && !RS2_IDX.isZeroReg())) {
-                sprintf(warn1, "0x%lu\n", inst->pc.instAddr());
-                sprintf(warn2, "EMTD CHECK: Policy Violated on COMPARE. Operand Tags do not match\n");
-                //DPRINTF(emtd_warning, "RS1 Tag: %s \tRS2 Tag: %s\n", EMTD_TAG_NAMES[RS1_TAG], EMTD_TAG_NAMES[RS2_TAG]);
-                //throw EMTD_INVALIDOP;
-	        record_violation(inst->pc.instAddr(), std::string(warn2), std::string(warn1));
-	    }
-            WRITE_RD_TAG(DATA);
-            DPRINTF(emtd, "0x%lu: Wrote tag %s to register %x\n", inst->pc.instAddr(), EMTD_TAG_NAMES[DATA], inst->staticInst->destRegIdx(0).index());
-        }
-
-        /*** Jumps: Move tag of NPC into RD (saves a return addr)
-             Invalid Op: Address being used (RS1 for JALR only...) is not a CODE_PTR
-        ***/
-        else if(Ops.is_jump_op(opc)){
-            if (opc == "jalr" && RS1_TAG != CODE_PTR) {
-		        sprintf(warn1, "0x%lu\n", inst->pc.instAddr());
-                sprintf(warn2, "EMTD CHECK: Policy Violated on JALR. Tag should be CODE_PTR(3), got %s.\n",EMTD_TAG_NAMES[RS1_TAG].c_str());
-                //throw EMTD_INVALIDOP;
-	            record_violation(inst->pc.instAddr(), std::string(warn2), std::string(warn1));
-	        }
-
-            // STACK FRAME HANDLING
-            // Function Call? Save SP
-            // CALLS == JAL/JALR's with RD == $ra
-            if (sI->destRegIdx(0).index() == 1){
-                assert(inst->traceData);
-                save_sp(inst->traceData->getThread());
-            }
-            // Function Return? Deallocate
-            else if (opc == "jalr" && sI->srcRegIdx(0).index() == 1 && sI->destRegIdx(0).index() == 0) {
-                deallocate_stack_tags();
-            }
-            // END STACK FRAME HANDLING
-           
-            //Write tag for next instruction if destination is not zero register
-            if(inst->staticInst->destRegIdx(0).index() != 0)
-                WRITE_RD_TAG(CODE_PTR);
-        }
-
-        /*** Branches: Nothing happens here. The resulting PC is made by get_next_pc_tag later in execution
-             Invalid Op: Using CODE as an operand
-        ***/
-        else if(Ops.is_branch_op(opc)){
-            // Invalid using CODE as an operand
-        }
-
-        /*** All Else: If there is an RD (not the ZERO register), assign a DATA tag
-        ***/
-        else{
-            WRITE_RD_TAG(DATA);
-            DPRINTF(emtd, "0x%x: Wrote tag %s to register %x\n", inst->pc.instAddr(), EMTD_TAG_NAMES[DATA], inst->staticInst->destRegIdx(0).index());
-        }
-     }
-    catch (int e) {
-        exit(e);
-    }
-}
 
 
 void Metadata::propagate_result_tag_o3(ThreadContext * tc, StaticInstPtr inst, Addr pc, Trace::InstRecord * traceData) {
@@ -584,6 +454,13 @@ void Metadata::propagate_result_tag_o3(ThreadContext * tc, StaticInstPtr inst, A
         char warn1 [100];
         char warn2 [100];
 
+
+
+        /*if (RS1_TAG == CIPHERTEXT || RS2_TAG == CIPHERTEXT){
+            DPRINTF(priv, "Source operands are ciphertexts\n");
+        }*/
+
+
         /*** Loads: Take the tag from memory and override the RD tag
              Invalid Op: Address being used (RS1) is a non-ptr type
         ***/
@@ -592,6 +469,11 @@ void Metadata::propagate_result_tag_o3(ThreadContext * tc, StaticInstPtr inst, A
             Addr mem_addr = get_mem_addr_atomic(inst, traceData);
             Emtd_tag rd_tag = get_mem_tag(mem_addr);
             WRITE_RD_TAG_ATOMIC(rd_tag);
+
+            //if( CIPHERTEXT){
+            DPRINTF(priv, "LOAD from 0x%x with tag %d\n", mem_addr, rd_tag);
+            //}
+
             if(rd_tag == CODE_PTR){
                 // Churn is working on reqAddr--reqAddr+BLOCK_SIZE
                 // Clean below reqAddr, dirty above reqAddr

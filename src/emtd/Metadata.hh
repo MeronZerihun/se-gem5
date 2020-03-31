@@ -122,12 +122,8 @@ public:
 	const std::map<memaddr_t, Emtd_tag>* get_mem_map_ptr() { return (const std::map<memaddr_t, Emtd_tag>*)&memory_tags; }
 	
 
-    void propagate_result_tag(Minor::MinorDynInstPtr inst);
-
     void propagate_result_tag_o3(ThreadContext * tc, StaticInstPtr inst, Addr pc, Trace::InstRecord * traceData);
 
-    // FUNCTIONS FOR ATOMIC CPU
-//    void propagate_result_tag_atomic(SimpleThread * tc, StaticInstPtr inst, Addr pc, Trace::InstRecord * traceData);
 
     void write_violation_stats();
     void record_violation(Addr pc, std::string msg, std::string pc_msg);
