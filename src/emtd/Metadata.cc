@@ -20,13 +20,12 @@
 #include <fstream>
 
 #include "emtd/Metadata.hh"
-//#include "emtd/churn/churn.hh"
 #include "debug/emtd.hh"
 #include "debug/emtd_warning.hh"
 #include "debug/priv.hh"
-//#include "debug/Churn.hh"
 
-Metadata::Metadata(MetadataParams *params) :i SimObject(params), filename(params->filename), progname(params->progname)
+
+Metadata::Metadata(MetadataParams *params) : SimObject(params), filename(params->filename), progname(params->progname)
 {
     // Do some error checking on this path: See it exists
     if (access(filename.c_str(), F_OK) != 0)
@@ -34,22 +33,18 @@ Metadata::Metadata(MetadataParams *params) :i SimObject(params), filename(params
         //throw std::runtime_error("Could not open " + filename);
     }
     // Init mask for variable tag size
-    // First check for configuration error
-    // TODO Confirm this works when tag bit width == 1
     assert(EMTD_TAG_BIT_WIDTH + EMTD_TAG_TYPE_BIT_WIDTH <= 8);
+
     // Initialize the tag-parsing masks
     tag_bits_mask = 0x00;
     tag_type_bits_mask = 0x00;
-    for (int bit = 0; bit < (EMTD_TAG_BIT_WIDTH + EMTD_TAG_TYPE_BIT_WIDTH); bit++)
-    {
+    for (int bit = 0; bit < (EMTD_TAG_BIT_WIDTH + EMTD_TAG_TYPE_BIT_WIDTH); bit++){
         // Tag bits in the LSBs
-        if (bit < EMTD_TAG_BIT_WIDTH)
-        {
+        if (bit < EMTD_TAG_BIT_WIDTH){
             tag_bits_mask |= (1 << bit);
         }
         // Type-bits in the part after the tag bits
-        else if (bit >= EMTD_TAG_BIT_WIDTH)
-        {
+        else if (bit >= EMTD_TAG_BIT_WIDTH){
             tag_type_bits_mask |= (1 << bit);
         }
     }
@@ -65,10 +60,8 @@ Metadata::Metadata(MetadataParams *params) :i SimObject(params), filename(params
 
 void Metadata::initialize_reg_tags()
 {
-
     // init all reg tags status to CLEAN
-    for (int idx = 0; idx < 32; idx++)
-    {
+    for (int idx = 0; idx < 32; idx++){
         RegId reg(IntRegClass, idx);
         reg_tags_status.insert(std::pair<RegId, Emtd_status_tag>(reg, CLEAN));
     }
@@ -82,15 +75,13 @@ void Metadata::initialize_reg_tags()
     reg_tags.insert(std::pair<RegId, Emtd_tag>(reg1, DATA));
 
     // x2 = sp, x3 = gp, x4 = tp
-    for (int idx = 2; idx < 5; idx++)
-    {
+    for (int idx = 2; idx < 5; idx++){
         RegId reg(IntRegClass, idx);
         reg_tags.insert(std::pair<RegId, Emtd_tag>(reg, DATA));
     }
 
     // x5 - x7
-    for (int idx = 5; idx < 8; idx++)
-    {
+    for (int idx = 5; idx < 8; idx++){
         RegId reg(IntRegClass, idx);
         reg_tags.insert(std::pair<RegId, Emtd_tag>(reg, DATA));
     }
@@ -100,8 +91,7 @@ void Metadata::initialize_reg_tags()
     reg_tags.insert(std::pair<RegId, Emtd_tag>(reg8, DATA));
 
     //x9 - x31
-    for (int idx = 9; idx < 32; idx++)
-    {
+    for (int idx = 9; idx < 32; idx++){
         RegId reg(IntRegClass, idx);
         reg_tags.insert(std::pair<RegId, Emtd_tag>(reg, DATA));
     }
@@ -110,31 +100,40 @@ void Metadata::initialize_reg_tags()
 
 
 
-// Get a tag for an addr. Assume UNTAGGED if non-existant
-Emtd_tag Metadata::get_mem_tag(memaddr_t memaddr)
-{
-    // See if the memory address exists
-    if (memory_tags.count(memaddr) > 0)
-    {
+/******************************************************************/
+//  Helper functions for tag management
+/******************************************************************/
+// Get a tag for an addr. Assume DATA if non-existant
+Emtd_tag Metadata::get_mem_tag(memaddr_t memaddr){
+    // If address exists, return tag
+    if (memory_tags.count(memaddr) > 0){
         return memory_tags[memaddr];
     }
     // If it doesn't exist...see if a tag at the 8-byte boundary exists
-    else
-    {
-        if (memory_tags.count(memaddr - (memaddr % EMTD_DATA_TAG_GRANULARITY)) > 0)
-        {
-            return memory_tags[memaddr - (memaddr % EMTD_DATA_TAG_GRANULARITY)];
-        }
+    else if (memory_tags.count(memaddr - (memaddr % EMTD_DATA_TAG_GRANULARITY)) > 0){
+        return memory_tags[memaddr - (memaddr % EMTD_DATA_TAG_GRANULARITY)];
+    }
+    // Otherwise return default 
+    else {
+        return DATA;
+    }
+}
+
+// Set the tag for a memory address
+void Metadata::set_mem_tag(memaddr_t memaddr, Emtd_tag newtag){
+    // Only write in at DATA_TAG_GRANULARITY aligned addresses
+    // This isn't a problem for CODE_TAG_GRANULARITY since code tags aren't set again after load time
+    memaddr_t addrToTag = memaddr;
+    if (memaddr % EMTD_DATA_TAG_GRANULARITY != 0){
+        addrToTag -= memaddr % EMTD_DATA_TAG_GRANULARITY;
     }
 
-    //return UNTAGGED;
-    //Made defaut DATA to deal with input from files
-    return DATA;
+    // Overwrite the tag at this tag address
+    memory_tags[addrToTag] = newtag;
 }
 
 // Get a tag for an insn const. If non-existant, give UNTAGGED (non-constant loading insn)
-Emtd_tag Metadata::get_insn_const_tag(memaddr_t memaddr)
-{
+Emtd_tag Metadata::get_insn_const_tag(memaddr_t memaddr){
     // See if the memory address exists
     if (insns_consts_tags.count(memaddr) > 0)
     {
@@ -144,63 +143,38 @@ Emtd_tag Metadata::get_insn_const_tag(memaddr_t memaddr)
 }
 
 // Get a tag for register
-Emtd_tag Metadata::get_reg_tag(RegId regIdx)
-{
+Emtd_tag Metadata::get_reg_tag(RegId regIdx){
 
-    if (reg_tags.count(regIdx) > 0)
-    {
+    if (reg_tags.count(regIdx) > 0){
         return reg_tags[regIdx];
     }
     return UNTAGGED;
 }
 
-// Get a tag for register
-Emtd_status_tag Metadata::get_reg_tag_status(RegId regIdx)
-{
+// Set tag for register
+void Metadata::set_reg_tag(RegId regIdx, Emtd_tag newtag){
+    if (!regIdx.isZeroReg()){
+        reg_tags[regIdx] = newtag;
+    }
+}
 
-    if (reg_tags_status.count(regIdx) > 0)
-    {
+// Get a status tag for register
+Emtd_status_tag Metadata::get_reg_tag_status(RegId regIdx){
+    if (reg_tags_status.count(regIdx) > 0){
         return reg_tags_status[regIdx];
     }
     return AHHH;
 }
 
-// Set the tag for a memory address
-void Metadata::set_mem_tag(memaddr_t memaddr, Emtd_tag newtag)
-{
-    // Only write in at DATA_TAG_GRANULARITY aligned addresses
-    // This isn't a problem for CODE_TAG_GRANULARITY since code tags aren't set again after load time
-    memaddr_t addrToTag = memaddr;
-    if (memaddr % EMTD_DATA_TAG_GRANULARITY != 0)
-    {
-        addrToTag -= memaddr % EMTD_DATA_TAG_GRANULARITY;
-    }
-
-    // Overwrite the tag at this tag address
-    memory_tags[addrToTag] = newtag;
-}
-
-// Set tag for register
-void Metadata::set_reg_tag(RegId regIdx, Emtd_tag newtag)
-{
-    if (!regIdx.isZeroReg())
-    {
-        reg_tags[regIdx] = newtag;
-    }
-}
-
-// Set tag for register
-void Metadata::set_reg_tag_status(RegId regIdx, Emtd_status_tag tag)
-{
-    if (!regIdx.isZeroReg())
-    {
+// Set status tag for register
+void Metadata::set_reg_tag_status(RegId regIdx, Emtd_status_tag tag){
+    if (!regIdx.isZeroReg()){
         reg_tags_status[regIdx] = tag;
     }
 }
 
 // Clear a range of tags in memory
-void Metadata::clear_mem_range_tags(memaddr_t bound1, memaddr_t bound2)
-{
+void Metadata::clear_mem_range_tags(memaddr_t bound1, memaddr_t bound2){
     memaddr_t lower_bound = (bound1 < bound2) ? bound1 : bound2;
     memaddr_t upper_bound = (lower_bound == bound1) ? bound2 : bound1;
 
@@ -212,83 +186,23 @@ void Metadata::clear_mem_range_tags(memaddr_t bound1, memaddr_t bound2)
     memory_tags.erase(lower_it, upper_it);
 }
 
-// Populates both the memory_tags and insns_consts_tags maps
-void Metadata::load_metadata_binary(const char *filename)
-{
-
-    DPRINTF(priv, "Loading metadata binary...\n");
-
-    // Open the metadata binary file
-    int metafile_descriptor = open(filename, O_RDONLY);
-    // Get file statistics (for its size)
-    struct stat metafile_stats;
-    assert(metafile_descriptor != -1);
-    assert(fstat(metafile_descriptor, &metafile_stats) >= 0);
-    size_t metafile_size = metafile_stats.st_size;
-
-    // Perform mapping of this file's data to this process's virtual addr space
-    char *buf = (char *)mmap(NULL, metafile_size, PROT_READ, MAP_PRIVATE, metafile_descriptor, 0);
-    assert(buf != MAP_FAILED);
-    close(metafile_descriptor);
-
-    // Get the number of metadata entries in the file
-    size_t num_meta_entries = metafile_size / sizeof(Emtd_MetadataEntry);
-    assert(num_meta_entries > 0);
-
-    DPRINTF(priv, "Found %d metadata entries...\n", num_meta_entries);
-
-    // Parse through the metadata file
-    auto meta_entries = (Emtd_MetadataEntry *)buf;
-    for (unsigned i = 0; i < num_meta_entries; i++)
-    {
-        // Get entry's starting address and tag
-        memaddr_t entry_start_addr = convert_byte_array_to_addr(meta_entries[i].startaddr);
-        Emtd_tag entry_tag = convert_tagbyte_to_tag(meta_entries[i].tagbyte);
-        //Emtd_tag_type entry_tag_type = convert_tagbyte_to_tag_type(meta_entries[i].tagbyte);
-
-        if (entry_tag == CIPHERTEXT)
-        {
-            // If it's a ciphertext tag, it's a start addr
-            // Assert the next entry is the ciphertexts' end addr
-            assert(convert_tagbyte_to_tag(meta_entries[i + 1].tagbyte) == CIPHERTEXT);
-            memaddr_t entry_end_addr = convert_byte_array_to_addr(meta_entries[i + 1].startaddr);
-
-            // Insert the first code element into *memory_tags* map
-            memory_tags[entry_start_addr] = entry_tag;
-            DPRINTF(priv, "Tagging global variable at 0x%x with tag %d\n", entry_start_addr, entry_tag);
-
-            // Populate rest of the code entries
-            for (memaddr_t idx = entry_start_addr; idx < entry_end_addr; idx += EMTD_CODE_TAG_GRANULARITY)
-            {
-                memory_tags[idx] = entry_tag;
-                DPRINTF(priv, "Tagging global variable at 0x%x with tag %d\n", idx, entry_tag);
-            }
-
-            // Increment loop to skip next entry (already processed as the code end tag)
-            i++;
-        }
-        else
-        {
-            assert(entry_tag == DATA);
-        }
-        /*if (entry_tag_type == DATA_SEG) {
-		    // Tag representing a global variable in the data segment. Add to the *memory_tags* map
-		    DPRINTF(priv, "Found global variable at 0x%x in data segment with tag %d\n", entry_start_addr, entry_tag);
-		    memory_tags[entry_start_addr] = entry_tag;
-		} else if (entry_tag_type == INSN_CONST) {
-		    // Tag representing the result of an instruction loading in a constant. Add to *insns_consts_tags* map
-		    insns_consts_tags[entry_start_addr] = entry_tag;
-		    DPRINTF(priv, "Found instruction loading a constant\n");	    
-		}*/
-    }
-
-    // Unmap the metafile (clear memory, yay!)
-    munmap(buf, metafile_size);
+// Get effective memory address for a ld/st operation
+memaddr_t Metadata::get_mem_addr(StaticInstPtr inst, Trace::InstRecord *traceData){
+    assert(traceData);
+    return traceData->getAddr();
 }
+/******************************************************************/
+//  END: Helper functions for tag management
+/******************************************************************/
 
+
+
+
+/******************************************************************/
+//  Helper functions for loading the metadata binary
+/******************************************************************/
 // Convert a byte array of 8 elements into a 64-bit memory address
-memaddr_t Metadata::convert_byte_array_to_addr(uint8_t *byte_array)
-{
+memaddr_t Metadata::convert_byte_array_to_addr(uint8_t *byte_array){
     memaddr_t result =
         static_cast<memaddr_t>(byte_array[0]) |
         static_cast<memaddr_t>(byte_array[1]) << 8 |
@@ -303,22 +217,112 @@ memaddr_t Metadata::convert_byte_array_to_addr(uint8_t *byte_array)
 }
 
 // Current implementation: Tag stored in lower bits of tagbyte
-Emtd_tag Metadata::convert_tagbyte_to_tag(uint8_t tagbyte)
-{
+Emtd_tag Metadata::convert_tagbyte_to_tag(uint8_t tagbyte){
     return static_cast<Emtd_tag>(tagbyte & tag_bits_mask);
 }
 
 // Current implementation: Tag type stored in upper bits
-Emtd_tag_type Metadata::convert_tagbyte_to_tag_type(uint8_t tagbyte)
-{
+Emtd_tag_type Metadata::convert_tagbyte_to_tag_type(uint8_t tagbyte){
     return static_cast<Emtd_tag_type>((tagbyte & tag_type_bits_mask) >> EMTD_TAG_BIT_WIDTH);
+}
+/******************************************************************/
+//  END: Helper functions for loading the metadata binary
+/******************************************************************/
+
+
+
+
+/******************************************************************/
+//  Helper functions for stack tag management
+/******************************************************************/
+// check and clear tags for deallocated stack
+void Metadata::check_stack_pointer(ThreadContext *tc){
+    if (!max_sp.empty() && max_sp.back() > tc->readIntReg(2)){
+        max_sp.back() = tc->readIntReg(2);
+    }
+}
+
+void Metadata::save_sp(ThreadContext *tc){
+    base_sp.push_back(tc->readIntReg(2));
+    max_sp.push_back(tc->readIntReg(2));
+}
+
+void Metadata::deallocate_stack_tags(){
+    // You are returning from a function and you need to dealloc
+    if (base_sp.back() > max_sp.back()){
+        clear_mem_range_tags(max_sp.back(), base_sp.back() - 8);
+        DPRINTF(emtd, "Cleared stack from 0x%x to 0x%x\n", max_sp.back(), base_sp.back() - 8);
+    }
+    max_sp.pop_back();
+    base_sp.pop_back();
+}
+/******************************************************************/
+//  END: Helper functions for stack tag management
+/******************************************************************/
+
+
+
+
+// Populates both the memory_tags and insns_consts_tags maps
+void Metadata::load_metadata_binary(const char *filename){
+
+    DPRINTF(priv, "Loading metadata binary...\n");
+    int metafile_descriptor = open(filename, O_RDONLY);
+
+    // Get file statistics (for its size)
+    struct stat metafile_stats;
+    assert(metafile_descriptor != -1);
+    assert(fstat(metafile_descriptor, &metafile_stats) >= 0);
+    size_t metafile_size = metafile_stats.st_size;
+
+    // Perform mapping of this file's data to this process's virtual addr space
+    char *buf = (char *)mmap(NULL, metafile_size, PROT_READ, MAP_PRIVATE, metafile_descriptor, 0);
+    assert(buf != MAP_FAILED);
+    close(metafile_descriptor);
+
+    // Get the number of metadata entries in the file
+    size_t num_meta_entries = metafile_size / sizeof(Emtd_MetadataEntry);
+    assert(num_meta_entries > 0);
+    DPRINTF(priv, "Found %d metadata entries...\n", num_meta_entries);
+
+    // Parse through the metadata file
+    auto meta_entries = (Emtd_MetadataEntry *)buf;
+    for (unsigned i = 0; i < num_meta_entries; i++){
+        // Get entry's starting address and tag
+        memaddr_t entry_start_addr = convert_byte_array_to_addr(meta_entries[i].startaddr);
+        Emtd_tag entry_tag = convert_tagbyte_to_tag(meta_entries[i].tagbyte);
+
+        if (entry_tag == CIPHERTEXT){
+            // If it's a ciphertext tag, it's a start addr
+            // Assert the next entry is the ciphertexts' end addr
+            assert(convert_tagbyte_to_tag(meta_entries[i + 1].tagbyte) == CIPHERTEXT);
+            memaddr_t entry_end_addr = convert_byte_array_to_addr(meta_entries[i + 1].startaddr);
+
+            // Insert the first code element into *memory_tags* map
+            memory_tags[entry_start_addr] = entry_tag;
+            DPRINTF(priv, "Tagging global variable at 0x%x with tag %d\n", entry_start_addr, entry_tag);
+
+            // Populate rest of the code entries
+            for (memaddr_t idx = entry_start_addr; idx < entry_end_addr; idx += EMTD_CODE_TAG_GRANULARITY){
+                memory_tags[idx] = entry_tag;
+                DPRINTF(priv, "Tagging global variable at 0x%x with tag %d\n", idx, entry_tag);
+            }
+
+            // Increment loop to skip next entry (already processed as the code end tag)
+            i++;
+        }
+        else {
+            // Any other entries must be data, otherwise issue with metadata file! 
+            assert(entry_tag == DATA);
+        }
+    }
+    munmap(buf, metafile_size);
 }
 
 
 
 
-void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Addr pc, Trace::InstRecord *traceData)
-{
+void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Addr pc, Trace::InstRecord *traceData){
 
     RISCVOps Ops;
     // Check for a valid rd_tag being set, meaning, we have an OVERRIDE TAG
@@ -328,7 +332,7 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
         // See if this is a store. If so, tag needs to go into the memory_tags map
         if (inst->isStore())
         {
-            set_mem_tag(get_mem_addr_atomic(inst, traceData), rdTag);
+            set_mem_tag(get_mem_addr(inst, traceData), rdTag);
         }
         else
         {
@@ -361,7 +365,7 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
         if (Ops.is_memory_load_op(opc))
         {
             // Write the resulting tag into RD
-            Addr mem_addr = get_mem_addr_atomic(inst, traceData);
+            Addr mem_addr = get_mem_addr(inst, traceData);
             Emtd_tag rd_tag = get_mem_tag(mem_addr);
             WRITE_RD_TAG_ATOMIC(rd_tag);
 
@@ -390,8 +394,8 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
             {
                 WRITE_RD_STATUS_ATOMIC(CLEAN);
             }
-            DPRINTF(emtd, "0x%lu: Wrote tag %s to register %x\n", pc, EMTD_TAG_NAMES[get_mem_tag(get_mem_addr_atomic(inst, traceData))], inst->destRegIdx(0).index());
-            DPRINTF(emtd, "ADDR LOADED FROM: 0x%x\n", get_mem_addr_atomic(inst, traceData));
+            DPRINTF(emtd, "0x%lu: Wrote tag %s to register %x\n", pc, EMTD_TAG_NAMES[get_mem_tag(get_mem_addr(inst, traceData))], inst->destRegIdx(0).index());
+            DPRINTF(emtd, "ADDR LOADED FROM: 0x%x\n", get_mem_addr(inst, traceData));
         }
 
         /*** Stores: Take the tag of RS2 (reg being stored) and override the tag in memory
@@ -400,7 +404,7 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
         else if (Ops.is_memory_store_op(opc))
         {
             // Write tag from RS2 into memory
-            Addr mem_addr = get_mem_addr_atomic(inst, traceData);
+            Addr mem_addr = get_mem_addr(inst, traceData);
             WRITE_MEM_TAG_ATOMIC(mem_addr, RS2_TAG_ATOMIC);
             if (RS2_TAG_ATOMIC == CODE_PTR)
             {
@@ -424,7 +428,7 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
                 //		We don't need this and its causing errors, so removing...
             }
 
-            DPRINTF(emtd, "0x%x: Wrote tag %s to memory 0x%x\n", pc, EMTD_TAG_NAMES[RS2_TAG_ATOMIC], get_mem_addr_atomic(inst, traceData));
+            DPRINTF(emtd, "0x%x: Wrote tag %s to memory 0x%x\n", pc, EMTD_TAG_NAMES[RS2_TAG_ATOMIC], get_mem_addr(inst, traceData));
         }
 
         /*** REG Arithmetic: Check tags of RS1 and RS2 for RD tag
@@ -541,55 +545,12 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
     }
 }
 
-memaddr_t Metadata::get_mem_addr_atomic(StaticInstPtr inst, Trace::InstRecord *traceData)
-{
-    //Trace::InstRecord *iR = inst->traceData;
-    //Addr addr = iR->getAddr();
-    assert(traceData);
-    return traceData->getAddr();
-}
-
-void Metadata::deallocate_stack_tags_atomic()
-{
-    // You are returning from a function and you need to dealloc
-    if (base_sp.back() > max_sp.back())
-    {
-        clear_mem_range_tags(max_sp.back(), base_sp.back() - 8);
-        DPRINTF(emtd, "Cleared stack from 0x%x to 0x%x\n", max_sp.back(), base_sp.back() - 8);
-    }
-    max_sp.pop_back();
-    base_sp.pop_back();
-}
-
-// check and clear tags for deallocated stack
-void Metadata::check_stack_pointer(ThreadContext *tc)
-{
-    if (!max_sp.empty() && max_sp.back() > tc->readIntReg(2))
-    {
-        max_sp.back() = tc->readIntReg(2);
-    }
-}
-
-void Metadata::save_sp(ThreadContext *tc)
-{
-    base_sp.push_back(tc->readIntReg(2));
-    max_sp.push_back(tc->readIntReg(2));
-}
-
-void Metadata::deallocate_stack_tags()
-{
-    // You are returning from a function and you need to dealloc
-    if (base_sp.back() > max_sp.back())
-    {
-        clear_mem_range_tags(max_sp.back(), base_sp.back() - 8);
-        DPRINTF(emtd, "Cleared stack from 0x%x to 0x%x\n", max_sp.back(), base_sp.back() - 8);
-    }
-    max_sp.pop_back();
-    base_sp.pop_back();
-}
 
 
 
+/******************************************************************/
+//  Deprecated functions for recording stats
+/******************************************************************/
 // void Metadata::write_violation_stats()
 // {
 //     DPRINTF(emtd_warning, "Dumping stats file\n");
@@ -631,6 +592,11 @@ void Metadata::deallocate_stack_tags()
 //         pc_violation_counts[pc]++;
 //     }
 // }
+/******************************************************************/
+//  END: Deprecated functions for recording stats
+/******************************************************************/
+
+
 
 Metadata *
 MetadataParams::create()

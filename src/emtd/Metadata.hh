@@ -125,6 +125,8 @@ private:
 	std::array<std::string, 5> EMTD_TAG_NAMES{{"DATA(0)", "CIPHERTEXT(1)", "UNTAGGED(2)"}};
 	std::map<memaddr_t, Emtd_tag> memory_tags;		 // Current state of memory tags
 													 // NOTE: Register's hold their own tags (in regfile)
+
+	// TODO:: Remove insns_consts_tags
 	std::map<memaddr_t, Emtd_tag> insns_consts_tags; // Used to find tag of destination register in insns
 
 	std::map<RegId, Emtd_tag> reg_tags;				  // Register file tag
@@ -151,11 +153,10 @@ private:
 	// Stack handling
 	void check_stack_pointer(ThreadContext *tc);
 	void save_sp(ThreadContext *tc);
-	void deallocate_stack_tags();
 
 	// FUNCTIONS FOR ATOMIC CPU
-	void deallocate_stack_tags_atomic();
-	memaddr_t get_mem_addr_atomic(StaticInstPtr inst, Trace::InstRecord *traceData);
+	void deallocate_stack_tags();
+	memaddr_t get_mem_addr(StaticInstPtr inst, Trace::InstRecord *traceData);
 
 	// Helper variables used for metadata binary loading
 	uint8_t tag_bits_mask;
