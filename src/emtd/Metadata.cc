@@ -190,6 +190,9 @@ void Metadata::set_reg_tag_status(RegId regIdx, Emtd_status_tag tag){
     if (!regIdx.isZeroReg()){
         reg_tags_status[regIdx] = tag;
     }
+    if (tag == CIPHERTEXT){
+        DPRINTF(priv, "REG 0x%x :: Reg %d tagged as %s\n", regIdx.flatIndex(), EMTD_TAG_NAMES[newtag]);
+    }
 }
 
 // Clear a range of tags in memory
@@ -378,6 +381,7 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
 
             if(rd_tag == CIPHERTEXT){
                 DPRINTF(priv, "LOAD from 0x%x with tag %d\n", mem_addr, rd_tag);
+		set_reg_tag(RD, rd_tag);
             }
             DPRINTF(emtd, "0x%lu: Wrote tag %s to register %x\n", pc, EMTD_TAG_NAMES[get_mem_tag(get_mem_addr(inst, traceData))], RD.index());
             DPRINTF(emtd, "ADDR LOADED FROM: 0x%x\n", get_mem_addr(inst, traceData));
