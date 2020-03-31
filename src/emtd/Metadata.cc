@@ -352,8 +352,8 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
 
     try
     {
-        char warn1[100];
-        char warn2[100];
+        //char warn1[100];
+        //char warn2[100];
 
         // Propogation + Data-Oblivious Policies: 
         // LD:   Address cannot be ciphertext
@@ -378,11 +378,12 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
             // Write the resulting tag into RD
             Addr mem_addr = get_mem_addr(inst, traceData);
             Emtd_tag rd_tag = get_mem_tag(mem_addr);
-            set_reg_tag(RD, rd_tag);
 
             if(rd_tag == CIPHERTEXT){
                 DPRINTF(priv, "OP :: LOAD from 0x%x with tag %s\n", mem_addr, EMTD_TAG_NAMES[rd_tag]);
             }
+            set_reg_tag(RD, rd_tag);
+
             DPRINTF(emtd, "0x%lu: Wrote tag %s to register %x\n", pc, EMTD_TAG_NAMES[rd_tag], RD.index());
         }
 
@@ -399,7 +400,7 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
             Emtd_tag rs2_tag = get_reg_tag((RS2));
             set_mem_tag(mem_addr, rs2_tag);
 
-            if(rd_tag == CIPHERTEXT){
+            if(rs2_tag == CIPHERTEXT){
                 DPRINTF(priv, "OP :: Store to 0x%x with tag %s\n", mem_addr, EMTD_TAG_NAMES[rs2_tag]);
             }
             DPRINTF(emtd, "0x%x: Wrote tag %s to memory 0x%x\n", pc, EMTD_TAG_NAMES[rs2_tag], mem_addr);
