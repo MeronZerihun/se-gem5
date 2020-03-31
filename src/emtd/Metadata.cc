@@ -129,18 +129,37 @@ void Metadata::set_mem_tag(memaddr_t memaddr, Emtd_tag newtag){
     }
 
     // Overwrite the tag at this tag address
-    memory_tags[addrToTag] = newtag;
+    // To save on space, only track live ciphertexts! 
+    auto it = memory_tags.find(addrToTag);
+    if (it != memory_tags.end()){
+        // Tag entry exists! 
+        Emtd_tag oldtag memory_tags[addrToTag];
+        if(newtag==CIPHERTEXT){
+            memory_tags[addrToTag] = newtag
+            DPRINTF(priv, "MEM 0x%x :: Changing memory tag from %s to %s\n", addrToTag, EMTD_TAG_NAMES[oldtag], EMTD_TAG_NAMES[newtag]);
+        }
+        else{
+            memory_tags.erase(addrToTag);
+            DPRINTF(priv, "MEM 0x%x :: Clearing memory tag (was %s, overwritten by %s)\n", addrToTag, EMTD_TAG_NAMES[oldtag], EMTD_TAG_NAMES[newtag]);
+        }
+    }
+    else {
+        if(newtag==CIPHERTEXT){
+            memory_tags[addrToTag] = newtag
+            DPRINTF(priv, "MEM 0x%x :: Adding memory tag %s\n", addrToTag, EMTD_TAG_NAMES[newtag]);
+        }
+    }
 }
 
 // Get a tag for an insn const. If non-existant, give UNTAGGED (non-constant loading insn)
-Emtd_tag Metadata::get_insn_const_tag(memaddr_t memaddr){
-    // See if the memory address exists
-    if (insns_consts_tags.count(memaddr) > 0)
-    {
-        return insns_consts_tags[memaddr];
-    }
-    return UNTAGGED;
-}
+// Emtd_tag Metadata::get_insn_const_tag(memaddr_t memaddr){
+//     // See if the memory address exists
+//     if (insns_consts_tags.count(memaddr) > 0)
+//     {
+//         return insns_consts_tags[memaddr];
+//     }
+//     return UNTAGGED;
+// }
 
 // Get a tag for register
 Emtd_tag Metadata::get_reg_tag(RegId regIdx){
@@ -324,25 +343,25 @@ void Metadata::load_metadata_binary(const char *filename){
 
 void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Addr pc, Trace::InstRecord *traceData){
 
-    RISCVOps Ops;
+    X86Ops Ops;
     // Check for a valid rd_tag being set, meaning, we have an OVERRIDE TAG
-    Emtd_tag rdTag = get_insn_const_tag(pc);
-    if (rdTag != UNTAGGED)
-    {
-        // See if this is a store. If so, tag needs to go into the memory_tags map
-        if (inst->isStore())
-        {
-            set_mem_tag(get_mem_addr(inst, traceData), rdTag);
-        }
-        else
-        {
-            RegId regIdx = inst->destRegIdx(0); //get destination register index
-            set_reg_tag(regIdx, rdTag);
-            set_reg_tag_status(regIdx, CLEAN);
-        }
-        // We are done here
-        return;
-    }
+    // Emtd_tag rdTag = get_insn_const_tag(pc);
+    // if (rdTag != UNTAGGED)
+    // {
+    //     // See if this is a store. If so, tag needs to go into the memory_tags map
+    //     if (inst->isStore())
+    //     {
+    //         set_mem_tag(get_mem_addr(inst, traceData), rdTag);
+    //     }
+    //     else
+    //     {
+    //         RegId regIdx = inst->destRegIdx(0); //get destination register index
+    //         set_reg_tag(regIdx, rdTag);
+    //         set_reg_tag_status(regIdx, CLEAN);
+    //     }
+    //     // We are done here
+    //     return;
+    // }
 
     // Save the $sp IF this is the insn coming *after* a function call
     // if (next_insn_save_sp) save_sp(inst);
@@ -351,16 +370,26 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
 
     try
     {
-        // So, not an insn loading a constant eh? Let's go through the policies then...
         char warn1[100];
         char warn2[100];
+
+        // Propogation + Data-Oblivious Policies: 
+        // LD:   Address cannot be ciphertext
+        //       Propagate ciphertext tag to register
+        // ST:   Address cannot be ciphertext
+        //       Propagate ciphertext tag to memory
+        // J/Br: Dest cannot be ciphertext
+        //       No proagation rules 
+        // DEF:  No limitations
+        //       Always propagate ciphertext tag to dest reg
+
 
         /*if (RS1_TAG == CIPHERTEXT || RS2_TAG == CIPHERTEXT){
             DPRINTF(priv, "Source operands are ciphertexts\n");
         }*/
 
         /*** Loads: Take the tag from memory and override the RD tag
-             Invalid Op: Address being used (RS1) is a non-ptr type
+             Invalid Op: Address being used (RS1) is a ciphertext type
         ***/
         if (Ops.is_memory_load_op(opc))
         {
@@ -369,38 +398,16 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
             Emtd_tag rd_tag = get_mem_tag(mem_addr);
             WRITE_RD_TAG_ATOMIC(rd_tag);
 
-            //if( CIPHERTEXT){
-            DPRINTF(priv, "LOAD from 0x%x with tag %d\n", mem_addr, rd_tag);
-            //}
-
-            if (rd_tag == CODE_PTR)
-            {
-                // Churn is working on reqAddr--reqAddr+BLOCK_SIZE
-                // Clean below reqAddr, dirty above reqAddr
-                // if (!is_churning)
-                // {
-                //     WRITE_RD_STATUS_ATOMIC(CLEAN);
-                // }
-                // else if (mem_addr < threshold)
-                // {
-                //     WRITE_RD_STATUS_ATOMIC(CLEAN);
-                // }
-                // else
-                // {
-                    WRITE_RD_STATUS_ATOMIC(STALE);
-                // }
-            }
-            else
-            {
-                WRITE_RD_STATUS_ATOMIC(CLEAN);
+            if(rd_tag == CIPHERTEXT){
+                DPRINTF(priv, "LOAD from 0x%x with tag %d\n", mem_addr, rd_tag);
             }
             DPRINTF(emtd, "0x%lu: Wrote tag %s to register %x\n", pc, EMTD_TAG_NAMES[get_mem_tag(get_mem_addr(inst, traceData))], inst->destRegIdx(0).index());
             DPRINTF(emtd, "ADDR LOADED FROM: 0x%x\n", get_mem_addr(inst, traceData));
         }
 
         /*** Stores: Take the tag of RS2 (reg being stored) and override the tag in memory
-                 Invalid Op: Address being used (RS1) is a non-ptr type OR value being stored is CODE
-            ***/
+             Invalid Op: Address being used (RS1) is a ciphertext type 
+        ***/
         else if (Ops.is_memory_store_op(opc))
         {
             // Write tag from RS2 into memory
@@ -408,24 +415,7 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
             WRITE_MEM_TAG_ATOMIC(mem_addr, RS2_TAG_ATOMIC);
             if (RS2_TAG_ATOMIC == CODE_PTR)
             {
-                //Check threshold
-                //PRIV
-                /*if(!is_churning){
-                    if (RRS2_STATUS_ATOMIC == STALE){
-                        DPRINTF(Churn, "DDAS CHURN STATUS WARN:: Storing STALE pointer to CLEAN mem location, Churn DONE\n");
-                    }
-                }
-                else {
-                    if ((mem_addr < threshold) && RS2_STATUS_ATOMIC == STALE) {
-                        DPRINTF(Churn, "DDAS CHURN STATUS WARN:: Storing STALE pointer to CLEAN mem location\n");
 
-                    } else if ((mem_addr > threshold) && RS2_STATUS_ATOMIC == CLEAN) {
-                        DPRINTF(Churn,
-                                "DDAS CHURN STATUS WARN:: Storing CLEAN pointer to STALE mem location... how?\n");
-                    }
-                }*/
-                //END PRIV:: Note, this code is to count threshold violations during churn (store(STALE->CLEAN))
-                //		We don't need this and its causing errors, so removing...
             }
 
             DPRINTF(emtd, "0x%x: Wrote tag %s to memory 0x%x\n", pc, EMTD_TAG_NAMES[RS2_TAG_ATOMIC], get_mem_addr(inst, traceData));

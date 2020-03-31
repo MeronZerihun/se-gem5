@@ -20,7 +20,7 @@
 #include "sim/insttracer.hh"
 #include "sim/sim_object.hh"
 #include "mem/mem_object.hh"
-#include "emtd/emtd_riscv_op_groups.hh"
+#include "emtd/emtd_x86_op_groups.hh"
 #include "params/Metadata.hh"
 #include <array>
 #include <string>
@@ -126,8 +126,8 @@ private:
 	std::map<memaddr_t, Emtd_tag> memory_tags;		 // Current state of memory tags
 													 // NOTE: Register's hold their own tags (in regfile)
 
-	// TODO:: Remove insns_consts_tags
-	std::map<memaddr_t, Emtd_tag> insns_consts_tags; // Used to find tag of destination register in insns
+	// // TODO:: Remove insns_consts_tags
+	// std::map<memaddr_t, Emtd_tag> insns_consts_tags; // Used to find tag of destination register in insns
 
 	std::map<RegId, Emtd_tag> reg_tags;				  // Register file tag
 	std::map<RegId, Emtd_status_tag> reg_tags_status; // Register file tag
