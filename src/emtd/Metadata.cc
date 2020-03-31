@@ -71,7 +71,7 @@ void Metadata::initialize_reg_tags()
     for (int idx = 0; idx < 32; idx++)
     {
         RegId reg(IntRegClass, idx);
-        reg_tags_status.insert(std::pair<RegId, Emtd_status_tag>(reg, DATA));
+        reg_tags_status.insert(std::pair<RegId, Emtd_status_tag>(reg, CLEAN));
     }
 
     //x0 (zero reg) is data
@@ -462,7 +462,7 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
                 WRITE_RD_TAG_ATOMIC(DATA);
                 WRITE_RD_STATUS_ATOMIC(CLEAN);
                 //throw EMTD_INVALIDOP;
-                record_violation(pc, std::string(warn2), std::string(warn1));
+                //record_violation(pc, std::string(warn2), std::string(warn1));
             }
             // All other ops should generate a DATA tag
             else
@@ -514,7 +514,7 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
                 sprintf(warn1, "0x%lu\n", pc);
                 sprintf(warn2, "EMTD CHECK: Policy Violated on JALR. Tag should be CODE_PTR(3), got %s.\n", EMTD_TAG_NAMES[RS1_TAG_ATOMIC].c_str());
                 //throw EMTD_INVALIDOP;
-                record_violation(pc, std::string(warn2), std::string(warn1));
+                //record_violation(pc, std::string(warn2), std::string(warn1));
             }
 
             // STACK FRAME HANDLING
