@@ -37,15 +37,9 @@
 #define EMTD_TAG_TYPE_BIT_WIDTH 1
 
 // Defines for atomic cpu
-#define RS1_TAG_ATOMIC get_reg_tag(inst->srcRegIdx(0))
-#define RS2_TAG_ATOMIC get_reg_tag(inst->srcRegIdx(1))
-#define WRITE_REG_TAG_ATOMIC(reg, tag) set_reg_tag(reg, tag)
-#define WRITE_RD_TAG_ATOMIC(tag) WRITE_REG_TAG_ATOMIC(inst->destRegIdx(0), tag)
-#define WRITE_MEM_TAG_ATOMIC(addr, tag) set_mem_tag(addr, tag)
-#define RS1_STATUS_ATOMIC get_reg_tag_status(inst->srcRegIdx(0))
-#define RS2_STATUS_ATOMIC get_reg_tag_status(inst->srcRegIdx(1))
-#define WRITE_REG_STATUS_ATOMIC(reg, tag) set_reg_tag_status(reg, tag)
-#define WRITE_RD_STATUS_ATOMIC(tag) WRITE_REG_STATUS_ATOMIC(inst->destRegIdx(0), tag)
+#define RS1 inst->srcRegIdx(0)
+#define RS2 inst->srcRegIdx(1)
+#define RD inst->destRegIdx(0)
 
 #define EMTD_INVALIDOP (-1)
 #define EMTD_NUMBER_OF_TAGS (Emtd_tag::Count - 1)

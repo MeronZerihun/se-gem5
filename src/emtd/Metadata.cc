@@ -344,28 +344,6 @@ void Metadata::load_metadata_binary(const char *filename){
 void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Addr pc, Trace::InstRecord *traceData){
 
     X86Ops Ops;
-    // Check for a valid rd_tag being set, meaning, we have an OVERRIDE TAG
-    // Emtd_tag rdTag = get_insn_const_tag(pc);
-    // if (rdTag != UNTAGGED)
-    // {
-    //     // See if this is a store. If so, tag needs to go into the memory_tags map
-    //     if (inst->isStore())
-    //     {
-    //         set_mem_tag(get_mem_addr(inst, traceData), rdTag);
-    //     }
-    //     else
-    //     {
-    //         RegId regIdx = inst->destRegIdx(0); //get destination register index
-    //         set_reg_tag(regIdx, rdTag);
-    //         set_reg_tag_status(regIdx, CLEAN);
-    //     }
-    //     // We are done here
-    //     return;
-    // }
-
-    // Save the $sp IF this is the insn coming *after* a function call
-    // if (next_insn_save_sp) save_sp(inst);
-
     std::string opc = inst->getName();
 
     try
@@ -396,12 +374,12 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
             // Write the resulting tag into RD
             Addr mem_addr = get_mem_addr(inst, traceData);
             Emtd_tag rd_tag = get_mem_tag(mem_addr);
-            WRITE_RD_TAG_ATOMIC(rd_tag);
+            set_reg_tag(RD, rd_tag);
 
             if(rd_tag == CIPHERTEXT){
                 DPRINTF(priv, "LOAD from 0x%x with tag %d\n", mem_addr, rd_tag);
             }
-            DPRINTF(emtd, "0x%lu: Wrote tag %s to register %x\n", pc, EMTD_TAG_NAMES[get_mem_tag(get_mem_addr(inst, traceData))], inst->destRegIdx(0).index());
+            DPRINTF(emtd, "0x%lu: Wrote tag %s to register %x\n", pc, EMTD_TAG_NAMES[get_mem_tag(get_mem_addr(inst, traceData))], RD.index());
             DPRINTF(emtd, "ADDR LOADED FROM: 0x%x\n", get_mem_addr(inst, traceData));
         }
 
@@ -412,13 +390,13 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
         {
             // Write tag from RS2 into memory
             Addr mem_addr = get_mem_addr(inst, traceData);
-            WRITE_MEM_TAG_ATOMIC(mem_addr, RS2_TAG_ATOMIC);
-            if (RS2_TAG_ATOMIC == CODE_PTR)
+            set_mem_tag(mem_addr, get_reg_tag(RS2));
+            if (get_reg_tag(RS2) == CODE_PTR)
             {
 
             }
 
-            DPRINTF(emtd, "0x%x: Wrote tag %s to memory 0x%x\n", pc, EMTD_TAG_NAMES[RS2_TAG_ATOMIC], get_mem_addr(inst, traceData));
+            DPRINTF(emtd, "0x%x: Wrote tag %s to memory 0x%x\n", pc, EMTD_TAG_NAMES[get_reg_tag(RS2)], get_mem_addr(inst, traceData));
         }
 
         /*** REG Arithmetic: Check tags of RS1 and RS2 for RD tag
@@ -427,22 +405,22 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
         else if (Ops.is_reg_arith_op(opc))
         {
             // Outlawing any arithmetic on code pointers (this is actually C-standard)
-            if (RS1_TAG_ATOMIC == CODE_PTR || RS2_TAG_ATOMIC == CODE_PTR)
+            if (get_reg_tag(RS1) == CODE_PTR || get_reg_tag(RS2) == CODE_PTR)
             {
                 sprintf(warn1, "0x%lu\n", pc);
                 sprintf(warn2, "EMTD CHECK: Policy Violated on REG ARITH. Operand is CODE_PTR(3) %s.\n", opc.c_str());
                 //DPRINTF(emtd_warning, "RS1 Tag: %s \tRS2 Tag: %s\n", EMTD_TAG_NAMES[RS1_TAG], EMTD_TAG_NAMES[RS2_TAG]);
-                WRITE_RD_TAG_ATOMIC(DATA);
-                WRITE_RD_STATUS_ATOMIC(CLEAN);
+                set_reg_tag(RD, DATA);
+                set_reg_tag_status(RD, CLEAN);
                 //throw EMTD_INVALIDOP;
                 //record_violation(pc, std::string(warn2), std::string(warn1));
             }
             // All other ops should generate a DATA tag
             else
             {
-                WRITE_RD_TAG_ATOMIC(DATA);
-                WRITE_RD_STATUS_ATOMIC(CLEAN);
-                DPRINTF(emtd, "0x%x: Wrote tag %s to register %x\n", pc, EMTD_TAG_NAMES[DATA], inst->destRegIdx(0).index());
+                set_reg_tag(RD, DATA);
+                set_reg_tag_status(RD, CLEAN);
+                DPRINTF(emtd, "0x%x: Wrote tag %s to register %x\n", pc, EMTD_TAG_NAMES[DATA], RD.index());
             }
             //check if the stack pointer is changing
             //assert(d_inst->traceData);
@@ -455,10 +433,10 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
             ***/
         else if (Ops.is_immed_arith_op(opc))
         {
-            WRITE_RD_TAG_ATOMIC(RS1_TAG_ATOMIC);
-            WRITE_RD_STATUS_ATOMIC(RS1_STATUS_ATOMIC);
+            set_reg_tag(RD, get_reg_tag(RS1));
+            set_reg_tag_status(RD, get_reg_tag(RS1));
 
-            DPRINTF(emtd, "0x%lu: Wrote tag %s to register %x\n", pc, EMTD_TAG_NAMES[RS1_TAG_ATOMIC], inst->destRegIdx(0).index());
+            DPRINTF(emtd, "0x%lu: Wrote tag %s to register %x\n", pc, EMTD_TAG_NAMES[get_reg_tag(RS1)], RD.index());
             //check if the stack pointer is changing
             //assert(d_inst->traceData);
             //check_stack_pointer(d_inst->traceData->getThread());
@@ -472,9 +450,9 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
         {
             // Restricting compares to within the same domain, BUT, compares to ZERO register are allowed
             // ALSO: immediate-operand based compares must be allowed.
-            WRITE_RD_TAG_ATOMIC(DATA);
-            WRITE_RD_STATUS_ATOMIC(CLEAN);
-            DPRINTF(emtd, "0x%lu: Wrote tag %s to register %x\n", pc, EMTD_TAG_NAMES[DATA], inst->destRegIdx(0).index());
+            set_reg_tag(RD), DATA);
+            set_reg_tag_status(RD, CLEAN);
+            DPRINTF(emtd, "0x%lu: Wrote tag %s to register %x\n", pc, EMTD_TAG_NAMES[DATA], RD.index());
         }
 
         /*** Jumps: Move tag of NPC into RD (saves a return addr)
@@ -482,10 +460,10 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
             ***/
         else if (Ops.is_jump_op(opc))
         {
-            if (opc == "jalr" && RS1_TAG_ATOMIC != CODE_PTR)
+            if (opc == "jalr" && get_reg_tag(RS1) != CODE_PTR)
             {
                 sprintf(warn1, "0x%lu\n", pc);
-                sprintf(warn2, "EMTD CHECK: Policy Violated on JALR. Tag should be CODE_PTR(3), got %s.\n", EMTD_TAG_NAMES[RS1_TAG_ATOMIC].c_str());
+                sprintf(warn2, "EMTD CHECK: Policy Violated on JALR. Tag should be CODE_PTR(3), got %s.\n", EMTD_TAG_NAMES[get_reg_tag(RS1)].c_str());
                 //throw EMTD_INVALIDOP;
                 //record_violation(pc, std::string(warn2), std::string(warn1));
             }
@@ -493,23 +471,23 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
             // STACK FRAME HANDLING
             // Function Call? Save SP
             // CALLS == JAL/JALR's with RD == $ra
-            if (inst->destRegIdx(0).index() == 1)
+            if (RD.index() == 1)
             {
                 //assert(d_inst->traceData);
                 //save_sp(d_inst->traceData->getThread());
                 save_sp(tc);
             }
             // Function Return? Deallocate
-            else if (opc == "jalr" && inst->srcRegIdx(0).index() == 1 && inst->destRegIdx(0).index() == 0)
+            else if (opc == "jalr" && inst->srcRegIdx(0).index() == 1 && RD.index() == 0)
             {
                 deallocate_stack_tags();
             }
             // END STACK FRAME HANDLING
 
             //Write tag for next instruction if destination is not zero register
-            if (inst->destRegIdx(0).index() != 0)
-                WRITE_RD_TAG_ATOMIC(CODE_PTR);
-            WRITE_RD_STATUS_ATOMIC(CLEAN);
+            if (RD.index() != 0)
+                set_reg_tag(RD, CODE_PTR);
+            set_reg_tag_status(RD, CLEAN);
         }
 
         /*** Branches: Nothing happens here. The resulting PC is made by get_next_pc_tag later in execution
@@ -524,9 +502,9 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
             ***/
         else
         {
-            WRITE_RD_TAG_ATOMIC(DATA);
-            WRITE_RD_STATUS_ATOMIC(CLEAN);
-            DPRINTF(emtd, "0x%x: Wrote tag %s to register %x\n", pc, EMTD_TAG_NAMES[DATA], inst->destRegIdx(0).index());
+            set_reg_tag(RD, DATA);
+            set_reg_tag_status(RD, CLEAN);
+            DPRINTF(emtd, "0x%x: Wrote tag %s to register %x\n", pc, EMTD_TAG_NAMES[DATA], RD.index());
         }
     }
     catch (int e)
