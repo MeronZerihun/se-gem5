@@ -133,9 +133,9 @@ void Metadata::set_mem_tag(memaddr_t memaddr, Emtd_tag newtag){
     auto it = memory_tags.find(addrToTag);
     if (it != memory_tags.end()){
         // Tag entry exists! 
-        Emtd_tag oldtag memory_tags[addrToTag];
+        Emtd_tag oldtag = memory_tags[addrToTag];
         if(newtag==CIPHERTEXT){
-            memory_tags[addrToTag] = newtag
+            memory_tags[addrToTag] = newtag;
             DPRINTF(priv, "MEM 0x%x :: Changing memory tag from %s to %s\n", addrToTag, EMTD_TAG_NAMES[oldtag], EMTD_TAG_NAMES[newtag]);
         }
         else{
@@ -145,7 +145,7 @@ void Metadata::set_mem_tag(memaddr_t memaddr, Emtd_tag newtag){
     }
     else {
         if(newtag==CIPHERTEXT){
-            memory_tags[addrToTag] = newtag
+            memory_tags[addrToTag] = newtag;
             DPRINTF(priv, "MEM 0x%x :: Adding memory tag %s\n", addrToTag, EMTD_TAG_NAMES[newtag]);
         }
     }
