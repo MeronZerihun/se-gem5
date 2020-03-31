@@ -434,7 +434,7 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
         else if (Ops.is_immed_arith_op(opc))
         {
             set_reg_tag(RD, get_reg_tag(RS1));
-            set_reg_tag_status(RD, get_reg_tag(RS1));
+            set_reg_tag_status(RD, get_reg_tag_status(RS1));
 
             DPRINTF(emtd, "0x%lu: Wrote tag %s to register %x\n", pc, EMTD_TAG_NAMES[get_reg_tag(RS1)], RD.index());
             //check if the stack pointer is changing
@@ -450,7 +450,7 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
         {
             // Restricting compares to within the same domain, BUT, compares to ZERO register are allowed
             // ALSO: immediate-operand based compares must be allowed.
-            set_reg_tag(RD), DATA);
+            set_reg_tag(RD, DATA);
             set_reg_tag_status(RD, CLEAN);
             DPRINTF(emtd, "0x%lu: Wrote tag %s to register %x\n", pc, EMTD_TAG_NAMES[DATA], RD.index());
         }
