@@ -27,7 +27,7 @@
 //#include "debug/Churn.hh"
 
 Metadata::Metadata(MetadataParams *params) : SimObject(params), filename(params->filename), progname(params->progname),
-                                             libc_start(params->libc_start), threshold(0xffffffff), is_churning(false)
+                                             threshold(0xffffffff), is_churning(false)
 {
     // Do some error checking on this path: See it exists
     if (access(filename.c_str(), F_OK) != 0)
@@ -60,13 +60,9 @@ Metadata::Metadata(MetadataParams *params) : SimObject(params), filename(params-
 
     // Initialize register tags
     initialize_reg_tags();
-
-    // Initialize the argument vectors
-    init_argvectors(progname);
 }
 
-// Do I need anything here?
-//Metadata::~Metadata()=default;
+
 
 void Metadata::initialize_reg_tags()
 {
@@ -75,7 +71,7 @@ void Metadata::initialize_reg_tags()
     for (int idx = 0; idx < 32; idx++)
     {
         RegId reg(IntRegClass, idx);
-        reg_tags_status.insert(std::pair<RegId, Emtd_status_tag>(reg, CLEAN));
+        reg_tags_status.insert(std::pair<RegId, Emtd_status_tag>(reg, DATA));
     }
 
     //x0 (zero reg) is data
@@ -84,7 +80,7 @@ void Metadata::initialize_reg_tags()
 
     // x1 (ra) is code pointer
     RegId reg1(IntRegClass, 1);
-    reg_tags.insert(std::pair<RegId, Emtd_tag>(reg1, CODE_PTR));
+    reg_tags.insert(std::pair<RegId, Emtd_tag>(reg1, DATA));
 
     // x2 = sp, x3 = gp, x4 = tp
     for (int idx = 2; idx < 5; idx++)
@@ -112,114 +108,7 @@ void Metadata::initialize_reg_tags()
     }
 }
 
-// Initialize the argument vectors. Experimentally found using print statements...yup :D
-void Metadata::init_argvectors(std::string progname)
-{
-    // Yes. These are constants. So good.
-    if (progname == "bzip2" || progname == "libquantum" || progname == "hmmer_nph3")
-    {
-        // ARGV
-        set_mem_tag(0x7fffffffffffff08, DATA);
-        set_mem_tag(0x7fffffffffffff10, DATA);
-        set_mem_tag(0x7fffffffffffff18, DATA);
-        set_mem_tag(0x7fffffffffffff20, DATA);
 
-        // ENVP
-        set_mem_tag(0x7fffffffffffff28, DATA);
-
-        // AUXV
-        set_mem_tag(0x7fffffffffffff38, DATA); // AT_ENTRY
-        set_mem_tag(0x7fffffffffffff68, DATA); // AT_PHDR
-        set_mem_tag(0x7fffffffffffff98, DATA); // AT_RANDOM
-    }
-    else if (progname == "mcf" || progname == "sjeng")
-    {
-        // ARGV
-        set_mem_tag(0x7fffffffffffff18, DATA);
-        set_mem_tag(0x7fffffffffffff20, DATA);
-        set_mem_tag(0x7fffffffffffff28, DATA);
-
-        // ENVP
-        set_mem_tag(0x7fffffffffffff30, DATA);
-
-        // AUXV
-        set_mem_tag(0x7fffffffffffff40, DATA); // AT_ENTRY
-        set_mem_tag(0x7fffffffffffff70, DATA); // AT_PHDR
-        set_mem_tag(0x7fffffffffffffa0, DATA); // AT_RANDOM
-    }
-    else if (progname == "milc")
-    {
-        // ARGV
-        set_mem_tag(0x7fffffffffffff28, DATA);
-        set_mem_tag(0x7fffffffffffff30, DATA);
-
-        // ENVP
-        set_mem_tag(0x7fffffffffffff38, DATA);
-
-        // AUXV
-        set_mem_tag(0x7fffffffffffff48, DATA); // AT_ENTRY
-        set_mem_tag(0x7fffffffffffff78, DATA); // AT_PHDR
-        set_mem_tag(0x7fffffffffffffa8, DATA); // AT_RANDOM
-    }
-    else if (progname == "hmmer")
-    {
-        // ARGV
-        set_mem_tag(0x7ffffffffffffe88, DATA);
-        set_mem_tag(0x7ffffffffffffe90, DATA);
-        set_mem_tag(0x7ffffffffffffe98, DATA);
-        set_mem_tag(0x7ffffffffffffea0, DATA);
-        set_mem_tag(0x7ffffffffffffea8, DATA);
-        set_mem_tag(0x7ffffffffffffeb0, DATA);
-        set_mem_tag(0x7ffffffffffffeb8, DATA);
-        set_mem_tag(0x7ffffffffffffec0, DATA);
-        set_mem_tag(0x7ffffffffffffec8, DATA);
-        set_mem_tag(0x7ffffffffffffed0, DATA);
-        set_mem_tag(0x7ffffffffffffed8, DATA);
-        set_mem_tag(0x7ffffffffffffee0, DATA);
-        set_mem_tag(0x7ffffffffffffee8, DATA);
-
-        // ENVP
-        set_mem_tag(0x7ffffffffffffef0, DATA);
-
-        // AUXV
-        set_mem_tag(0x7fffffffffffff00, DATA); // AT_ENTRY
-        set_mem_tag(0x7fffffffffffff30, DATA); // AT_PHDR
-        set_mem_tag(0x7fffffffffffff60, DATA); // AT_RANDOM
-    }
-    else if (progname == "h264ref")
-    {
-        // ARGV
-        set_mem_tag(0x7ffffffffffffee8, DATA);
-        set_mem_tag(0x7ffffffffffffef0, DATA);
-        set_mem_tag(0x7ffffffffffffef8, DATA);
-        set_mem_tag(0x7fffffffffffff00, DATA);
-
-        // ENVP
-        set_mem_tag(0x7fffffffffffff08, DATA);
-
-        // AUXV
-        set_mem_tag(0x7fffffffffffff18, DATA); // AT_ENTRY
-        set_mem_tag(0x7fffffffffffff48, DATA); // AT_PHDR
-        set_mem_tag(0x7fffffffffffff78, DATA); // AT_RANDOM
-    }
-    else if (progname == "sphinx3" || progname == "gobmk")
-    {
-        // ARGV
-        set_mem_tag(0x7ffffffffffffef8, DATA);
-        set_mem_tag(0x7fffffffffffff00, DATA);
-        set_mem_tag(0x7fffffffffffff08, DATA);
-        set_mem_tag(0x7fffffffffffff10, DATA);
-        set_mem_tag(0x7fffffffffffff18, DATA);
-
-        // ENVP
-        set_mem_tag(0x7fffffffffffff20, DATA);
-
-        // AUXV
-        set_mem_tag(0x7fffffffffffff30, DATA); // AT_ENTRY
-        set_mem_tag(0x7fffffffffffff60, DATA); // AT_PHDR
-        set_mem_tag(0x7fffffffffffff90, DATA); // AT_RANDOM
-    }
-}
 
 void Metadata::inc_threshold(int inc)
 {
@@ -446,19 +335,8 @@ Emtd_tag_type Metadata::convert_tagbyte_to_tag_type(uint8_t tagbyte)
     return static_cast<Emtd_tag_type>((tagbyte & tag_type_bits_mask) >> EMTD_TAG_BIT_WIDTH);
 }
 
-Addr Metadata::get_mem_addr(Minor::MinorDynInstPtr inst)
-{
-    //Trace::InstRecord *iR = inst->traceData;
-    //Addr addr = iR->getAddr();
-    assert(inst->traceData);
-    return inst->traceData->getAddr();
-}
 
-uint64_t Metadata::get_reg_value(Minor::MinorDynInstPtr inst, RegId regIdx)
-{
-    assert(inst->traceData);
-    return inst->traceData->getThread()->readIntReg(regIdx.index());
-}
+
 
 void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Addr pc, Trace::InstRecord *traceData)
 {
@@ -731,47 +609,49 @@ void Metadata::deallocate_stack_tags()
     base_sp.pop_back();
 }
 
-void Metadata::write_violation_stats()
-{
-    DPRINTF(emtd_warning, "Dumping stats file\n");
-    std::ofstream file;
-    file.open("m5out/violation_stats.txt");
 
-    std::map<Addr, int>::iterator it = pc_violation_counts.begin();
 
-    while (it != pc_violation_counts.end())
-    {
-        Addr pc = it->first;
-        int count = it->second;
-        std::string warning = pc_violation_type[pc];
-        //file << std::to_string(pc) + ", " + std::to_string(count) + ", " + warning + " \n";
-        file << "0x" << std::hex << pc << ", " + std::to_string(count) + ", " + warning + " \n";
+// void Metadata::write_violation_stats()
+// {
+//     DPRINTF(emtd_warning, "Dumping stats file\n");
+//     std::ofstream file;
+//     file.open("m5out/violation_stats.txt");
 
-        it++;
-    }
-    file.close();
-}
+//     std::map<Addr, int>::iterator it = pc_violation_counts.begin();
 
-void Metadata::record_violation(Addr pc, std::string msg, std::string pc_msg)
-{
-    if ((int)pc < (int)libc_start)
-    {
-        // Warning is from the program, not library code
-        DPRINTF(emtd_warning, "%s", pc_msg);
-        DPRINTF(emtd_warning, "%s", msg);
-        warning_count++;
-    }
-    if (pc_violation_counts.count(pc) == 0)
-    {
-        // First time we've encountered this warning
-        pc_violation_counts[pc] = 1;
-        pc_violation_type[pc] = msg;
-    }
-    else
-    {
-        pc_violation_counts[pc]++;
-    }
-}
+//     while (it != pc_violation_counts.end())
+//     {
+//         Addr pc = it->first;
+//         int count = it->second;
+//         std::string warning = pc_violation_type[pc];
+//         //file << std::to_string(pc) + ", " + std::to_string(count) + ", " + warning + " \n";
+//         file << "0x" << std::hex << pc << ", " + std::to_string(count) + ", " + warning + " \n";
+
+//         it++;
+//     }
+//     file.close();
+// }
+
+// void Metadata::record_violation(Addr pc, std::string msg, std::string pc_msg)
+// {
+//     if ((int)pc < (int)libc_start)
+//     {
+//         // Warning is from the program, not library code
+//         DPRINTF(emtd_warning, "%s", pc_msg);
+//         DPRINTF(emtd_warning, "%s", msg);
+//         warning_count++;
+//     }
+//     if (pc_violation_counts.count(pc) == 0)
+//     {
+//         // First time we've encountered this warning
+//         pc_violation_counts[pc] = 1;
+//         pc_violation_type[pc] = msg;
+//     }
+//     else
+//     {
+//         pc_violation_counts[pc]++;
+//     }
+// }
 
 Metadata *
 MetadataParams::create()

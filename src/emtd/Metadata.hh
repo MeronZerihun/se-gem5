@@ -14,7 +14,6 @@
 #include <stdint.h>
 #include <string>
 #include <map>
-
 #include "cpu/reg_class.hh" //RegID
 #include "cpu/minor/dyn_inst.hh"
 #include "cpu/simple/base.hh"
@@ -26,9 +25,7 @@
 #include <array>
 #include <string>
 #include <vector>
-//#include "cpu/o3/dyn_inst.hh"
-//#include "cpu/o3/impl.hh"
-//#include "cpu/o3/deriv.hh"
+
 
 //Define how many bytes get a single tag
 //It is assumed that the metadata generator gives us metadata properly aligned
@@ -39,21 +36,12 @@
 #define EMTD_TAG_BIT_WIDTH 1
 #define EMTD_TAG_TYPE_BIT_WIDTH 1
 
-#define RS1_TAG get_reg_tag(inst->staticInst->srcRegIdx(0))
-#define RS2_TAG get_reg_tag(inst->staticInst->srcRegIdx(1))
-#define RS1_IDX inst->staticInst->srcRegIdx(0)
-#define RS2_IDX inst->staticInst->srcRegIdx(1)
-#define WRITE_REG_TAG(reg, tag) set_reg_tag(reg, tag)
-#define WRITE_RD_TAG(tag) WRITE_REG_TAG(inst->staticInst->destRegIdx(0), tag)
-#define WRITE_MEM_TAG(addr, tag) set_mem_tag(addr, tag)
-
 // Defines for atomic cpu
 #define RS1_TAG_ATOMIC get_reg_tag(inst->srcRegIdx(0))
 #define RS2_TAG_ATOMIC get_reg_tag(inst->srcRegIdx(1))
 #define WRITE_REG_TAG_ATOMIC(reg, tag) set_reg_tag(reg, tag)
 #define WRITE_RD_TAG_ATOMIC(tag) WRITE_REG_TAG_ATOMIC(inst->destRegIdx(0), tag)
 #define WRITE_MEM_TAG_ATOMIC(addr, tag) set_mem_tag(addr, tag)
-
 #define RS1_STATUS_ATOMIC get_reg_tag_status(inst->srcRegIdx(0))
 #define RS2_STATUS_ATOMIC get_reg_tag_status(inst->srcRegIdx(1))
 #define WRITE_REG_STATUS_ATOMIC(reg, tag) set_reg_tag_status(reg, tag)
@@ -126,20 +114,20 @@ public:
 	void write_violation_stats();
 	void record_violation(Addr pc, std::string msg, std::string pc_msg);
 
-	void inc_threshold(int inc);
-	void set_threshold(Addr new_threshold);
-	Addr get_threshold();
-	void begin_churn();
-	void end_churn();
+	void inc_threshold(int inc); 				//ONLY USED BY CHURN
+	void set_threshold(Addr new_threshold); 	//ONLY USED BY CHURN
+	Addr get_threshold();						//ONLY USED BY CHURN
+	void begin_churn();							//ONLY USED BY CHURN
+	void end_churn();							//ONLY USED BY CHURN
 
 private:
 	std::string filename;
 	std::string progname;
-	Addr libc_start;
+	// Addr libc_start;
 
 public:
-	Addr threshold;
-	bool is_churning;
+	Addr threshold;								//ONLY USED BY CHURN
+	bool is_churning;							//ONLY USED BY CHURN
 
 private:
 	// Some nice string representations of tags
@@ -155,16 +143,12 @@ private:
 	std::map<Addr, std::string> pc_violation_type; // Violation descriptions
 
 	void load_metadata_binary(const char *filename);				   // Populate initial mem tags and insns_const_tags
-	memaddr_t get_mem_addr(Minor::MinorDynInstPtr inst);			   // Returns memory address for memory reference instructions.
-	uint64_t get_reg_value(Minor::MinorDynInstPtr inst, RegId regIdx); // Returns register value
 
 	memaddr_t convert_byte_array_to_addr(uint8_t *byte_array);
 	Emtd_tag convert_tagbyte_to_tag(uint8_t tagbyte);			// Helper function to mask bits in tagbyte
 	Emtd_tag_type convert_tagbyte_to_tag_type(uint8_t tagbyte); // Helper function to get tag's type
 	void initialize_reg_tags();									// Initialize tags for registers
 
-	// HACK: Store init tags needed for environment vectors: argv, envp, auxv
-	void init_argvectors(std::string progname);
 
 	// Variables used to keep track of
 	// stack frame size
