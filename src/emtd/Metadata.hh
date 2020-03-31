@@ -114,20 +114,11 @@ public:
 	void write_violation_stats();
 	void record_violation(Addr pc, std::string msg, std::string pc_msg);
 
-	void inc_threshold(int inc); 				//ONLY USED BY CHURN
-	void set_threshold(Addr new_threshold); 	//ONLY USED BY CHURN
-	Addr get_threshold();						//ONLY USED BY CHURN
-	void begin_churn();							//ONLY USED BY CHURN
-	void end_churn();							//ONLY USED BY CHURN
 
 private:
 	std::string filename;
 	std::string progname;
 	// Addr libc_start;
-
-public:
-	Addr threshold;								//ONLY USED BY CHURN
-	bool is_churning;							//ONLY USED BY CHURN
 
 private:
 	// Some nice string representations of tags

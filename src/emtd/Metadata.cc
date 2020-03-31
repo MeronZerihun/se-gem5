@@ -26,8 +26,7 @@
 #include "debug/priv.hh"
 //#include "debug/Churn.hh"
 
-Metadata::Metadata(MetadataParams *params) : SimObject(params), filename(params->filename), progname(params->progname),
-                                             threshold(0xffffffff), is_churning(false)
+Metadata::Metadata(MetadataParams *params) :i SimObject(params), filename(params->filename), progname(params->progname)
 {
     // Do some error checking on this path: See it exists
     if (access(filename.c_str(), F_OK) != 0)
@@ -110,26 +109,6 @@ void Metadata::initialize_reg_tags()
 
 
 
-void Metadata::inc_threshold(int inc)
-{
-    threshold = threshold + inc;
-}
-void Metadata::set_threshold(Addr new_threshold)
-{
-    threshold = new_threshold;
-}
-Addr Metadata::get_threshold()
-{
-    return threshold;
-}
-void Metadata::begin_churn()
-{
-    is_churning = true;
-}
-void Metadata::end_churn()
-{
-    is_churning = false;
-}
 
 // Get a tag for an addr. Assume UNTAGGED if non-existant
 Emtd_tag Metadata::get_mem_tag(memaddr_t memaddr)
@@ -394,18 +373,18 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
             {
                 // Churn is working on reqAddr--reqAddr+BLOCK_SIZE
                 // Clean below reqAddr, dirty above reqAddr
-                if (!is_churning)
-                {
-                    WRITE_RD_STATUS_ATOMIC(CLEAN);
-                }
-                else if (mem_addr < threshold)
-                {
-                    WRITE_RD_STATUS_ATOMIC(CLEAN);
-                }
-                else
-                {
+                // if (!is_churning)
+                // {
+                //     WRITE_RD_STATUS_ATOMIC(CLEAN);
+                // }
+                // else if (mem_addr < threshold)
+                // {
+                //     WRITE_RD_STATUS_ATOMIC(CLEAN);
+                // }
+                // else
+                // {
                     WRITE_RD_STATUS_ATOMIC(STALE);
-                }
+                // }
             }
             else
             {
