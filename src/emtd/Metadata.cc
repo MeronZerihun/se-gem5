@@ -399,56 +399,45 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
         /*** Branches: Nothing happens here. The resulting PC is made by get_next_pc_tag later in execution
         **** Invalid Op: Using CODE as an operand
         ***/
-        // else if (inst->isControl()){
-        //     if(inst->isUncondCtrl()){
-        //         if (inst->isCall()){
-        //             // STACK FRAM HANDLING::
-        //             // Function Call? Save SP
-        //             save_sp(tc);
-        //         }
-        //         else if (inst->isReturn()){
-        //             // STACK FRAM HANDLING::
-        //             // Function Return? Deallocate
-        //             deallocate_stack_tags();
-        //         }
-        //         else {
+        else if (inst->isControl()){
 
-        //         }
-        //     }
-        //     else if (inst->isCondCtrl()){
+            
+            if(inst->isUncondCtrl()){
+                if (inst->isCall()){
+                    // STACK FRAM HANDLING::
+                    // Function Call? Save SP
+                    //save_sp(tc);
+                }
+                else if (inst->isReturn()){
+                    // STACK FRAM HANDLING::
+                    // Function Return? Deallocate
+                    //deallocate_stack_tags();
+                }
 
-        //     }
-        //     else {
-        //         //Some other case here idk what it is... but showed up in bmk 
-        //     }
+                if (RD.index() != 0)
+                    set_reg_tag(RD, DATA);
+                set_reg_tag_status(RD, CLEAN);
 
-        // }
-        else if (Ops.is_jump_op(opc))
-        {
-            // Check Invalid Op
-            // TODO
-
-
-            // STACK FRAME HANDLING
-            // Function Call? Save SP
-            // CALLS == JAL/JALR's with RD == $ra
-            if (RD.index() == 1)
-            {
-                //assert(d_inst->traceData);
-                //save_sp(d_inst->traceData->getThread());
-                save_sp(tc);
             }
-            // Function Return? Deallocate
-            else if (opc == "jalr" && inst->srcRegIdx(0).index() == 1 && RD.index() == 0)
-            {
-                deallocate_stack_tags();
-            }
-            // END STACK FRAME HANDLING
+            else if (Ops.is_jump_op(opc)){
+                //Jump op that isn;t unconditional... weird
+                //Still do this 
+                if (RD.index() != 0)
+                    set_reg_tag(RD, DATA);
+                set_reg_tag_status(RD, CLEAN);
+                //Figure out what's going on here... TODO 
+                std::cerr << "jump_op :: ";
+                inst->printFlags(std::cerr, "; ");
+                std::cerr << "\n";
 
-            //Write tag for next instruction if destination is not zero register
-            if (RD.index() != 0)
-                set_reg_tag(RD, CODE_PTR);
-            set_reg_tag_status(RD, CLEAN);
+            }
+            else if (inst->isCondCtrl()){
+
+            }
+            else {
+                //Some other case here idk what it is... but showed up in bmk 
+            }
+
         }
 
         /*** Branches: Nothing happens here. The resulting PC is made by get_next_pc_tag later in execution
