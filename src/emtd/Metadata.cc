@@ -362,6 +362,7 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
         {
             // Check Invalid Op
             // TODO
+            
             Addr mem_addr = get_mem_addr(inst, traceData);
 
             if (inst->isLoad()){
@@ -383,6 +384,7 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
             }
             else{
                 // TODO PANIC
+                DPRINTF(priv, "PANIC:: Unhandled mem ref case\n");
             }
             
         }
@@ -393,30 +395,69 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
         /*** Branches: Nothing happens here. The resulting PC is made by get_next_pc_tag later in execution
         **** Invalid Op: Using CODE as an operand
         ***/
-        else if (inst->isControl()){
-            if(inst->isUncondCtrl()){
-                if (inst->isCall()){
-                    // STACK FRAM HANDLING::
-                    // Function Call? Save SP
-                    save_sp(tc);
-                }
-                else if (inst->isReturn()){
-                    // STACK FRAM HANDLING::
-                    // Function Return? Deallocate
-                    deallocate_stack_tags();
-                }
-                else {
+        // else if (inst->isControl()){
+        //     if(inst->isUncondCtrl()){
+        //         if (inst->isCall()){
+        //             // STACK FRAM HANDLING::
+        //             // Function Call? Save SP
+        //             save_sp(tc);
+        //         }
+        //         else if (inst->isReturn()){
+        //             // STACK FRAM HANDLING::
+        //             // Function Return? Deallocate
+        //             deallocate_stack_tags();
+        //         }
+        //         else {
 
-                }
-            }
-            else if (inst->isCondCtrl()){
+        //         }
+        //     }
+        //     else if (inst->isCondCtrl()){
 
-            }
-            else {
-                //Some other case here idk what it is... but showed up in bmk 
-            }
+        //     }
+        //     else {
+        //         //Some other case here idk what it is... but showed up in bmk 
+        //     }
 
+        // }
+        else if (Ops.is_jump_op(opc))
+        {
+            // Check Invalid Op
+            // TODO
+
+
+            // STACK FRAME HANDLING
+            // Function Call? Save SP
+            // CALLS == JAL/JALR's with RD == $ra
+            if (RD.index() == 1)
+            {
+                //assert(d_inst->traceData);
+                //save_sp(d_inst->traceData->getThread());
+                save_sp(tc);
+            }
+            // Function Return? Deallocate
+            else if (opc == "jalr" && inst->srcRegIdx(0).index() == 1 && RD.index() == 0)
+            {
+                deallocate_stack_tags();
+            }
+            // END STACK FRAME HANDLING
+
+            //Write tag for next instruction if destination is not zero register
+            if (RD.index() != 0)
+                set_reg_tag(RD, CODE_PTR);
+            set_reg_tag_status(RD, CLEAN);
         }
+
+        /*** Branches: Nothing happens here. The resulting PC is made by get_next_pc_tag later in execution
+        **** Invalid Op: Using CODE as an operand
+        ***/
+        else if (Ops.is_branch_op(opc))
+        {
+            // Invalid using CODE as an operand
+        }
+
+
+
+
 
         /*** OTHER:: TODO!!
         ****
@@ -426,7 +467,7 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
             /*** REG Arithmetic: Check tags of RS1 and RS2 for RD tag
             **** Invalid Ops: Check the header file. This depends on the source tags
             ***/
-            else if (Ops.is_reg_arith_op(opc) || Ops.is_cmp_op(opc))
+            if (Ops.is_reg_arith_op(opc) || Ops.is_cmp_op(opc))
             {
                 // Check Invalid Op
                 // TODO
