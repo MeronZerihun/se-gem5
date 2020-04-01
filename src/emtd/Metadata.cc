@@ -363,24 +363,28 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
             // Check Invalid Op
             // TODO
             
-            Addr mem_addr = get_mem_addr(inst, traceData);
+            Addr eff_addr = get_mem_addr(inst, traceData);
+            Emtd_tag eff_addr_tag = get_reg_tag(RS1);
+            if (eff_addr_tag == CIPHERTEXT){
+                DPRINTF(priv, "PANIC:: Policy violated on ld/st, effective address is ciphertext\n");
+            }
 
             if (inst->isLoad()){
-                Emtd_tag rd_tag = get_mem_tag(mem_addr);
+                Emtd_tag rd_tag = get_mem_tag(eff_addr);
                 if(rd_tag == CIPHERTEXT){
-                    DPRINTF(priv, "OP :: LOAD from 0x%x with tag %s\n", mem_addr, EMTD_TAG_NAMES[rd_tag]);
+                    DPRINTF(priv, "OP :: LOAD from 0x%x with tag %s\n", eff_addr, EMTD_TAG_NAMES[rd_tag]);
                 }
                 set_reg_tag(RD, rd_tag);
                 DPRINTF(emtd, "0x%lu: Wrote tag %s to register %x\n", pc, EMTD_TAG_NAMES[rd_tag], RD.index());
             }
             else if (inst->isStore()){
                 Emtd_tag rs2_tag = get_reg_tag((RS2));
-                set_mem_tag(mem_addr, rs2_tag);
+                set_mem_tag(eff_addr, rs2_tag);
 
                 if(rs2_tag == CIPHERTEXT){
-                    DPRINTF(priv, "OP :: Store to 0x%x with tag %s\n", mem_addr, EMTD_TAG_NAMES[rs2_tag]);
+                    DPRINTF(priv, "OP :: Store to 0x%x with tag %s\n", eff_addr, EMTD_TAG_NAMES[rs2_tag]);
                 }
-                DPRINTF(emtd, "0x%x: Wrote tag %s to memory 0x%x\n", pc, EMTD_TAG_NAMES[rs2_tag], mem_addr);
+                DPRINTF(emtd, "0x%x: Wrote tag %s to memory 0x%x\n", pc, EMTD_TAG_NAMES[rs2_tag], eff_addr);
             }
             else{
                 // TODO PANIC
