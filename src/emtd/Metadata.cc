@@ -120,13 +120,14 @@ Emtd_tag Metadata::get_mem_tag(memaddr_t memaddr){
 }
 
 // Set the tag for a memory address
-void Metadata::set_mem_tag(memaddr_t memaddr, Emtd_tag newtag){
+void Metadata::set_mem_tag(memaddr_t memaddr, Emtd_tag newtag, Addr pc){
     // Only write in at DATA_TAG_GRANULARITY aligned addresses
     // This isn't a problem for CODE_TAG_GRANULARITY since code tags aren't set again after load time
     memaddr_t addrToTag = memaddr;
     if (memaddr % EMTD_DATA_TAG_GRANULARITY != 0){
         addrToTag -= memaddr % EMTD_DATA_TAG_GRANULARITY;
     }
+    DPRINTF(emtd, "0x%x: Wrote tag %s to memory 0x%x\n", pc, EMTD_TAG_NAMES[newtag], memaddr);
 
     // Overwrite the tag at this tag address
     // To save on space, only track live ciphertexts! 
@@ -171,14 +172,14 @@ Emtd_tag Metadata::get_reg_tag(RegId regIdx){
 }
 
 // Set tag for register
-void Metadata::set_reg_tag(RegId regIdx, Emtd_tag newtag){
+void Metadata::set_reg_tag(RegId regIdx, Emtd_tag newtag, Addr pc){
     if (!regIdx.isZeroReg()){
         reg_tags[regIdx] = newtag;
     }
     if (newtag == CIPHERTEXT){
         DPRINTF(priv, "REG :: R%d tagged as %s\n", regIdx.flatIndex(), EMTD_TAG_NAMES[newtag]);
     }
-
+    DPRINTF(emtd, "0x%lu: Wrote tag %s to register %x\n", pc, EMTD_TAG_NAMES[newtag], regIdx.index());
 }
 
 // Get a status tag for register
@@ -360,31 +361,27 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
         ***/
         if (inst->isMemRef())
         {
-            // Check Invalid Op
-            // TODO
-            
+            // Assert effective address is not tagged as ciphertext
             Addr eff_addr = get_mem_addr(inst, traceData);
             Emtd_tag eff_addr_tag = get_reg_tag(RS1);
             if (eff_addr_tag == CIPHERTEXT){
                 DPRINTF(priv, "PANIC:: Policy violated on ld/st, effective address is ciphertext\n");
             }
 
+            // Propagate destination tag
             if (inst->isLoad()){
                 Emtd_tag rd_tag = get_mem_tag(eff_addr);
+                set_reg_tag(RD, rd_tag, pc);
                 if(rd_tag == CIPHERTEXT){
                     DPRINTF(priv, "OP :: LOAD from 0x%x with tag %s\n", eff_addr, EMTD_TAG_NAMES[rd_tag]);
                 }
-                set_reg_tag(RD, rd_tag);
-                DPRINTF(emtd, "0x%lu: Wrote tag %s to register %x\n", pc, EMTD_TAG_NAMES[rd_tag], RD.index());
             }
             else if (inst->isStore()){
                 Emtd_tag rs2_tag = get_reg_tag((RS2));
-                set_mem_tag(eff_addr, rs2_tag);
-
+                set_mem_tag(eff_addr, rs2_tag, pc);
                 if(rs2_tag == CIPHERTEXT){
                     DPRINTF(priv, "OP :: Store to 0x%x with tag %s\n", eff_addr, EMTD_TAG_NAMES[rs2_tag]);
                 }
-                DPRINTF(emtd, "0x%x: Wrote tag %s to memory 0x%x\n", pc, EMTD_TAG_NAMES[rs2_tag], eff_addr);
             }
             else{
                 // TODO PANIC
@@ -400,30 +397,35 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
         **** Invalid Op: Using CODE as an operand
         ***/
         else if (inst->isControl()){
-
-            
+        
             if(inst->isUncondCtrl()){
+
+                // Assert target address is not tagged as ciphertext
+                Emtd_tag target_addr_tag = get_reg_tag(RS1);
+                if (target_addr_tag == CIPHERTEXT){
+                    DPRINTF(priv, "PANIC:: Policy violated on control transfer, target address is ciphertext\n");
+                }
+
+                // Propagate destination tag
                 if (inst->isCall()){
-                    // STACK FRAM HANDLING::
-                    // Function Call? Save SP
+                    // STACK FRAM HANDLING CAUSING ERRORS
                     //save_sp(tc);
                 }
                 else if (inst->isReturn()){
-                    // STACK FRAM HANDLING::
-                    // Function Return? Deallocate
+                    // STACK FRAM HANDLING CAUSING ERRORS
                     //deallocate_stack_tags();
                 }
 
+                // Set tag of destination register
                 if (RD.index() != 0)
-                    set_reg_tag(RD, DATA);
-                set_reg_tag_status(RD, CLEAN);
+                    set_reg_tag(RD, DATA, pc);
 
             }
             else if (Ops.is_jump_op(opc)){
                 //Jump op that isn;t unconditional... weird
                 //Still do this 
                 if (RD.index() != 0)
-                    set_reg_tag(RD, DATA);
+                    set_reg_tag(RD, DATA, pc);
                 set_reg_tag_status(RD, CLEAN);
                 //Figure out what's going on here... TODO 
                 std::cerr << "jump_op :: ";
@@ -436,6 +438,8 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
             }
             else {
                 //Some other case here idk what it is... but showed up in bmk 
+                DPRINTF(priv, "PANIC:: Unhandled control case\n");
+
             }
 
         }
@@ -446,6 +450,7 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
         else if (Ops.is_branch_op(opc))
         {
             // Invalid using CODE as an operand
+            DPRINTF(priv, "PANIC:: Unhandled branch case\n");
         }
 
 
@@ -460,25 +465,32 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
             /*** REG Arithmetic: Check tags of RS1 and RS2 for RD tag
             **** Invalid Ops: Check the header file. This depends on the source tags
             ***/
+
+            Emtd_tag rs1_tag = get_reg_tag(RS1);
+            Emtd_tag rs2_tag = get_reg_tag(RS2);
+            if (rs1_tag == CIPHERTEXT || rs2_tag == CIPHERTEXT){
+                DPRINTF(priv, "OP :: R%d <-- R%d op R%d with tag %s\n", RD.index(), RS1.index(), RS2.index(), EMTD_TAG_NAMES[CIPHERTEXT]);
+            }
+
             if (Ops.is_reg_arith_op(opc) || Ops.is_cmp_op(opc))
             {
                 // Check Invalid Op
                 // TODO
 
                 if (get_reg_tag(RS1) == CIPHERTEXT || get_reg_tag(RS2) == CIPHERTEXT){
-                    set_reg_tag(RD, CIPHERTEXT);
-                    // set_reg_tag_status(RD, CLEAN);
+                    set_reg_tag(RD, CIPHERTEXT, pc);
+                    // set_reg_tag_status(RD, CLEAN, pc);
                     DPRINTF(priv, "OP :: R%d <-- R%d op R%d with tag %s\n", RD.index(), RS1.index(), RS2.index(), EMTD_TAG_NAMES[CIPHERTEXT]);
                     DPRINTF(emtd, "0x%x: Wrote tag %s to register %x\n", pc, EMTD_TAG_NAMES[CIPHERTEXT], RD.index());
                 }
                 else {
-                    set_reg_tag(RD, DATA);
+                    set_reg_tag(RD, DATA, pc);
                     // set_reg_tag_status(RD, CLEAN);
                     DPRINTF(emtd, "0x%x: Wrote tag %s to register %x\n", pc, EMTD_TAG_NAMES[DATA], RD.index());
                 }
 
                 //check if the stack pointer is changing
-                check_stack_pointer(tc);
+                // check_stack_pointer(tc);
             }
 
             /*** IMMED Arithmetic: Moves the tag of RS1 into RD
@@ -495,7 +507,7 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
                 DPRINTF(emtd, "0x%lu: Wrote tag %s to register %x\n", pc, EMTD_TAG_NAMES[get_reg_tag(RS1)], RD.index());
                 
                 //check if the stack pointer is changing
-                check_stack_pointer(tc);
+                // check_stack_pointer(tc);
             }
 
             /*** All Else: If there is an RD (not the ZERO register), assign a DATA tag
