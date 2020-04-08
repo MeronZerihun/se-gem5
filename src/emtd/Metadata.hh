@@ -96,7 +96,7 @@ public:
 
 	// Set a tag in the map (must overwrite existing entry at that memory location)
 	void set_mem_tag(memaddr_t memaddr, Emtd_tag newtag);
-	void set_reg_tag(RegId regIdx, Emtd_tag newtag);
+	void set_reg_tag(RegId regIdx, Emtd_tag newtag, Addr pc);
 
 	void set_reg_tag_status(RegId regIdx, Emtd_status_tag tag);
 
