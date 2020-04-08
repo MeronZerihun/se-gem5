@@ -481,12 +481,10 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
                     set_reg_tag(RD, CIPHERTEXT, pc);
                     // set_reg_tag_status(RD, CLEAN, pc);
                     DPRINTF(priv, "OP :: R%d <-- R%d op R%d with tag %s\n", RD.index(), RS1.index(), RS2.index(), EMTD_TAG_NAMES[CIPHERTEXT]);
-                    DPRINTF(emtd, "0x%x: Wrote tag %s to register %x\n", pc, EMTD_TAG_NAMES[CIPHERTEXT], RD.index());
                 }
                 else {
                     set_reg_tag(RD, DATA, pc);
                     // set_reg_tag_status(RD, CLEAN);
-                    DPRINTF(emtd, "0x%x: Wrote tag %s to register %x\n", pc, EMTD_TAG_NAMES[DATA], RD.index());
                 }
 
                 //check if the stack pointer is changing
@@ -501,10 +499,8 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
                 // Check Invalid Op
                 // TODO
 
-                set_reg_tag(RD, get_reg_tag(RS1));
+                set_reg_tag(RD, get_reg_tag(RS1), pc);
                 // set_reg_tag_status(RD, get_reg_tag_status(RS1));
-
-                DPRINTF(emtd, "0x%lu: Wrote tag %s to register %x\n", pc, EMTD_TAG_NAMES[get_reg_tag(RS1)], RD.index());
                 
                 //check if the stack pointer is changing
                 // check_stack_pointer(tc);
@@ -514,9 +510,8 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
             ***/
             else
             {
-                set_reg_tag(RD, DATA);
+                set_reg_tag(RD, DATA, pc);
                 set_reg_tag_status(RD, CLEAN);
-                DPRINTF(emtd, "0x%x: Wrote tag %s to register %x\n", pc, EMTD_TAG_NAMES[DATA], RD.index());
             }
         }
     }
