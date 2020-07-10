@@ -159,6 +159,14 @@ FUPool::FUPool(const Params *p)
 int
 FUPool::getUnit(OpClass capability)
 {
+    // LMB:: TODO:: This function called by inst_queue_impl...
+    // We can return the ENC/DEC version of functional unit (to add latency)
+    // So, ALU (1 cyle) -> DEC_ALU_ENC -> 141 cycles
+    // Naive but could work 
+    // Otherwise, override MICRO-OP functionality, where DEC_ALU_ENC
+    // breaks down into DEC FU, ALU FU, and ENC FU
+    // How does this work in gem5 tho??? 
+
     //  If this pool doesn't have the specified capability,
     //  return this information to the caller
     if (!capabilityList[capability])
