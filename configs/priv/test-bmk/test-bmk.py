@@ -98,6 +98,7 @@ system.cpu = DerivO3CPU(fetchWidth = systemWidth, decodeWidth = systemWidth, ren
 #system.cpu.metadataFileName = binary[0] + '.metadata.bin'
 system.metadata = Metadata()
 system.metadata.filename = binary[0] + '.metadata.bin'
+system.metadata.insfilename = binary[0] + '.taints.bin'
 system.metadata.progname = 'main'
 system.metadata.libc_start = 0x0016704c
 system.cpu.metadata = system.metadata
