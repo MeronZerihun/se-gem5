@@ -111,6 +111,7 @@ public:
 
 private:
 	std::string filename;
+	std::string insfilename;
 	std::string progname;
 	// Addr libc_start;
 

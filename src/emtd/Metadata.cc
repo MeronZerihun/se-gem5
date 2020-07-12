@@ -25,7 +25,7 @@
 #include "debug/priv.hh"
 
 
-Metadata::Metadata(MetadataParams *params) : SimObject(params), filename(params->filename), progname(params->progname)
+Metadata::Metadata(MetadataParams *params) : SimObject(params), filename(params->filename), insfilename(params->insfilename),  progname(params->progname)
 {
     // Do some error checking on this path: See it exists
     if (access(filename.c_str(), F_OK) != 0)
