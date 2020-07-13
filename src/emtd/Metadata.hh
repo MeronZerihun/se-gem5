@@ -135,6 +135,8 @@ private:
 	std::map<Addr, std::string> pc_violation_type; // Violation descriptions
 
 	void load_metadata_binary(const char *filename);				   // Populate initial mem tags and insns_const_tags
+	void load_ins_taints(const char *filename);
+
 
 	memaddr_t convert_byte_array_to_addr(uint8_t *byte_array);
 	Emtd_tag convert_tagbyte_to_tag(uint8_t tagbyte);			// Helper function to mask bits in tagbyte
