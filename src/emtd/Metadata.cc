@@ -347,7 +347,14 @@ void Metadata::load_metadata_binary(const char *filename){
 // Populates insn_tags
 void Metadata::load_ins_taints(const char *filename){
     DPRINTF(priv, "Loading instruction taints...\n");
-    int metafile_descriptor = open(filename, O_RDONLY);
+    ifstream ins_taints = open(filename, O_RDONLY);
+    assert(ins_taints.is_open());
+
+    string line;
+    while(getline(ins_taints, line)){
+        DPRINTF(priv, "Got line %s\n", line);
+    }
+    ins_taints.close()
 }
 
 
