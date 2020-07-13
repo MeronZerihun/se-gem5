@@ -25,6 +25,7 @@
 #include <array>
 #include <string>
 #include <vector>
+#include <unordered_set>
 
 
 //Define how many bytes get a single tag
@@ -60,7 +61,7 @@ enum Emtd_tag : uint8_t
 	DATA = 0,
 	CIPHERTEXT = 1,
 	UNTAGGED = 2,
-	CODE_PTR = 3,
+	CODE_PTR = 3, //Unused
 	Count
 };
 
@@ -120,6 +121,9 @@ private:
 	std::array<std::string, 5> EMTD_TAG_NAMES{{"DATA(0)", "CIPHERTEXT(1)", "UNTAGGED(2)"}};
 	std::map<memaddr_t, Emtd_tag> memory_tags;		 // Current state of memory tags
 													 // NOTE: Register's hold their own tags (in regfile)
+
+	// Representation of insn taints / "enc_ins"
+	std::unordered_set<memaddr_t> insn_tags;  // Unordered_set chosen for efficiency 
 
 	// // TODO:: Remove insns_consts_tags
 	// std::map<memaddr_t, Emtd_tag> insns_consts_tags; // Used to find tag of destination register in insns
