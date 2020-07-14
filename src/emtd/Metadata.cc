@@ -18,6 +18,7 @@
 #include <string>
 #include <map>
 #include <fstream>
+#include <iostream>
 
 #include "emtd/Metadata.hh"
 #include "debug/emtd.hh"
@@ -347,14 +348,16 @@ void Metadata::load_metadata_binary(const char *filename){
 // Populates insn_tags
 void Metadata::load_ins_taints(const char *filename){
     DPRINTF(priv, "Loading instruction taints...\n");
-    ifstream ins_taints = open(filename, O_RDONLY);
+    std::ifstream ins_taints (filename);
     assert(ins_taints.is_open());
 
-    string line;
+    std::string line;
     while(getline(ins_taints, line)){
-        DPRINTF(priv, "Got line %s\n", line);
+	long addr = strtol(line.c_str(), NULL, 16);
+	insn_tags.insert(addr);
+	DPRINTF(priv, "Tainting instruction at 0x%x \n", addr);
     }
-    ins_taints.close()
+    ins_taints.close();
 }
 
 
