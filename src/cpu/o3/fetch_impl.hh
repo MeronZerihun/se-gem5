@@ -76,6 +76,7 @@
 #include "sim/full_system.hh"
 #include "sim/system.hh"
 #include "cpu/o3/isa_specific.hh"
+#include "debug/csd.hh"
 
 using namespace std;
 
@@ -1299,7 +1300,9 @@ DefaultFetch<Impl>::fetch(bool &status_change)
         do {
             if (!(curMacroop || inRom)) {
                 if (decoder[tid]->instReady()) {
-                    staticInst = decoder[tid]->decode(thisPC);
+                    bool isTainted = true; //metadata->isTainted(thisPC.instAddr()); // REPLACE W METADATA CALL. 
+                    if(isTainted){ DPRINTF(csd, "Decoding tainted instruction 0x%x\n", thisPC.instAddr()); }
+                    staticInst = decoder[tid]->decode(thisPC, isTainted); //EMTD
 
                     // Increment stat of fetched instructions.
                     ++fetchedInsts;
@@ -1315,11 +1318,11 @@ DefaultFetch<Impl>::fetch(bool &status_change)
                     break;
                 }
             }
-            //Begin EMTD
-            //Perform the context sensitive translation here
-            if(curMacroop)
-            	curMacroop->cTXAlterMicroops();
-            //End EMTD
+            // //Begin EMTD
+            // //Perform the context sensitive translation here
+            // if(curMacroop)
+            // 	curMacroop->cTXAlterMicroops();
+            // //End EMTD
 
             
             // Whether we're moving to a new macroop because we're at the

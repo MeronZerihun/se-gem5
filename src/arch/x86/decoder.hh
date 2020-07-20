@@ -346,7 +346,8 @@ class Decoder
     /// @param mach_inst The binary instruction to decode.
     /// @retval A pointer to the corresponding StaticInst object.
     StaticInstPtr decode(ExtMachInst mach_inst, Addr addr);
-    StaticInstPtr decode(X86ISA::PCState &nextPC);
+    StaticInstPtr decode(X86ISA::PCState &nextPC, bool isTainted=false); //EMTD
+
 };
 
 } // namespace X86ISA
