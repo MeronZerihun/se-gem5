@@ -63,7 +63,7 @@ class MacroopBase : public X86StaticInst
     MacroopBase(const char *mnem, ExtMachInst _machInst, 
         uint32_t _numMicroops, X86ISA::EmulEnv _env) ;
 
-    ~MacroopBase()''
+    ~MacroopBase();
 
     StaticInstPtr * microops;
 
