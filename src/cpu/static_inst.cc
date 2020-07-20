@@ -105,7 +105,7 @@ StaticInst::fetchMicroop(MicroPC upc) const
 
 //Begin EMTD
 int
-StaticInst::cTXAlterMicroops(Addr pc){
+StaticInst::cTXAlterMicroops(){
 	 panic("StaticInst::cTXAlterMicroops() called on instruction "
 	          "that is not microcoded.");
 }

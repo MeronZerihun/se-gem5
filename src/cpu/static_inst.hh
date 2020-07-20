@@ -295,7 +295,7 @@ class StaticInst : public RefCounted, public StaticInstFlags
 	 * Go through the microOps of a macro op and perform some changes in
 	 * macroops
 	 */
-    virtual int cTXAlterMicroops(Addr pc) ;
+    virtual int cTXAlterMicroops() ;
     //End EMTD
 
     
