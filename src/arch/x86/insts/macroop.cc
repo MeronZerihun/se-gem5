@@ -33,7 +33,7 @@ int
 MacroopBase::cTXAlterMicroops()
 {
 	DPRINTF(csd, "MacroopBase::cTXAlterMicroops()\n");
-	if(ctx_decoded==false){
+	/*if(ctx_decoded==false){
 		for(int i=0;i<numMicroops;i++){
 			if(microops[i]->isLoad())
 			{
@@ -63,7 +63,7 @@ MacroopBase::cTXAlterMicroops()
 		}
 		microops[(numMicroops-1)]->setLastMicroop();
 		ctx_decoded=true;
-	}
+	}*/
 	return 0;
 
 }
