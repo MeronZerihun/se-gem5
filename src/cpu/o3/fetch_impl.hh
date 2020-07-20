@@ -1315,6 +1315,13 @@ DefaultFetch<Impl>::fetch(bool &status_change)
                     break;
                 }
             }
+            //Begin EMTD
+            //Perform the context sensitive translation here
+            if(curMacroop)
+            	curMacroop->cTXAlterMicroops();
+            //End EMTD
+
+            
             // Whether we're moving to a new macroop because we're at the
             // end of the current one, or the branch predictor incorrectly
             // thinks we are...

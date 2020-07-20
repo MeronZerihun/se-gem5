@@ -204,8 +204,10 @@ class StaticInst : public RefCounted, public StaticInstFlags
 
     void setFirstMicroop() { flags[IsFirstMicroop] = true; }
     void setLastMicroop() { flags[IsLastMicroop] = true; }
+    void clearLastMicroop() { flags[IsLastMicroop] = false; } //EMTD
     void setDelayedCommit() { flags[IsDelayedCommit] = true; }
     void setFlag(Flags f) { flags[f] = true; }
+    void setInjected() { flags[IsInjected] = true; } //EMTD
 
     /// Operation class.  Used to select appropriate function unit in issue.
     OpClass opClass()     const { return _opClass; }
@@ -287,6 +289,16 @@ class StaticInst : public RefCounted, public StaticInstFlags
 
     virtual void advancePC(TheISA::PCState &pcState) const = 0;
 
+
+    //Begin EMTD
+    /**
+	 * Go through the microOps of a macro op and perform some changes in
+	 * macroops
+	 */
+    virtual int cTXAlterMicroops() ;
+    //End EMTD
+
+    
     /**
      * Return the microop that goes with a particular micropc. This should
      * only be defined/used in macroops which will contain microops

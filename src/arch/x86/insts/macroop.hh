@@ -40,10 +40,11 @@
 #ifndef __ARCH_X86_INSTS_MACROOP_HH__
 #define __ARCH_X86_INSTS_MACROOP_HH__
 
-#include "arch/x86/insts/badmicroop.hh"
 #include "arch/x86/insts/static_inst.hh"
 #include "arch/x86/emulenv.hh"
 #include "arch/x86/types.hh"
+#include "arch/x86/insts/badmicroop.hh"
+#include "mem/request.hh"
 
 namespace X86ISA
 {
@@ -53,26 +54,21 @@ class MacroopBase : public X86StaticInst
   protected:
     const char *macrocodeBlock;
 
-    const uint32_t numMicroops;
+    uint32_t numMicroops;
     X86ISA::EmulEnv env;
 
-    //Constructor.
-    MacroopBase(const char *mnem, ExtMachInst _machInst,
-            uint32_t _numMicroops, X86ISA::EmulEnv _env) :
-                X86StaticInst(mnem, _machInst, No_OpClass),
-                numMicroops(_numMicroops), env(_env)
-    {
-        assert(numMicroops);
-        microops = new StaticInstPtr[numMicroops];
-        flags[IsMacroop] = true;
-    }
+    bool ctx_decoded; //EMTD
 
-    ~MacroopBase()
-    {
-        delete [] microops;
-    }
+    //Constructor.
+    MacroopBase(const char *mnem, ExtMachInst _machInst, 
+        uint32_t _numMicroops, X86ISA::EmulEnv _env) ;
+
+    ~MacroopBase()''
 
     StaticInstPtr * microops;
+
+    int cTXAlterMicroops(); //EMTD
+
 
     StaticInstPtr
     fetchMicroop(MicroPC microPC) const

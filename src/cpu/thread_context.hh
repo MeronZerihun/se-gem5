@@ -97,6 +97,12 @@ class ThreadContext : public PCEventScope
     using VecElem = TheISA::VecElem;
     using VecPredRegContainer = TheISA::VecPredRegContainer;
 
+    //Begin EMTD
+    /** Some state info */
+	std::map<std::string, int64_t> tc_vars;
+	std::map<uint64_t, int> code_ver;
+    //End EMTD
+
   public:
 
     enum Status
@@ -118,6 +124,16 @@ class ThreadContext : public PCEventScope
         /// this state, the simulation will terminate.
         Halted
     };
+
+    //Begin EMTD
+
+    /** Some helper methods */
+    virtual void set_tc_var(std::string var_name, int var_value){ tc_vars[var_name] = var_value; }
+    virtual uint64_t get_tc_var(std::string var_name) { if (tc_vars.find(var_name) != tc_vars.end()) {return tc_vars[var_name];} return 0; }
+
+    virtual void set_code_ver(uint64_t addr, int version){ code_ver[addr] = version; }
+    virtual int get_code_ver(uint64_t addr) { if (code_ver.find(addr) != code_ver.end()) {return code_ver[addr];} return 0; }
+    //End EMTD
 
     virtual ~ThreadContext() { };
 

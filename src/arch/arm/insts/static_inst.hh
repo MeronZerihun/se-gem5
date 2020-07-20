@@ -190,6 +190,14 @@ class ArmStaticInst : public StaticInst
                        IntRegIndex rs, uint32_t shiftAmt, ArmShiftType type,
                        uint64_t imm) const;
 
+    //Begin EMTD
+    void 
+    cTXAlterMicroops()
+    {
+        return;
+    }
+    //End EMTD
+
     void
     advancePC(PCState &pcState) const override
     {
