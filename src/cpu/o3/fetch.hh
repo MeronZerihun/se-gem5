@@ -409,6 +409,10 @@ class DefaultFetch
     /** Profile the reasons of fetch stall. */
     void profileStall(ThreadID tid);
 
+  public:
+    /** EMTD metadata object */
+    Metadata *metadata;  
+
   private:
     /** Pointer to the O3CPU. */
     O3CPU *cpu;

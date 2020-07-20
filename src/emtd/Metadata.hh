@@ -109,6 +109,7 @@ public:
 	void write_violation_stats();
 	void record_violation(Addr pc, std::string msg, std::string pc_msg);
 
+	bool isTainted(Addr pc);
 
 private:
 	std::string filename;

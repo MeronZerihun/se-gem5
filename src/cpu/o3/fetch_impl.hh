@@ -77,11 +77,15 @@
 #include "sim/system.hh"
 #include "cpu/o3/isa_specific.hh"
 
+#include "emtd/Metadata.hh" //Read taints from Metadata 
+#include "debug/csd.hh"
+
 using namespace std;
 
 template<class Impl>
 DefaultFetch<Impl>::DefaultFetch(O3CPU *_cpu, DerivO3CPUParams *params)
     : fetchPolicy(params->smtFetchPolicy),
+      metadata(params->metadata),
       cpu(_cpu),
       branchPred(nullptr),
       decodeToFetchDelay(params->decodeToFetchDelay),
@@ -1317,7 +1321,7 @@ DefaultFetch<Impl>::fetch(bool &status_change)
             }
             //Begin EMTD
             //Perform the context sensitive translation here
-            if(curMacroop)
+            if(curMacroop && metadata.isTainted(thisPC.instAddr()));
             	curMacroop->cTXAlterMicroops();
             //End EMTD
 
