@@ -691,7 +691,7 @@ Decoder::decode(ExtMachInst mach_inst, Addr addr)
 }
 
 StaticInstPtr
-Decoder::decode(PCState &nextPC, bool isTainted)
+Decoder::decode(PCState &nextPC)
 {
     if (!instDone)
         return NULL;
@@ -699,14 +699,9 @@ Decoder::decode(PCState &nextPC, bool isTainted)
     updateNPC(nextPC);
 
     StaticInstPtr &si = instBytes->si;
-    if (si){
-        //Begin EMTD
-        if(si->isMacroop() && isTainted){
-            si->cTXAlterMicroops(nextPC.instAddr());
-        }
-        //End EMTD
+    if (si)
         return si;
-    }
+
     // We didn't match in the AddrMap, but we still populated an entry. Fix
     // up its byte masks.
     const int chunkSize = sizeof(MachInst);
@@ -736,12 +731,6 @@ Decoder::decode(PCState &nextPC, bool isTainted)
     }
 
     si = decode(emi, origPC);
-    //Begin EMTD
-    // si = decode(emi, nextPC.instAddr());
-    if(si->isMacroop() && isTainted){
-        si->cTXAlterMicroops(nextPC.instAddr());
-    }
-    //End EMTD
     return si;
 }
 
