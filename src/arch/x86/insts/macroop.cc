@@ -30,13 +30,14 @@ MacroopBase::~MacroopBase()
 	delete [] microops;
 }
 int
-MacroopBase::cTXAlterMicroops()
+MacroopBase::cTXAlterMicroops(Addr pc)
 {
 	DPRINTF(csd, "MacroopBase::cTXAlterMicroops()\n");
 	if(ctx_decoded==false){
 		for(int i=0;i<numMicroops;i++){
 			if(microops[i]->isLoad())
 			{
+				DPRINTF(csd, "FOUND LOAD MICROOP\n");
 				//relocate
 				numMicroops+=1;
 				StaticInstPtr*tempmicroops = new StaticInstPtr[numMicroops];
@@ -44,11 +45,44 @@ MacroopBase::cTXAlterMicroops()
 					tempmicroops[j]=microops[j];
 					tempmicroops[j]->clearLastMicroop();
 				}
-				StaticInstPtr injected = new X86ISAInst::Ld(machInst,
-						macrocodeBlock, (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0 |  (1ULL << StaticInst::IsDataPrefetch), env.scale, InstRegIndex(env.index),
-						InstRegIndex(env.base), 0x4a3000, InstRegIndex(env.seg), InstRegIndex(NUM_INTREGS+0),
-						4, 8, 0 | Request::PREFETCH );
 
+				//LB:: I think this constructor comes from ldstop.isa line 226, 260
+				//	 	or line 100 of microldstop.hh
+				// StaticInstPtr injected = new X86ISAInst::Ld(
+				// 		machInst, 					//ExtMachInst _machInst
+				// 		macrocodeBlock, 			//const char * instMnem, in later versions this is just set to "injectedBranch"
+				// 		(1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0 |  (1ULL << StaticInst::IsDataPrefetch), //uint64_t setFlags
+				// 		env.scale, 					// uint8_t _scale
+				// 		InstRegIndex(env.index), 	//InstRegIndex _index
+				// 		InstRegIndex(env.base), 	//InstRegIndex _base
+				// 		0x4a3000,  					// uint64_t _disp
+				// 		InstRegIndex(env.seg), 		//InstRegIndex _segment
+				// 		InstRegIndex(NUM_INTREGS+0), // InstRegIndex _data
+				// 		4, 							//uint8_t _dataSize
+				// 		8, 							//uint8_t _addressSize
+				// 		0 | Request::PREFETCH ); 	//Request::FlagsType _memFlags
+
+
+				//From a later version... 
+				StaticInstPtr injected = new X86ISAInst::Ld(
+						machInst,
+						"injetedBranch", 
+						(1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0 ,
+						1 , 
+						InstRegIndex(NUM_INTREGS+0),
+						InstRegIndex(NUM_INTREGS+1) , 
+						0,
+						InstRegIndex(env.seg), 
+						InstRegIndex(NUM_INTREGS+2),
+						4, 
+						8, 
+						0 );
+				injected->SetSrcRegIdx(2,NUM_INTREGS+3);
+				injected->setInjected();
+
+				DPRINTF(csd, injected->generateDisassembly(pc, nullptr)); 
+
+				injected->SetSrcRegIdx(2,NUM_INTREGS+3); //From a later version... 
 				injected->setInjected();
 				//injected->printFlags(std::cout," ");
 				tempmicroops[i+1]=injected;
