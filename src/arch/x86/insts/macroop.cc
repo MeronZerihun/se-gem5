@@ -52,58 +52,35 @@ MacroopBase::cTXAlterMicroops()
 
 				//LB:: I think this constructor comes from ldstop.isa line 226, 260
 				//	 	or line 100 of microldstop.hh
-				// StaticInstPtr injected = new X86ISAInst::Ld(
-				// 		machInst, 					//ExtMachInst _machInst
-				// 		macrocodeBlock, 			//const char * instMnem, in later versions this is just set to "injectedBranch"
-				// 		(1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0 |  (1ULL << StaticInst::IsDataPrefetch), //uint64_t setFlags
-				// 		env.scale, 					// uint8_t _scale
-				// 		InstRegIndex(env.index), 	//InstRegIndex _index
-				// 		InstRegIndex(env.base), 	//InstRegIndex _base
-				// 		0x4a3000,  					// uint64_t _disp
-				// 		InstRegIndex(env.seg), 		//InstRegIndex _segment
-				// 		InstRegIndex(NUM_INTREGS+0), // InstRegIndex _data
-				// 		4, 							//uint8_t _dataSize
-				// 		8, 							//uint8_t _addressSize
-				// 		0 | Request::PREFETCH ); 	//Request::FlagsType _memFlags
-
-
-				//From a later version... 
-			 	//StaticInstPtr injected = microops[i];
-				//injected->setDisp(0x8);
 				StaticInstPtr injected = new X86ISAInst::Ld(
-						machInst,
-						"INJ_MOV_R_M", 
-						(1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0 ,
-						env.scale , 
-						InstRegIndex(env.index), //InstRegIndex(NUM_INTREGS+0), //index
-						InstRegIndex(env.base) , //base
-						microops[i]->getDisp() + 8,	//disp
-						InstRegIndex(env.seg), //seg
-						InstRegIndex(microops[i]->destRegIdx(0).index()), //data
-						env.dataSize, 
-						env.addressSize, 
-						0 );
-				//injected->SetSrcRegIdx(2,NUM_INTREGS+3); ERROR
+						machInst, 						//ExtMachInst _machInst
+						"INJ_MOV_R_M", 					//const char * instMnem, in later versions this is just set to "injectedBranch"
+						(1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0 |  (1ULL << StaticInst::IsDataPrefetch), //uint64_t setFlags
+						env.scale, 						// uint8_t _scale
+						InstRegIndex(env.index), 		//InstRegIndex _index
+						InstRegIndex(env.base), 		//InstRegIndex _base
+						microops[i]->getDisp() + 8,		// uint64_t _disp
+						InstRegIndex(env.seg), 			//InstRegIndex _segment
+						InstRegIndex(microops[i]->destRegIdx(0).index()), 	// InstRegIndex _data
+						env.dataSize, 					//uint8_t _dataSize
+						env.addressSize, 				//uint8_t _addressSize
+						0); 							//Request::FlagsType _memFlags
 				injected->setInjected();
 
+				//Sanity check for print
 				DPRINTF(csd, "Load Ins:: %s\n", microops[i]->generateDisassembly(0, NULL));
-			        DPRINTF(csd, "Inj Ins:: %s\n", injected->generateDisassembly(0, NULL));	
-				
-				
-				//Index, Base, Data
-				// 0, 1, 2
-				//Inj Ins::   injetedBranch : ld   t2d, DS:[t1]
+			    DPRINTF(csd, "Inj Ins:: %s\n", injected->generateDisassembly(0, NULL));	
 
-				//injected->SetSrcRegIdx(2,NUM_INTREGS+3); //From a later version... 
-				//injected->setInjected();
-				//injected->printFlags(std::cout," ");
 				tempmicroops[i+1]=injected;
 				for(int j=i+2;j<numMicroops;j++){
 					tempmicroops[j]=microops[j-1];
 				}
-				i++;
-				delete [] microops;
-				microops = tempmicroops;
+				i++; //Skip injected microop
+
+				//LB :: Dont actually change microops for testing purposes..
+				numMicroops-=1;
+				// delete [] microops;
+				// microops = tempmicroops;
 
 			}
 		}
