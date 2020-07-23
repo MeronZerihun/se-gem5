@@ -38,13 +38,17 @@ MacroopBase::cTXAlterMicroops()
 			if(microops[i]->isLoad())
 			{
 				DPRINTF(csd, "FOUND LOAD MICROOP\n");
+				DPRINTF(csd, "SRC O %d\n", microops[i]->srcRegIdx(0));
+				DPRINTF(csd, "DEST O %d\n", microops[i]->destRegIdx(0));
+
 				//relocate
-				/*numMicroops+=1;
+				numMicroops+=1;
 				/StaticInstPtr*tempmicroops = new StaticInstPtr[numMicroops];
 				for(int j=0;j<i+1;j++){
 					tempmicroops[j]=microops[j];
 					tempmicroops[j]->clearLastMicroop();
 				}
+				
 
 				//LB:: I think this constructor comes from ldstop.isa line 226, 260
 				//	 	or line 100 of microldstop.hh
@@ -66,14 +70,14 @@ MacroopBase::cTXAlterMicroops()
 				//From a later version... 
 				StaticInstPtr injected = new X86ISAInst::Ld(
 						machInst,
-						"injetedBranch", 
+						"injetedCTX", 
 						(1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0 ,
 						1 , 
-						InstRegIndex(NUM_INTREGS+0),
-						InstRegIndex(NUM_INTREGS+1) , 
-						0,
-						InstRegIndex(env.seg), 
-						InstRegIndex(NUM_INTREGS+2),
+						InstRegIndex(NUM_INTREGS+0), //index
+						InstRegIndex(NUM_INTREGS+1) , //base
+						0,	//disp
+						InstRegIndex(env.seg), //seg
+						InstRegIndex(NUM_INTREGS+2), //data
 						4, 
 						8, 
 						0 );
@@ -96,7 +100,7 @@ MacroopBase::cTXAlterMicroops()
 				}
 				i++;
 				delete [] microops;
-				microops = tempmicroops;*/
+				microops = tempmicroops;
 
 			}
 		}
