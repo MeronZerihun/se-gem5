@@ -87,10 +87,11 @@ namespace X86ISA
                 : StaticInst(mnem, _machInst, __opClass)
             {
             }
-
+      public:
         std::string generateDisassembly(Addr pc,
             const SymbolTable *symtab) const;
 
+      protected:
         void printMnemonic(std::ostream &os, const char * mnemonic) const;
         void printMnemonic(std::ostream &os, const char * instMnemonic,
                 const char * mnemonic) const;

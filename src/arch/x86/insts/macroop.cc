@@ -30,7 +30,7 @@ MacroopBase::~MacroopBase()
 	delete [] microops;
 }
 int
-MacroopBase::cTXAlterMicroops(Addr pc)
+MacroopBase::cTXAlterMicroops()
 {
 	DPRINTF(csd, "MacroopBase::cTXAlterMicroops()\n");
 	if(ctx_decoded==false){
@@ -39,8 +39,8 @@ MacroopBase::cTXAlterMicroops(Addr pc)
 			{
 				DPRINTF(csd, "FOUND LOAD MICROOP\n");
 				//relocate
-				numMicroops+=1;
-				StaticInstPtr*tempmicroops = new StaticInstPtr[numMicroops];
+				/*numMicroops+=1;
+				/StaticInstPtr*tempmicroops = new StaticInstPtr[numMicroops];
 				for(int j=0;j<i+1;j++){
 					tempmicroops[j]=microops[j];
 					tempmicroops[j]->clearLastMicroop();
@@ -77,12 +77,17 @@ MacroopBase::cTXAlterMicroops(Addr pc)
 						4, 
 						8, 
 						0 );
-				injected->SetSrcRegIdx(2,NUM_INTREGS+3);
+				//injected->SetSrcRegIdx(2,NUM_INTREGS+3); ERROR
 				injected->setInjected();
 
-				DPRINTF(csd, injected->generateDisassembly(pc, nullptr)); 
+				std::string dis = injected->generateDisassembly(0, NULL);
+			        DPRINTF(csd, "Inj Ins:: %s\n", dis);	
+				
+				//Index, Base, Data
+				// 0, 1, 2
+				//Inj Ins::   injetedBranch : ld   t2d, DS:[t1]
 
-				injected->SetSrcRegIdx(2,NUM_INTREGS+3); //From a later version... 
+				//injected->SetSrcRegIdx(2,NUM_INTREGS+3); //From a later version... 
 				injected->setInjected();
 				//injected->printFlags(std::cout," ");
 				tempmicroops[i+1]=injected;
@@ -91,7 +96,7 @@ MacroopBase::cTXAlterMicroops(Addr pc)
 				}
 				i++;
 				delete [] microops;
-				microops = tempmicroops;
+				microops = tempmicroops;*/
 
 			}
 		}

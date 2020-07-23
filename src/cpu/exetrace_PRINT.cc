@@ -95,6 +95,8 @@ Trace::ExeTracerRecord::traceInst(const StaticInstPtr &inst, bool ran)
         outs << "0x" << hex << cur_pc;
     }
 
+    outs << "::PC 0x" << hex << cur_pc << "::";
+
     if (inst->isMicroop()) {
         outs << "." << setw(2) << dec << pc.microPC();
     } else {

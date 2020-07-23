@@ -67,7 +67,7 @@ class MacroopBase : public X86StaticInst
 
     StaticInstPtr * microops;
 
-    int cTXAlterMicroops(Addr pc); //EMTD
+    int cTXAlterMicroops(); //EMTD
 
 
     StaticInstPtr

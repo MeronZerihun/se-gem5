@@ -114,6 +114,7 @@ namespace X86ISA
         {
         }
 
+      public:  
         std::string generateDisassembly(Addr pc,
             const SymbolTable *symtab) const;
     };
