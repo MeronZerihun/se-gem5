@@ -32,10 +32,10 @@ MacroopBase::~MacroopBase()
 
 
 
-std::vector <StaticInstPtr>
+std::vector<StaticInstPtr>
 MacroopBase::injectLoadMicros (StaticInstPtr load_microop){
 
-	std::vector <StaticInstPtr> result;
+	std::vector<StaticInstPtr> result;
 	
 	//LB:: I think this constructor comes from ldstop.isa line 226, 260
 	//	 	or line 100 of microldstop.hh
@@ -69,7 +69,7 @@ MacroopBase::cTXAlterMicroops()
 	DPRINTF(csd, "MacroopBase::cTXAlterMicroops()\n");
 	if(ctx_decoded==false){
 		//Caculate total number of injected microops
-		new_numMicroops = numMicroops;
+		int new_numMicroops = numMicroops;
 		for(int i=0;i<numMicroops;i++){
 			if(microops[i]->isLoad())
 			{

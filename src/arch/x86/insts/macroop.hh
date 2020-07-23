@@ -67,6 +67,8 @@ class MacroopBase : public X86StaticInst
 
     StaticInstPtr * microops;
 
+    std::vector<StaticInstPtr> injectLoadMicros (StaticInstPtr load_microop);
+
     int cTXAlterMicroops(); //EMTD
 
 
