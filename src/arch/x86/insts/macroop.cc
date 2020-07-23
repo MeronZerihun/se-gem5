@@ -55,10 +55,10 @@ MacroopBase::injectLoadMicros (StaticInstPtr load_microop){
 	injected->setInjected();
 	result.push_back(injected);
 
-	DPRINTF(csd, "Load Ins:: %s\n", microops[i]->generateDisassembly(0, NULL));
+	DPRINTF(csd, "Load Ins:: %s\n", load_microop->generateDisassembly(0, NULL));
 	DPRINTF(csd, "Inj Ins:: %s\n", injected->generateDisassembly(0, NULL));	
 
-
+	return result;
 
 }
 
@@ -78,7 +78,7 @@ MacroopBase::cTXAlterMicroops()
 		}
 
 		//Now inject microops
-		numMicroops = new_numMicroops
+		numMicroops = new_numMicroops;
 		StaticInstPtr* tempmicroops = new StaticInstPtr[numMicroops];
 
 		for(int i=0;i<numMicroops;i++){
