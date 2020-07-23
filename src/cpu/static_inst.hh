@@ -60,6 +60,7 @@
 #include "cpu/thread_context.hh"
 #include "enums/StaticInstFlags.hh"
 #include "sim/byteswap.hh"
+#include "debug/csd.hh"
 
 // forward declarations
 class Packet;
@@ -298,6 +299,11 @@ class StaticInst : public RefCounted, public StaticInstFlags
 	 * macroops
 	 */
     virtual int cTXAlterMicroops() ;
+
+    virtual int getDisp(){
+	    DPRINTF(csd, "(!) We should not be here, StaticInst::getDisp\n");
+	    return 0;
+    }
     //End EMTD
 
     

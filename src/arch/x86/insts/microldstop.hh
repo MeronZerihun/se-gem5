@@ -58,7 +58,9 @@ namespace X86ISA
         const uint8_t scale;
         const RegIndex index;
         const RegIndex base;
-        const uint64_t disp;
+      public:
+     	const uint64_t disp;
+      protected:
         const uint8_t segment;
         const uint8_t dataSize;
         const uint8_t addressSize;
@@ -86,6 +88,8 @@ namespace X86ISA
             foldABit =
                 (addressSize == 1 && !_machInst.rex.present) ? 1 << 6 : 0;
         }
+
+	int getDisp(){return disp;}
     };
 
     /**

@@ -40,10 +40,10 @@ MacroopBase::cTXAlterMicroops()
 				DPRINTF(csd, "FOUND LOAD MICROOP\n");
 				DPRINTF(csd, "SRC O %d\n", microops[i]->srcRegIdx(0));
 				DPRINTF(csd, "DEST O %d\n", microops[i]->destRegIdx(0));
-
+				DPRINTF(csd, "DISP %d\n", microops[i]->getDisp());
 				//relocate
 				numMicroops+=1;
-				/StaticInstPtr*tempmicroops = new StaticInstPtr[numMicroops];
+				StaticInstPtr* tempmicroops = new StaticInstPtr[numMicroops];
 				for(int j=0;j<i+1;j++){
 					tempmicroops[j]=microops[j];
 					tempmicroops[j]->clearLastMicroop();
@@ -68,31 +68,34 @@ MacroopBase::cTXAlterMicroops()
 
 
 				//From a later version... 
+			 	//StaticInstPtr injected = microops[i];
+				//injected->setDisp(0x8);
 				StaticInstPtr injected = new X86ISAInst::Ld(
 						machInst,
-						"injetedCTX", 
+						"INJ_MOV_R_M", 
 						(1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0 ,
-						1 , 
-						InstRegIndex(NUM_INTREGS+0), //index
-						InstRegIndex(NUM_INTREGS+1) , //base
-						0,	//disp
+						env.scale , 
+						InstRegIndex(env.index), //InstRegIndex(NUM_INTREGS+0), //index
+						InstRegIndex(env.base) , //base
+						microops[i]->getDisp() + 8,	//disp
 						InstRegIndex(env.seg), //seg
-						InstRegIndex(NUM_INTREGS+2), //data
-						4, 
-						8, 
+						InstRegIndex(microops[i]->destRegIdx(0).index()), //data
+						env.dataSize, 
+						env.addressSize, 
 						0 );
 				//injected->SetSrcRegIdx(2,NUM_INTREGS+3); ERROR
 				injected->setInjected();
 
-				std::string dis = injected->generateDisassembly(0, NULL);
-			        DPRINTF(csd, "Inj Ins:: %s\n", dis);	
+				DPRINTF(csd, "Load Ins:: %s\n", microops[i]->generateDisassembly(0, NULL));
+			        DPRINTF(csd, "Inj Ins:: %s\n", injected->generateDisassembly(0, NULL));	
+				
 				
 				//Index, Base, Data
 				// 0, 1, 2
 				//Inj Ins::   injetedBranch : ld   t2d, DS:[t1]
 
 				//injected->SetSrcRegIdx(2,NUM_INTREGS+3); //From a later version... 
-				injected->setInjected();
+				//injected->setInjected();
 				//injected->printFlags(std::cout," ");
 				tempmicroops[i+1]=injected;
 				for(int j=i+2;j<numMicroops;j++){
