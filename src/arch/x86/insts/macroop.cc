@@ -59,6 +59,22 @@ MacroopBase::injectLoadMicros (StaticInstPtr load_microop){
 	//DPRINTF(csd, "Load Ins:: %s\n", load_microop->generateDisassembly(0, NULL));
 	//DPRINTF(csd, "Inj Ins:: %s\n", injected->generateDisassembly(0, NULL));	
 
+
+	StaticInstPtr injected2 = new X86ISAInst::Enc(
+			machInst, 						//ExtMachInst _machInst
+			"INJ_MOV_R_M", 		//const char * instMnem, in later versions this is just set to "injectedBranch"
+			(1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, //uint64_t setFlags
+			env.scale, 						// uint8_t _scale
+			InstRegIndex(env.index), 		//InstRegIndex _index
+			InstRegIndex(env.base), 		//InstRegIndex _base
+			load_microop->getDisp() + 8,		// uint64_t _disp
+			InstRegIndex(env.seg), 			//InstRegIndex _segment
+			InstRegIndex(NUM_INTREGS+1),//load_microop->destRegIdx(0).index()), 	// InstRegIndex _data
+			env.dataSize, 					//uint8_t _dataSize
+			env.addressSize, 				//uint8_t _addressSize
+			0); 							//Request::FlagsType _memFlags
+	injected2->setInjected();
+
 	return result;
 
 }

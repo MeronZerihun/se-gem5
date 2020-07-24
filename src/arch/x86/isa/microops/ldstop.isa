@@ -479,6 +479,8 @@ let {{
 
         microopClasses[name] = LoadOp
 
+    defineMicroLoadOp('Enc', 'Data = merge(Data, Mem, dataSize);', #EMTD TEST
+                            'Data = Mem & mask(dataSize * 8);')
     defineMicroLoadOp('Ld', 'Data = merge(Data, Mem, dataSize);',
                             'Data = Mem & mask(dataSize * 8);')
     defineMicroLoadOp('Ldis', 'Data = merge(Data, Mem, dataSize);',

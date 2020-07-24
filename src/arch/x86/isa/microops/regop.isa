@@ -752,6 +752,16 @@ let {{
         code = 'DestReg = merge(SrcReg1, op2, dataSize)'
         else_code = 'DestReg = DestReg;'
 
+    # EMTD
+    class Enc(RegOp):
+        op_class = 'EncryptOp'
+        code = 'DestReg = merge(SrcReg1, op2, dataSize)' #TODO
+    
+    class Dec(RegOp):
+        op_class = 'DecryptOp'
+        code = 'DestReg = merge(SrcReg1, op2, dataSize)' #TODO
+
+
     # Shift instructions
 
     class Sll(RegOp):
