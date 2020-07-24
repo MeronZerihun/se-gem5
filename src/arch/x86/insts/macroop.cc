@@ -32,10 +32,10 @@ MacroopBase::~MacroopBase()
 
 
 
-StaticInstPtr
+std::vector<StaticInstPtr>
 MacroopBase::injectLoadMicros (StaticInstPtr load_microop){
 
-	//StaticInstPtr* result[1];
+	std::vector<StaticInstPtr> result;
 	
 	//LB:: I think this constructor comes from ldstop.isa line 226, 260
 	//	 	or line 100 of microldstop.hh
@@ -55,10 +55,11 @@ MacroopBase::injectLoadMicros (StaticInstPtr load_microop){
 	injected->setInjected();
 	//result[0] = injected;
 
+	result.push_back(injected);
 	//DPRINTF(csd, "Load Ins:: %s\n", load_microop->generateDisassembly(0, NULL));
 	//DPRINTF(csd, "Inj Ins:: %s\n", injected->generateDisassembly(0, NULL));	
 
-	return injected;
+	return result;
 
 }
 
@@ -90,7 +91,8 @@ MacroopBase::cTXAlterMicroops()
 			{	
 				DPRINTF(csd, "copying over load\n");
 				//StaticInstPtr* toBeInjected = injectLoadMicros(microops[i]);	
-				tempmicroops[i] = injectLoadMicros(microops[i]); //toBeInjected[0];
+				std::vector<StaticInstPtr> toInject = injectLoadMicros(microops[i]);
+				tempmicroops[i] = toInject.at(0); //toBeInjected[0];
 				tempmicroops[i]->clearLastMicroop();
 				tempmicroops[i+1] = microops[i];
 				tempmicroops[i+1]->clearLastMicroop();
