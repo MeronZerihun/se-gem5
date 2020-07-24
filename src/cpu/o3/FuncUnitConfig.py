@@ -46,8 +46,9 @@ from m5.objects.FuncUnit import *
 
 
 #### BEGIN EMTD
-class DDASJalr(FUDesc):
-    opList = [ OpDesc(opClass='DDASJalr', opLat=2, pipelined=False)]
+class EncryptDecrypt(FUDesc):
+    opList = [  OpDesc(opClass='Encrypt', opLat=20, pipelined=True),
+                OpDesc(opClass='Decrypt', opLat=20, pipelined=True)]
     count = 1
 #### END EMTD
 
