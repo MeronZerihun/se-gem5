@@ -81,7 +81,7 @@ MacroopBase::cTXAlterMicroops()
 
 		//Caculate total number of injected microops
 		int num_inj_microops = 0;
-		for(int i=0;i<num_inj_microops;i++){
+		for(int i=0;i<numMicroops;i++){
 			if(microops[i]->isLoad())
 			{
 				num_inj_microops += 2;
