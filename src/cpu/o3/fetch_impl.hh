@@ -1322,9 +1322,9 @@ DefaultFetch<Impl>::fetch(bool &status_change)
             //Begin EMTD
             //Perform the context sensitive translation here
             if(curMacroop && metadata->isTainted(thisPC.instAddr())){
-                DPRINTF(csd, "Altering microops of tainted instruction 0x%x\n", thisPC.instAddr()); 
-	        curMacroop->cTXAlterMicroops();
-	    }
+                DPRINTF(csd, "MacroopBase::cTXAlterMicroops():: Altering microops of tainted instruction 0x%x\n", thisPC.instAddr()); 
+	            curMacroop->cTXAlterMicroops();
+	        }
             //End EMTD
 
             
