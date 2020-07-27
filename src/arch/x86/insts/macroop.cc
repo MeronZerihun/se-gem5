@@ -35,7 +35,9 @@ MacroopBase::~MacroopBase()
 int 
 MacroopBase::countLoadMicros (StaticInstPtr load_microop){
 
-	// if (same src and dest) return 3;
+	X86ISA::InstRegIndex dest = InstRegIndex(load_microop->destRegIdx(0).index());
+	X86ISA::InstRegIndex ptr = InstRegIndex(env.base);
+	if (dest == ptr) {return 3;}
 
 	return 2;
 }
@@ -46,7 +48,7 @@ MacroopBase::injectLoadMicros (StaticInstPtr load_microop){
 	std::vector<StaticInstPtr> result;
 	
 	X86ISA::InstRegIndex dest = InstRegIndex(load_microop->destRegIdx(0).index());
-	X86ISA::InstRegIndex ptr = InstRegIndex(env.base)
+	X86ISA::InstRegIndex ptr = InstRegIndex(env.base);
 
 	if(dest == ptr){
 	// MOV constructor originates from microregop.hh::85
@@ -60,6 +62,7 @@ MacroopBase::injectLoadMicros (StaticInstPtr load_microop){
 				env.dataSize, 						//uint8_t _dataSize
 				0); 								//uint16_t _ext
 		inj_mov->setInjected();
+		inj_mov->clearLastMicroop();
 		result.push_back(inj_mov);
 		ptr = InstRegIndex(NUM_INTREGS+1); //New ptr is temp register
 	}
@@ -79,8 +82,25 @@ MacroopBase::injectLoadMicros (StaticInstPtr load_microop){
 			env.addressSize, 					//uint8_t _addressSize
 			0); 								//Request::FlagsType _memFlags
 	inj_load->setInjected();
+	inj_load->clearLastMicroop();
 	result.push_back(inj_load);
 
+	//LOAD constructor originates from microldstop.hh::100
+	StaticInstPtr existing_load = new X86ISAInst::Ld(
+			machInst, 							//ExtMachInst _machInst
+			macrocodeBlock,						//const char * instMnem
+			(1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, //uint64_t setFlags
+			env.scale, 							// uint8_t _scale
+			InstRegIndex(env.index), 			//InstRegIndex _index
+			ptr, 								//InstRegIndex _base
+			load_microop->getDisp(),			// uint64_t _disp
+			InstRegIndex(env.seg), 				//InstRegIndex _segment
+			dest,								// InstRegIndex _data
+			env.dataSize, 						//uint8_t _dataSize
+			env.addressSize, 					//uint8_t _addressSize
+			0); 								//Request::FlagsType _memFlags
+	existing_load->clearLastMicroop();
+	result.push_back(existing_load);
 
 	// DEC constructor originates from microregop.hh::85
 	StaticInstPtr inj_dec = new X86ISAInst::Dec(
@@ -93,10 +113,10 @@ MacroopBase::injectLoadMicros (StaticInstPtr load_microop){
 			env.dataSize, 						//uint8_t _dataSize
 			0); 								//uint16_t _ext
 	inj_dec->setInjected();
+	inj_dec->clearLastMicroop();
 	result.push_back(inj_dec);
 
 	return result;
-
 }
 
 
@@ -123,16 +143,12 @@ MacroopBase::cTXAlterMicroops()
 			StaticInstPtr* tempmicroops = new StaticInstPtr[numMicroops];
 
 			for(int i=0;i<numMicroops;i++){
-				if(microops[i]->isLoad())
-				{	
+				if(microops[i]->isLoad()) {	
 					std::vector<StaticInstPtr> toInject = injectLoadMicros(microops[i]);
-					tempmicroops[i] = toInject.at(0); 
-					tempmicroops[i]->clearLastMicroop();
-					tempmicroops[i+1] = microops[i];
-					tempmicroops[i+1]->clearLastMicroop();
-					tempmicroops[i+2] = toInject.at(1);
-					tempmicroops[i+2]->clearLastMicroop();
-					i += 2; //Skip injected microop
+					for(int j=0; j<toInject.size(); j++){
+						tempmicroops[i+j] = toInject.at(j); 
+					}
+					i = i + toInject.size() - 1; //Skip injected microops
 				}
 				else {
 					tempmicroops[i]=microops[i];
