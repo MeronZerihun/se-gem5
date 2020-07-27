@@ -32,11 +32,22 @@ MacroopBase::~MacroopBase()
 
 
 
+int 
+MacroopBase::countLoadMicros (StaticInstPtr load_microop){
+
+	// if (same src and dest) return 3;
+
+	return 2;
+}
+
 std::vector<StaticInstPtr>
 MacroopBase::injectLoadMicros (StaticInstPtr load_microop){
 
 	std::vector<StaticInstPtr> result;
 	
+	X86ISA::InstRegIndex dest = load_microop->destRegIdx(0).index();
+	DPRINTF(csd, "%d\n", dest);
+
 	//LOAD constructor originates from microldstop.hh::100
 	StaticInstPtr inj_load = new X86ISAInst::Ld(
 			machInst, 							//ExtMachInst _machInst
@@ -84,7 +95,7 @@ MacroopBase::cTXAlterMicroops()
 		for(int i=0;i<numMicroops;i++){
 			if(microops[i]->isLoad())
 			{
-				num_inj_microops += 2;
+				num_inj_microops += countLoadMicros(microops[i]);
 			}
 			else if(microops[i]->isStore()){
 				DPRINTF(csd, "issa store\n");
