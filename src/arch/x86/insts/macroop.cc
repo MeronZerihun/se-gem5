@@ -45,21 +45,36 @@ MacroopBase::injectLoadMicros (StaticInstPtr load_microop){
 
 	std::vector<StaticInstPtr> result;
 	
-	X86ISA::InstRegIndex dest = load_microop->destRegIdx(0).index();
-	DPRINTF(csd, "%d\n", dest);
+	X86ISA::InstRegIndex dest = InstRegIndex(load_microop->destRegIdx(0).index());
+	X86ISA::InstRegIndex ptr = InstRegIndex(env.base)
+
+	if(dest == ptr){
+	// MOV constructor originates from microregop.hh::85
+		StaticInstPtr inj_mov = new X86ISAInst::Mov(
+				machInst, 							//ExtMachInst _machInst
+				"INJ_MOV", 							//const char * instMnem
+				(1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, //uint64_t setFlags
+				ptr, 								//InstRegIndex _src1
+				ptr, 								//InstRegIndex _src2
+				InstRegIndex(NUM_INTREGS+1), 		//InstRegIndex _dest
+				env.dataSize, 						//uint8_t _dataSize
+				0); 								//uint16_t _ext
+		inj_mov->setInjected();
+		result.push_back(inj_mov);
+		ptr = InstRegIndex(NUM_INTREGS+1); //New ptr is temp register
+	}
 
 	//LOAD constructor originates from microldstop.hh::100
 	StaticInstPtr inj_load = new X86ISAInst::Ld(
 			machInst, 							//ExtMachInst _machInst
-			"INJ_MOV_R_M", 						//const char * instMnem
+			"INJ_LD", 							//const char * instMnem
 			(1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, //uint64_t setFlags
 			env.scale, 							// uint8_t _scale
 			InstRegIndex(env.index), 			//InstRegIndex _index
-			InstRegIndex(env.base), 			//InstRegIndex _base
+			ptr, 								//InstRegIndex _base
 			load_microop->getDisp() + 8,		// uint64_t _disp
 			InstRegIndex(env.seg), 				//InstRegIndex _segment
-			//load_microop->destRegIdx(0).index()), 	// InstRegIndex _data
-			InstRegIndex(NUM_INTREGS+1),		// InstRegIndex _data
+			dest,								// InstRegIndex _data
 			env.dataSize, 						//uint8_t _dataSize
 			env.addressSize, 					//uint8_t _addressSize
 			0); 								//Request::FlagsType _memFlags
@@ -72,9 +87,9 @@ MacroopBase::injectLoadMicros (StaticInstPtr load_microop){
 			machInst, 							//ExtMachInst _machInst
 			"INJ_DEC", 							//const char * instMnem
 			(1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, //uint64_t setFlags
-			InstRegIndex(env.index), 			//InstRegIndex _src1
-			InstRegIndex(NUM_INTREGS+2), 		//InstRegIndex _src2
-			InstRegIndex(env.seg), 				//InstRegIndex _dest
+			dest, 								//InstRegIndex _src1
+			dest, 								//InstRegIndex _src2
+			InstRegIndex(NUM_INTREGS+0), 		//InstRegIndex _dest
 			env.dataSize, 						//uint8_t _dataSize
 			0); 								//uint16_t _ext
 	inj_dec->setInjected();
