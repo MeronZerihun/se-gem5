@@ -59,21 +59,18 @@ MacroopBase::injectLoadMicros (StaticInstPtr load_microop){
 	//DPRINTF(csd, "Load Ins:: %s\n", load_microop->generateDisassembly(0, NULL));
 	//DPRINTF(csd, "Inj Ins:: %s\n", injected->generateDisassembly(0, NULL));	
 
-
-	StaticInstPtr injected2 = new X86ISAInst::Enc(
+	// Constructor from line 85 of microregop.hh
+	StaticInstPtr injected2 = new X86ISAInst::Dec(
 			machInst, 						//ExtMachInst _machInst
-			"INJ_MOV_R_M", 		//const char * instMnem, in later versions this is just set to "injectedBranch"
+			"INJ_DEC", 		//const char * instMnem, in later versions this is just set to "injectedBranch"
 			(1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, //uint64_t setFlags
-			env.scale, 						// uint8_t _scale
-			InstRegIndex(env.index), 		//InstRegIndex _index
-			InstRegIndex(env.base), 		//InstRegIndex _base
-			load_microop->getDisp() + 8,		// uint64_t _disp
-			InstRegIndex(env.seg), 			//InstRegIndex _segment
-			InstRegIndex(NUM_INTREGS+1),//load_microop->destRegIdx(0).index()), 	// InstRegIndex _data
+			InstRegIndex(env.index), 		//InstRegIndex _src1
+			InstRegIndex(NUM_INTREGS+2), 		//InstRegIndex _src2
+			InstRegIndex(env.seg), 			//InstRegIndex _dest
 			env.dataSize, 					//uint8_t _dataSize
-			env.addressSize, 				//uint8_t _addressSize
-			0); 							//Request::FlagsType _memFlags
+			env.addressSize); 				//uint16_t _ext
 	injected2->setInjected();
+	result.push_back(injected2);
 
 	return result;
 
@@ -87,10 +84,11 @@ MacroopBase::cTXAlterMicroops()
 	if(ctx_decoded==false){
 		//Caculate total number of injected microops
 		int new_numMicroops = 0;
+
 		for(int i=0;i<numMicroops;i++){
 			if(microops[i]->isLoad())
 			{
-				new_numMicroops += 1;
+				new_numMicroops += 2;
 			}
 			else if(microops[i]->isStore()){
 				DPRINTF(csd, "issa store\n");
@@ -106,13 +104,14 @@ MacroopBase::cTXAlterMicroops()
 			if(microops[i]->isLoad())
 			{	
 				DPRINTF(csd, "copying over load\n");
-				//StaticInstPtr* toBeInjected = injectLoadMicros(microops[i]);	
 				std::vector<StaticInstPtr> toInject = injectLoadMicros(microops[i]);
-				tempmicroops[i] = toInject.at(0); //toBeInjected[0];
+				tempmicroops[i] = toInject.at(0); 
 				tempmicroops[i]->clearLastMicroop();
 				tempmicroops[i+1] = microops[i];
 				tempmicroops[i+1]->clearLastMicroop();
-				i += 1; //Skip injected microop
+				tempmicroops[i+2] = toInject.at(1);
+				tempmicroops[i+2]->clearLastMicroop();
+				i += 2; //Skip injected microop
 				DPRINTF(csd, "end copy\n");
 			}
 			else {
