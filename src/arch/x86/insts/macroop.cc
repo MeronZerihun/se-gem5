@@ -88,7 +88,7 @@ MacroopBase::injectLoadMicros (StaticInstPtr load_microop){
 	//LOAD constructor originates from microldstop.hh::100
 	StaticInstPtr existing_load = new X86ISAInst::Ld(
 			machInst, 							//ExtMachInst _machInst
-			macrocodeBlock,						//const char * instMnem
+			"MOV_M_R",							//const char * instMnem
 			(1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, //uint64_t setFlags
 			env.scale, 							// uint8_t _scale
 			InstRegIndex(env.index), 			//InstRegIndex _index
@@ -120,6 +120,40 @@ MacroopBase::injectLoadMicros (StaticInstPtr load_microop){
 }
 
 
+
+
+
+int 
+MacroopBase::countStoreMicros (StaticInstPtr store_microop){
+	return 1;
+}
+
+std::vector<StaticInstPtr> 
+MacroopBase::injectStoreMicros (StaticInstPtr store_microop){
+	std::vector<StaticInstPtr> result;
+	//LOAD constructor originates from microldstop.hh::100
+	StaticInstPtr existing_store = new X86ISAInst::St(
+			machInst, 							//ExtMachInst _machInst
+			"MOV_M_R",							//const char * instMnem
+			(1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, //uint64_t setFlags
+			env.scale, 							// uint8_t _scale
+			InstRegIndex(env.index), 			//InstRegIndex _index
+			ptr, 								//InstRegIndex _base
+			load_microop->getDisp(),			// uint64_t _disp
+			InstRegIndex(env.seg), 				//InstRegIndex _segment
+			dest,								// InstRegIndex _data
+			env.dataSize, 						//uint8_t _dataSize
+			env.addressSize, 					//uint8_t _addressSize
+			0); 								//Request::FlagsType _memFlags
+	existing_store->clearLastMicroop();
+	result.push_back(existing_store);
+
+	return result;
+}
+
+
+
+
 int
 MacroopBase::cTXAlterMicroops()
 {
@@ -133,7 +167,7 @@ MacroopBase::cTXAlterMicroops()
 				num_inj_microops += countLoadMicros(microops[i]);
 			}
 			else if(microops[i]->isStore()){
-				DPRINTF(csd, "issa store\n");
+				num_inj_microops += countLStoreMicros(microops[i]);
 			}
 		}
 
@@ -149,6 +183,13 @@ MacroopBase::cTXAlterMicroops()
 						tempmicroops[i+j] = toInject.at(j); 
 					}
 					i = i + toInject.size() - 1; //Skip injected microops
+				}
+				else if(microops[i]->isStore()){
+					std::vector<StaticInstPtr> toInject = injectStoreMicros(microops[i]);
+					for(int j=0; j<toInject.size(); j++){
+						tempmicroops[i+j] = toInject.at(j); 
+					}
+					i = i + toInject.size() - 1; //Skip injected microops	
 				}
 				else {
 					tempmicroops[i]=microops[i];
