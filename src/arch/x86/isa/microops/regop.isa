@@ -507,6 +507,12 @@ let {{
         code = 'DestReg = merge(DestReg, result = (psrc1 + op2), dataSize);'
         big_code = 'DestReg = result = (psrc1 + op2) & mask(dataSize * 8);'
 
+    #EMTD
+    class EncAdd(FlagRegOp):
+        code = 'DestReg = merge(DestReg, result = (psrc1 + op2), dataSize);'
+        big_code = 'DestReg = result = (psrc1 + op2) & mask(dataSize * 8);'
+        op_class = 'EncIntAlu'
+
     class Or(LogicRegOp):
         code = 'DestReg = merge(DestReg, result = (psrc1 | op2), dataSize);'
         big_code = 'DestReg = result = (psrc1 | op2) & mask(dataSize * 8);'
