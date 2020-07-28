@@ -56,7 +56,7 @@ class EncryptDecrypt(FUDesc):
 
 class IntALU(FUDesc):
     opList = [  OpDesc(opClass='IntAlu'),
-                OpDesc(opClass='EncIntAlu', opLat=1+(2*ENC_LATENCY), ]
+                OpDesc(opClass='EncIntAlu', opLat=1+(2*ENC_LATENCY)) ]
     count = 6
 
 class IntMultDiv(FUDesc):
