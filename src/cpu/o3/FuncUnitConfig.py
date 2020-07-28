@@ -44,19 +44,19 @@ from m5.params import *
 
 from m5.objects.FuncUnit import *
 
-ENC_LATENCY = 20
+ENC_LATENCY = 70
 
 #### BEGIN EMTD
 class EncryptDecrypt(FUDesc):
     opList = [  OpDesc(opClass='Encrypt', opLat=20, pipelined=True),
-                OpDesc(opClass='Decrypt', opLat=20, pipelined=True)]
+                OpDesc(opClass='Decrypt', opLat=20, pipelined=True),
+                OpDesc(opClass='EncIntAlu', opLat=(1 + 2*ENC_LATENCY), pipelined=True)]
     count = 1
 #### END EMTD
 
 
 class IntALU(FUDesc):
-    opList = [  OpDesc(opClass='IntAlu'),
-                OpDesc(opClass='EncIntAlu', opLat=1+(2*ENC_LATENCY)) ]
+    opList = [  OpDesc(opClass='IntAlu') ]
     count = 6
 
 class IntMultDiv(FUDesc):

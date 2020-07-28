@@ -177,6 +177,10 @@ MacroopBase::cTXAlterMicroops()
 			else if(microops[i]->isStore()){
 				num_inj_microops += countStoreMicros(microops[i]);
 			}
+			else if(microops[i]->opClass() == OpClass::IntAlu){
+				//Swap op class here!
+				microops[i]->setOpClass(OpClass::EncIntAlu); 
+			}
 		}
 		
 		//Perform microop injection
