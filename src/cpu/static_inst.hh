@@ -60,6 +60,7 @@
 #include "cpu/thread_context.hh"
 #include "enums/StaticInstFlags.hh"
 #include "sim/byteswap.hh"
+#include "debug/csd.hh"
 
 // forward declarations
 class Packet;
@@ -204,8 +205,10 @@ class StaticInst : public RefCounted, public StaticInstFlags
 
     void setFirstMicroop() { flags[IsFirstMicroop] = true; }
     void setLastMicroop() { flags[IsLastMicroop] = true; }
+    void clearLastMicroop() { flags[IsLastMicroop] = false; } //EMTD
     void setDelayedCommit() { flags[IsDelayedCommit] = true; }
     void setFlag(Flags f) { flags[f] = true; }
+    void setInjected() { flags[IsInjected] = true; } //EMTD
 
     /// Operation class.  Used to select appropriate function unit in issue.
     OpClass opClass()     const { return _opClass; }
@@ -249,12 +252,14 @@ class StaticInst : public RefCounted, public StaticInstFlags
      */
     mutable std::string *cachedDisassembly;
 
+  public:
     /**
      * Internal function to generate disassembly string.
      */
     virtual std::string
     generateDisassembly(Addr pc, const SymbolTable *symtab) const = 0;
 
+  protected:
     /// Constructor.
     /// It's important to initialize everything here to a sane
     /// default, since the decoder generally only overrides
@@ -287,6 +292,21 @@ class StaticInst : public RefCounted, public StaticInstFlags
 
     virtual void advancePC(TheISA::PCState &pcState) const = 0;
 
+
+    //Begin EMTD
+    /**
+	 * Go through the microOps of a macro op and perform some changes in
+	 * macroops
+	 */
+    virtual int cTXAlterMicroops() ;
+
+    virtual int getDisp(){
+	    DPRINTF(csd, "(!) We should not be here, StaticInst::getDisp\n");
+	    return 0;
+    }
+    //End EMTD
+
+    
     /**
      * Return the microop that goes with a particular micropc. This should
      * only be defined/used in macroops which will contain microops

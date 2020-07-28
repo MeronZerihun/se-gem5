@@ -53,6 +53,7 @@ if env['TARGET_ISA'] == 'x86':
     Source('insts/microldstop.cc')
     Source('insts/micromediaop.cc')
     Source('insts/microop.cc')
+    Source('insts/macroop.cc')
     Source('insts/microregop.cc')
     Source('insts/static_inst.cc')
     Source('interrupts.cc')

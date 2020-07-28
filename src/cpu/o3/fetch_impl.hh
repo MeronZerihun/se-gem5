@@ -77,11 +77,15 @@
 #include "sim/system.hh"
 #include "cpu/o3/isa_specific.hh"
 
+#include "emtd/Metadata.hh" //Read taints from Metadata 
+#include "debug/csd.hh"
+
 using namespace std;
 
 template<class Impl>
 DefaultFetch<Impl>::DefaultFetch(O3CPU *_cpu, DerivO3CPUParams *params)
     : fetchPolicy(params->smtFetchPolicy),
+      metadata(params->metadata),
       cpu(_cpu),
       branchPred(nullptr),
       decodeToFetchDelay(params->decodeToFetchDelay),
@@ -1315,6 +1319,15 @@ DefaultFetch<Impl>::fetch(bool &status_change)
                     break;
                 }
             }
+            //Begin EMTD
+            //Perform the context sensitive translation here
+            if(curMacroop && metadata->isTainted(thisPC.instAddr())){
+                DPRINTF(csd, "MacroopBase::cTXAlterMicroops():: Altering microops of tainted instruction 0x%x\n", thisPC.instAddr()); 
+	            curMacroop->cTXAlterMicroops();
+	        }
+            //End EMTD
+
+            
             // Whether we're moving to a new macroop because we're at the
             // end of the current one, or the branch predictor incorrectly
             // thinks we are...

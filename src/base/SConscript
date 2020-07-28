@@ -125,6 +125,7 @@ DebugFlag('GDBWrite', "Writes to the remote address space")
 DebugFlag('SQL', "SQL queries sent to the server")
 DebugFlag('Stats', "Statistics management")
 DebugFlag('StatEvents', "Statistics event tracking")
+DebugFlag('csd', "Prints for csd additions")
 
 CompoundFlag('GDBAll',
     [ 'GDBMisc', 'GDBAcc', 'GDBRead', 'GDBWrite', 'GDBSend', 'GDBRecv',

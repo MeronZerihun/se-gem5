@@ -103,6 +103,14 @@ StaticInst::fetchMicroop(MicroPC upc) const
           "that is not microcoded.");
 }
 
+//Begin EMTD
+int
+StaticInst::cTXAlterMicroops(){
+	 panic("StaticInst::cTXAlterMicroops() called on instruction "
+	          "that is not microcoded.");
+}
+//End EMTD
+
 TheISA::PCState
 StaticInst::branchTarget(const TheISA::PCState &pc) const
 {

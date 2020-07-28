@@ -360,6 +360,14 @@ void Metadata::load_ins_taints(const char *filename){
     ins_taints.close();
 }
 
+bool Metadata::isTainted(Addr pc){
+    for (auto const& value: (insn_tags)) {
+       //fprintf(stderr, "tainted pc = %x current pc = %x \n",(unsigned int)value, (unsigned int)pc.pc());
+       if (value==pc)
+            return true;
+    }
+    return false;
+}
 
 
 
@@ -456,7 +464,7 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
             }
             else {
                 //Some other case here idk what it is... but showed up in bmk 
-                DPRINTF(priv, "PANIC:: Unhandled control case\n");
+                //DPRINTF(priv, "PANIC:: Unhandled control case\n"); TOO MUCH PRINTING D:<
 
             }
 
