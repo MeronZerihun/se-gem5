@@ -37,9 +37,9 @@ MacroopBase::countLoadMicros (StaticInstPtr load_microop){
 
 	X86ISA::InstRegIndex dest = InstRegIndex(load_microop->destRegIdx(0).index());
 	X86ISA::InstRegIndex ptr = InstRegIndex(env.base);
-	if (dest == ptr) {return 3;}
+	if (dest == ptr) {return 2;}
 
-	return 2;
+	return 1;
 }
 
 std::vector<StaticInstPtr>
@@ -102,20 +102,6 @@ MacroopBase::injectLoadMicros (StaticInstPtr load_microop){
 	existing_load->clearLastMicroop();
 	result.push_back(existing_load);
 
-	// DEC constructor originates from microregop.hh::85
-	StaticInstPtr inj_dec = new X86ISAInst::Dec(
-			machInst, 							//ExtMachInst _machInst
-			"INJ_DEC", 							//const char * instMnem
-			(1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, //uint64_t setFlags
-			dest, 								//InstRegIndex _src1
-			dest, 								//InstRegIndex _src2
-			InstRegIndex(NUM_INTREGS+0), 		//InstRegIndex _dest
-			env.dataSize, 						//uint8_t _dataSize
-			0); 								//uint16_t _ext
-	inj_dec->setInjected();
-	inj_dec->clearLastMicroop();
-	result.push_back(inj_dec);
-
 	return result;
 }
 
@@ -125,7 +111,7 @@ MacroopBase::injectLoadMicros (StaticInstPtr load_microop){
 
 int 
 MacroopBase::countStoreMicros (StaticInstPtr store_microop){
-	return 2;
+	return 1;
 }
 
 std::vector<StaticInstPtr> 
@@ -134,20 +120,6 @@ MacroopBase::injectStoreMicros (StaticInstPtr store_microop){
 
     X86ISA::InstRegIndex dest = InstRegIndex(store_microop->destRegIdx(0).index());
     X86ISA::InstRegIndex ptr = InstRegIndex(env.base);
-
-	// ENC constructor originates from microregop.hh::85
-	StaticInstPtr inj_enc = new X86ISAInst::Enc(
-			machInst, 							//ExtMachInst _machInst
-			"INJ_ENC", 							//const char * instMnem
-			(1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, //uint64_t setFlags
-			dest, 								//InstRegIndex _src1
-			dest, 								//InstRegIndex _src2
-			dest, 								//InstRegIndex _dest
-			env.dataSize, 						//uint8_t _dataSize
-			0); 								//uint16_t _ext
-	inj_enc->setInjected();
-	inj_enc->clearLastMicroop();
-	result.push_back(inj_enc);
 
 	//STORE constructor originates from microldstop.hh::100
 	StaticInstPtr existing_store = new X86ISAInst::St(
