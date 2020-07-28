@@ -125,12 +125,16 @@ MacroopBase::injectLoadMicros (StaticInstPtr load_microop){
 
 int 
 MacroopBase::countStoreMicros (StaticInstPtr store_microop){
-	return 1;
+	return 0;
 }
 
 std::vector<StaticInstPtr> 
 MacroopBase::injectStoreMicros (StaticInstPtr store_microop){
 	std::vector<StaticInstPtr> result;
+
+        X86ISA::InstRegIndex dest = InstRegIndex(store_microop->destRegIdx(0).index());
+        X86ISA::InstRegIndex ptr = InstRegIndex(env.base);
+
 	//LOAD constructor originates from microldstop.hh::100
 	StaticInstPtr existing_store = new X86ISAInst::St(
 			machInst, 							//ExtMachInst _machInst
@@ -139,7 +143,7 @@ MacroopBase::injectStoreMicros (StaticInstPtr store_microop){
 			env.scale, 							// uint8_t _scale
 			InstRegIndex(env.index), 			//InstRegIndex _index
 			ptr, 								//InstRegIndex _base
-			load_microop->getDisp(),			// uint64_t _disp
+			store_microop->getDisp(),			// uint64_t _disp
 			InstRegIndex(env.seg), 				//InstRegIndex _segment
 			dest,								// InstRegIndex _data
 			env.dataSize, 						//uint8_t _dataSize
@@ -167,10 +171,10 @@ MacroopBase::cTXAlterMicroops()
 				num_inj_microops += countLoadMicros(microops[i]);
 			}
 			else if(microops[i]->isStore()){
-				num_inj_microops += countLStoreMicros(microops[i]);
+				num_inj_microops += countStoreMicros(microops[i]);
 			}
 		}
-
+		
 		//Perform microop injection
 		if(num_inj_microops > 0){
 			numMicroops += num_inj_microops;
@@ -191,6 +195,7 @@ MacroopBase::cTXAlterMicroops()
 					}
 					i = i + toInject.size() - 1; //Skip injected microops	
 				}
+				
 				else {
 					tempmicroops[i]=microops[i];
 					tempmicroops[i]->clearLastMicroop();
