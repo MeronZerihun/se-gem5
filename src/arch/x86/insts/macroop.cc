@@ -181,6 +181,14 @@ MacroopBase::cTXAlterMicroops()
 				//Swap op class here!
 				microops[i]->setOpClass(OpClass::EncIntAlu); 
 			}
+			else if(microops[i]->opClass() == OpClass::IntMult){
+				//Swap op class here!
+				microops[i]->setOpClass(OpClass::EncIntMult); 
+			}
+			else if(microops[i]->opClass() == OpClass::IntDiv){
+				//Swap op class here!
+				microops[i]->setOpClass(OpClass::EncIntDiv); 
+			}
 		}
 		
 		//Perform microop injection

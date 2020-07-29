@@ -56,6 +56,8 @@ using Enums::No_OpClass;
 static const OpClass EncryptOp = Enums::Encrypt; //Use EncryptOp in decoder.isa
 static const OpClass DecryptOp = Enums::Decrypt;
 static const OpClass EncIntAluOp = Enums::EncIntAlu;
+static const OpClass EncIntMultOp = Enums::EncIntMult;
+static const OpClass EncIntDivOp = Enums::EncIntDiv;
 // END EMTD
 static const OpClass IntAluOp = Enums::IntAlu;
 static const OpClass IntMultOp = Enums::IntMult;
