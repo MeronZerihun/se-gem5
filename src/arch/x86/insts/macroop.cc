@@ -179,6 +179,7 @@ MacroopBase::cTXAlterMicroops()
 			}
 			else if(microops[i]->opClass() == OpClass::IntAlu){
 				//Swap op class here!
+				DPRINTF(csd, "Swapping opclass\n");
 				microops[i]->setOpClass(OpClass::EncIntAlu); 
 			}
 			else if(microops[i]->opClass() == OpClass::IntMult){

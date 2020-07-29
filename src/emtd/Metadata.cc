@@ -24,7 +24,7 @@
 #include "debug/emtd.hh"
 #include "debug/emtd_warning.hh"
 #include "debug/priv.hh"
-
+#include "debug/csd.hh"
 
 Metadata::Metadata(MetadataParams *params) : SimObject(params), filename(params->filename), insfilename(params->insfilename),  progname(params->progname)
 {
@@ -376,6 +376,11 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
 
     X86Ops Ops;
     std::string opc = inst->getName();
+
+    if(isTainted(pc)){
+        DPRINTF(csd, "Committing Tainted Instruction 0x%x\n", pc);
+        DPRINTF(csd, "---- %s\n", inst->generateDisassembly(pc, NULL));
+    }
 
     try
     {
