@@ -77,7 +77,10 @@ class IntMultDiv(FUDesc):
 class FP_ALU(FUDesc):
     opList = [ OpDesc(opClass='FloatAdd', opLat=2),
                OpDesc(opClass='FloatCmp', opLat=2),
-               OpDesc(opClass='FloatCvt', opLat=2) ]
+               OpDesc(opClass='FloatCvt', opLat=2),
+               OpDesc(opClass='EncFloatAdd', opLat=2 + 2*ENC_LATENCY),
+               OpDesc(opClass='EncFloatCmp', opLat=2 + 2*ENC_LATENCY),
+               OpDesc(opClass='EncFloatCvt', opLat=2 + 2*ENC_LATENCY)  ]
     count = 4
 
 class FP_MultDiv(FUDesc):
@@ -85,7 +88,12 @@ class FP_MultDiv(FUDesc):
                OpDesc(opClass='FloatMultAcc', opLat=5),
                OpDesc(opClass='FloatMisc', opLat=3),
                OpDesc(opClass='FloatDiv', opLat=12, pipelined=False),
-               OpDesc(opClass='FloatSqrt', opLat=24, pipelined=False) ]
+               OpDesc(opClass='FloatSqrt', opLat=24, pipelined=False),
+               OpDesc(opClass='EncFloatMult', opLat=4 + 2*ENC_LATENCY),
+               OpDesc(opClass='EncFloatMultAcc', opLat=5 + 2*ENC_LATENCY),
+               OpDesc(opClass='EncFloatMisc', opLat=3 + 2*ENC_LATENCY),
+               OpDesc(opClass='EncFloatDiv', opLat=12 + 2*ENC_LATENCY, pipelined=False),
+               OpDesc(opClass='EncFloatSqrt', opLat=24 + 2*ENC_LATENCY, pipelined=False) ]
     count = 2
 
 class SIMD_Unit(FUDesc):

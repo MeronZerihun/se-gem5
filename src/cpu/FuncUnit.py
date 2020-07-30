@@ -43,6 +43,8 @@ from m5.params import *
 
 class OpClass(Enum):
     vals = ['No_OpClass', 'Encrypt', 'Decrypt', 'EncIntAlu', 'EncIntMult', 'EncIntDiv', 
+            'EncFloatAdd', 'EncFloatCmp', 'EncFloatCvt', 'EncFloatMult', 'EncFloatMultAcc', 'EncFloatDiv',
+            'EncFloatMisc', 'EncFloatSqrt',
             'IntAlu', 'IntMult', 'IntDiv', 'FloatAdd',
             'FloatCmp', 'FloatCvt', 'FloatMult', 'FloatMultAcc', 'FloatDiv',
             'FloatMisc', 'FloatSqrt',

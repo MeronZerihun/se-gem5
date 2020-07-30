@@ -177,19 +177,34 @@ MacroopBase::cTXAlterMicroops()
 			else if(microops[i]->isStore()){
 				num_inj_microops += countStoreMicros(microops[i]);
 			}
-			else if(microops[i]->opClass() == OpClass::IntAlu){
-				//Swap op class here!
-				DPRINTF(csd, "Swapping opclass\n");
-				microops[i]->setOpClass(OpClass::EncIntAlu); 
+			else{
+				switch(microops[i]->opClass()){
+					case OpClass::IntAlu: microops[i]->setOpClass(OpClass::EncIntAlu); 
+						break;
+					case OpClass::IntMult: microops[i]->setOpClass(OpClass::EncIntMult); 
+						break;
+					case OpClass::IntDiv: microops[i]->setOpClass(OpClass::EncIntDiv); 
+						break;
+					case OpClass::FloatAdd: microops[i]->setOpClass(OpClass::EncFloatAdd); 
+						break;
+					case OpClass::FloatCmp: microops[i]->setOpClass(OpClass::EncFloatCmp); 
+						break;
+					case OpClass::FloatCvt: microops[i]->setOpClass(OpClass::EncFloatCvt); 
+						break;
+					case OpClass::FloatMult : microops[i]->setOpClass(OpClass::EncFloatMult); 
+						break;
+					case OpClass::FloatMultAcc : microops[i]->setOpClass(OpClass::EncFloatMultAcc); 
+						break;
+					case OpClass::FloatDiv : microops[i]->setOpClass(OpClass::EncFloatDiv); 
+						break;
+					case OpClass::FloatMisc : microops[i]->setOpClass(OpClass::EncFloatMisc); 
+						break;
+					case OpClass::FloatSqrt : microops[i]->setOpClass(OpClass::EncFloatSqrt); 
+						break;
+				}
 			}
-			else if(microops[i]->opClass() == OpClass::IntMult){
-				//Swap op class here!
-				microops[i]->setOpClass(OpClass::EncIntMult); 
-			}
-			else if(microops[i]->opClass() == OpClass::IntDiv){
-				//Swap op class here!
-				microops[i]->setOpClass(OpClass::EncIntDiv); 
-			}
+
+
 		}
 		
 		//Perform microop injection

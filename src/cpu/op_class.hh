@@ -57,7 +57,15 @@ static const OpClass EncryptOp = Enums::Encrypt; //Use EncryptOp in decoder.isa
 static const OpClass DecryptOp = Enums::Decrypt;
 static const OpClass EncIntAluOp = Enums::EncIntAlu;
 static const OpClass EncIntMultOp = Enums::EncIntMult;
-static const OpClass EncIntDivOp = Enums::EncIntDiv;
+static const OpClass EncEncIntDivOp = Enums::EncInEnctDiv;
+static const OpClass EncFloatAddOp =       Enums::EncFloatAdd;
+static const OpClass EncFloatCmpOp =       Enums::EncFloatCmp;
+static const OpClass EncFloatCvtOp =       Enums::EncFloatCvt;
+static const OpClass EncFloatMultOp =      Enums::EncFloatMult;
+static const OpClass EncFloatMultAccOp =   Enums::EncFloatMultAcc;
+static const OpClass EncFloatDivOp =       Enums::EncFloatDiv;
+static const OpClass EncFloatMiscOp =      Enums::EncFloatMisc;
+static const OpClass EncFloatSqrtOp =      Enums::EncFloatSqrt;
 // END EMTD
 static const OpClass IntAluOp = Enums::IntAlu;
 static const OpClass IntMultOp = Enums::IntMult;
