@@ -49,6 +49,7 @@ MacroopBase::injectLoadMicros (StaticInstPtr load_microop){
 	
 	X86ISA::InstRegIndex dest = InstRegIndex(load_microop->destRegIdx(0).index());
 	X86ISA::InstRegIndex ptr = InstRegIndex(env.base);
+	std::string opName = microops[i]->getName());
 
 	if(dest == ptr){
 	// MOV constructor originates from microregop.hh::85
@@ -67,40 +68,82 @@ MacroopBase::injectLoadMicros (StaticInstPtr load_microop){
 		ptr = InstRegIndex(NUM_INTREGS+1); //New ptr is temp register
 	}
 
-	//LOAD constructor originates from microldstop.hh::100
-/*	StaticInstPtr inj_load = new X86ISAInst::Ld(
-			machInst, 							//ExtMachInst _machInst
-			"INJ_LD", 							//const char * instMnem
-			(1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, //uint64_t setFlags
-			env.scale, 							// uint8_t _scale
-			InstRegIndex(env.index), 			//InstRegIndex _index
-			ptr, 								//InstRegIndex _base
-			load_microop->getDisp() + 8,		// uint64_t _disp
-			InstRegIndex(env.seg), 				//InstRegIndex _segment
-			dest,								// InstRegIndex _data
-			env.dataSize, 						//uint8_t _dataSize
-			env.addressSize, 					//uint8_t _addressSize
-			0); 								//Request::FlagsType _memFlags
-	inj_load->setInjected();
-	inj_load->clearLastMicroop();
-	result.push_back(inj_load);
-*/
-	//LOAD constructor originates from microldstop.hh::100
-	StaticInstPtr existing_load = new X86ISAInst::Ld(
-			machInst, 							//ExtMachInst _machInst
-			"MOV_M_R",							//const char * instMnem
-			(1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, //uint64_t setFlags
-			env.scale, 							// uint8_t _scale
-			InstRegIndex(env.index), 			//InstRegIndex _index
-			ptr, 								//InstRegIndex _base
-			load_microop->getDisp(),			// uint64_t _disp
-			InstRegIndex(env.seg), 				//InstRegIndex _segment
-			dest,								// InstRegIndex _data
-			env.dataSize, 						//uint8_t _dataSize
-			env.addressSize, 					//uint8_t _addressSize
-			0); 								//Request::FlagsType _memFlags
-	existing_load->clearLastMicroop();
-	result.push_back(existing_load);
+	
+	if(opName.compare("ld")==0){
+		//LOAD constructor originates from microldstop.hh::100
+		StaticInstPtr inj_load = new X86ISAInst::Ld(
+				machInst, 							//ExtMachInst _machInst
+				"INJ_LD", 							//const char * instMnem
+				(1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, //uint64_t setFlags
+				env.scale, 							// uint8_t _scale
+				InstRegIndex(env.index), 			//InstRegIndex _index
+				ptr, 								//InstRegIndex _base
+				load_microop->getDisp() + 8,		// uint64_t _disp
+				InstRegIndex(env.seg), 				//InstRegIndex _segment
+				dest,								// InstRegIndex _data
+				env.dataSize, 						//uint8_t _dataSize
+				env.addressSize, 					//uint8_t _addressSize
+				0); 								//Request::FlagsType _memFlags
+		inj_load->setInjected();
+		inj_load->clearLastMicroop();
+		result.push_back(inj_load);
+
+		//LOAD constructor originates from microldstop.hh::100
+		StaticInstPtr existing_load = new X86ISAInst::Ld(
+				machInst, 							//ExtMachInst _machInst
+				"MOV_M_R",							//const char * instMnem
+				(1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, //uint64_t setFlags
+				env.scale, 							// uint8_t _scale
+				InstRegIndex(env.index), 			//InstRegIndex _index
+				ptr, 								//InstRegIndex _base
+				load_microop->getDisp(),			// uint64_t _disp
+				InstRegIndex(env.seg), 				//InstRegIndex _segment
+				dest,								// InstRegIndex _data
+				env.dataSize, 						//uint8_t _dataSize
+				env.addressSize, 					//uint8_t _addressSize
+				0); 								//Request::FlagsType _memFlags
+		existing_load->clearLastMicroop();
+		result.push_back(existing_load);
+	}
+	else if(opName.compare("ldfp")==0){
+		//LOAD constructor originates from microldstop.hh::100
+		StaticInstPtr inj_load = new X86ISAInst::Ldfp(
+				machInst, 							//ExtMachInst _machInst
+				"INJ_LD", 							//const char * instMnem
+				(1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, //uint64_t setFlags
+				env.scale, 							// uint8_t _scale
+				InstRegIndex(env.index), 			//InstRegIndex _index
+				ptr, 								//InstRegIndex _base
+				load_microop->getDisp() + 8,		// uint64_t _disp
+				InstRegIndex(env.seg), 				//InstRegIndex _segment
+				dest,								// InstRegIndex _data
+				env.dataSize, 						//uint8_t _dataSize
+				env.addressSize, 					//uint8_t _addressSize
+				0); 								//Request::FlagsType _memFlags
+		inj_load->setInjected();
+		inj_load->clearLastMicroop();
+		result.push_back(inj_load);
+
+		//LOAD constructor originates from microldstop.hh::100
+		StaticInstPtr existing_load = new X86ISAInst::Ldfp(
+				machInst, 							//ExtMachInst _machInst
+				"MOV_M_R",							//const char * instMnem
+				(1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, //uint64_t setFlags
+				env.scale, 							// uint8_t _scale
+				InstRegIndex(env.index), 			//InstRegIndex _index
+				ptr, 								//InstRegIndex _base
+				load_microop->getDisp(),			// uint64_t _disp
+				InstRegIndex(env.seg), 				//InstRegIndex _segment
+				dest,								// InstRegIndex _data
+				env.dataSize, 						//uint8_t _dataSize
+				env.addressSize, 					//uint8_t _addressSize
+				0); 								//Request::FlagsType _memFlags
+		existing_load->clearLastMicroop();
+		result.push_back(existing_load);
+	}
+	else{
+		DPRINTF(csd, "WARNING:: OpName not handled by load injection in cTXAlterMicroops():: %s\n", opName);
+	}
 
 	return result;
 }
@@ -172,13 +215,11 @@ MacroopBase::cTXAlterMicroops()
 		for(int i=0;i<numMicroops;i++){
 			if(microops[i]->isLoad())
 			{
-				DPRINTF(csd, "LD-- %s\n", microops[i]->generateDisassembly(0, NULL));
-				//num_inj_microops += countLoadMicros(microops[i]);
+				num_inj_microops += countLoadMicros(microops[i]);
 				DPRINTF(csd, "%s\n", microops[i]->getName());
 			}
 			else if(microops[i]->isStore()){
-				DPRINTF(csd, "ST-- %s\n", microops[i]->generateDisassembly(0, NULL));
-				//num_inj_microops += countStoreMicros(microops[i]);
+				num_inj_microops += countStoreMicros(microops[i]);
 			}
 			else{
 				switch(microops[i]->opClass()){
