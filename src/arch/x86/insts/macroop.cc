@@ -37,9 +37,9 @@ MacroopBase::countLoadMicros (StaticInstPtr load_microop){
 
 	X86ISA::InstRegIndex dest = InstRegIndex(load_microop->destRegIdx(0).index());
 	X86ISA::InstRegIndex ptr = InstRegIndex(env.base);
-	if (dest == ptr) {return 1;}
+	if (dest == ptr) {return 2;}
 
-	return 0;
+	return 1;
 }
 
 std::vector<StaticInstPtr>
@@ -49,7 +49,7 @@ MacroopBase::injectLoadMicros (StaticInstPtr load_microop){
 	
 	X86ISA::InstRegIndex dest = InstRegIndex(load_microop->destRegIdx(0).index());
 	X86ISA::InstRegIndex ptr = InstRegIndex(env.base);
-	std::string opName = microops[i]->getName());
+	std::string opName = load_microop->getName();
 
 	if(dest == ptr){
 	// MOV constructor originates from microregop.hh::85
