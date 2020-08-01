@@ -37,9 +37,9 @@ MacroopBase::countLoadMicros (StaticInstPtr load_microop){
 
 	X86ISA::InstRegIndex dest = InstRegIndex(load_microop->destRegIdx(0).index());
 	X86ISA::InstRegIndex ptr = InstRegIndex(env.base);
-	if (dest == ptr) {return 2;}
+	if (dest == ptr) {return 1;}
 
-	return 1;
+	return 0;
 }
 
 std::vector<StaticInstPtr>
@@ -68,7 +68,7 @@ MacroopBase::injectLoadMicros (StaticInstPtr load_microop){
 	}
 
 	//LOAD constructor originates from microldstop.hh::100
-	StaticInstPtr inj_load = new X86ISAInst::Ld(
+/*	StaticInstPtr inj_load = new X86ISAInst::Ld(
 			machInst, 							//ExtMachInst _machInst
 			"INJ_LD", 							//const char * instMnem
 			(1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, //uint64_t setFlags
@@ -84,7 +84,7 @@ MacroopBase::injectLoadMicros (StaticInstPtr load_microop){
 	inj_load->setInjected();
 	inj_load->clearLastMicroop();
 	result.push_back(inj_load);
-
+*/
 	//LOAD constructor originates from microldstop.hh::100
 	StaticInstPtr existing_load = new X86ISAInst::Ld(
 			machInst, 							//ExtMachInst _machInst
@@ -172,10 +172,13 @@ MacroopBase::cTXAlterMicroops()
 		for(int i=0;i<numMicroops;i++){
 			if(microops[i]->isLoad())
 			{
-				num_inj_microops += countLoadMicros(microops[i]);
+				DPRINTF(csd, "LD-- %s\n", microops[i]->generateDisassembly(0, NULL));
+				//num_inj_microops += countLoadMicros(microops[i]);
+				DPRINTF(csd, "%s\n", microops[i]->getName());
 			}
 			else if(microops[i]->isStore()){
-				num_inj_microops += countStoreMicros(microops[i]);
+				DPRINTF(csd, "ST-- %s\n", microops[i]->generateDisassembly(0, NULL));
+				//num_inj_microops += countStoreMicros(microops[i]);
 			}
 			else{
 				switch(microops[i]->opClass()){
@@ -201,6 +204,8 @@ MacroopBase::cTXAlterMicroops()
 						break;
 					case OpClass::FloatSqrt : microops[i]->setOpClass(OpClass::EncFloatSqrt); 
 						break;
+					default: DPRINTF(csd, "WARNING:: OpClass not handled by switch in cTXAlterMicroops()\n");
+						 break;
 				}
 			}
 
