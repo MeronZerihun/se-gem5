@@ -51,7 +51,7 @@ Metadata::Metadata(MetadataParams *params) : SimObject(params), filename(params-
     }
 
     // Load the initial metadata info from the supplied files
-    load_metadata_binary(filename.c_str());
+    //load_metadata_binary(filename.c_str());
     load_ins_taints(insfilename.c_str());
 
     // Initialize register tags
@@ -347,7 +347,7 @@ void Metadata::load_metadata_binary(const char *filename){
 
 // Populates insn_tags
 void Metadata::load_ins_taints(const char *filename){
-    DPRINTF(priv, "Loading instruction taints...\n");
+    DPRINTF(priv, "Loading instruction taints... %s\n", filename);
     std::ifstream ins_taints (filename);
     assert(ins_taints.is_open());
 
