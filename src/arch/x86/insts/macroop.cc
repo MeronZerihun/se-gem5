@@ -222,10 +222,6 @@ MacroopBase::cTXAlterMicroops()
 				num_inj_microops += countStoreMicros(microops[i]);
 			}
 			else{
-
-				//TESTING FOR SEGFAULT
-        		DPRINTF(csd, "---- %s\n", microops[i]->generateDisassembly(0, NULL));
-
 				switch(microops[i]->opClass()){
 					case OpClass::IntAlu: microops[i]->setOpClass(OpClass::EncIntAlu); 
 						break;
@@ -259,31 +255,35 @@ MacroopBase::cTXAlterMicroops()
 		
 		//Perform microop injection
 		if(num_inj_microops > 0){
-			numMicroops += num_inj_microops;
-			StaticInstPtr* tempmicroops = new StaticInstPtr[numMicroops];
+			
+			int temp_numMicroops = numMicroops + num_inj_microops;
+			int temp_index = 0;
+			StaticInstPtr* temp_microops = new StaticInstPtr[temp_numMicroops];
 
 			for(int i=0;i<numMicroops;i++){
-				if(microops[i]->isLoad()) {	
+				if(microops[i]->isLoad()) {
 					std::vector<StaticInstPtr> toInject = injectLoadMicros(microops[i]);
 					for(int j=0; j<toInject.size(); j++){
-						tempmicroops[i+j] = toInject.at(j); 
+						temp_microops[temp_index+j] = toInject.at(j); 
 					}
-					i = i + toInject.size() - 1; //Skip injected microops
+					temp_index = temp_index + toInject.size(); //Skip injected microops
 				}
 				else if(microops[i]->isStore()){
 					std::vector<StaticInstPtr> toInject = injectStoreMicros(microops[i]);
 					for(int j=0; j<toInject.size(); j++){
-						tempmicroops[i+j] = toInject.at(j); 
+						temp_microops[temp_index+j] = toInject.at(j); 
 					}
-					i = i + toInject.size() - 1; //Skip injected microops	
+					temp_index = temp_index + toInject.size(); //Skip injected microops	
 				}
 				else {
-					tempmicroops[i]=microops[i];
-					tempmicroops[i]->clearLastMicroop();
+					temp_microops[temp_index]=microops[i];
+					temp_microops[temp_index]->clearLastMicroop();
+					temp_index++;
 				}
 			}
 			delete [] microops;
-			microops = tempmicroops;
+			microops = temp_microops;
+			numMicroops = temp_numMicroops;
 			microops[(numMicroops-1)]->setLastMicroop();
 		}
 		ctx_decoded=true;
