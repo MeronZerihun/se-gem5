@@ -222,6 +222,10 @@ MacroopBase::cTXAlterMicroops()
 				num_inj_microops += countStoreMicros(microops[i]);
 			}
 			else{
+
+				//TESTING FOR SEGFAULT
+        		DPRINTF(csd, "---- %s\n", microops[i]->generateDisassembly(0, NULL));
+
 				switch(microops[i]->opClass()){
 					case OpClass::IntAlu: microops[i]->setOpClass(OpClass::EncIntAlu); 
 						break;
@@ -246,7 +250,7 @@ MacroopBase::cTXAlterMicroops()
 					case OpClass::FloatSqrt : microops[i]->setOpClass(OpClass::EncFloatSqrt); 
 						break;
 					default: DPRINTF(csd, "WARNING:: OpClass not handled by switch in cTXAlterMicroops()\n");
-						 break;
+						break;
 				}
 			}
 
