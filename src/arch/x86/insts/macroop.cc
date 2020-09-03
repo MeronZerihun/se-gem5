@@ -49,6 +49,10 @@ MacroopBase::injectLoadMicros (StaticInstPtr load_microop){
 	
 	X86ISA::InstRegIndex dest = InstRegIndex(load_microop->destRegIdx(0).index());
 	X86ISA::InstRegIndex ptr = InstRegIndex(env.base);
+	if (ptr.isZeroReg()){
+		DPRINTF(csd, "WARNING:: This microop has a zero ptr\n");
+		ptr = InstRegIndex(load_microop->srcRegIdx(1).index());
+	}
 	std::string opName = load_microop->getName();
 
 	if(dest == ptr){
@@ -213,10 +217,10 @@ MacroopBase::cTXAlterMicroops()
 		//Caculate total number of injected microops
 		int num_inj_microops = 0;
 		for(int i=0;i<numMicroops;i++){
+			DPRINTF(csd, "(OLD %d)-- %s\n", i, microops[i]->generateDisassembly(0, NULL));
 			if(microops[i]->isLoad())
 			{
 				num_inj_microops += countLoadMicros(microops[i]);
-				DPRINTF(csd, "%s\n", microops[i]->getName());
 			}
 			else if(microops[i]->isStore()){
 				num_inj_microops += countStoreMicros(microops[i]);
@@ -289,7 +293,7 @@ MacroopBase::cTXAlterMicroops()
 		ctx_decoded=true;
 	
 		for(int i=0; i<numMicroops; i++){
-        		DPRINTF(csd, "---- %s\n", microops[i]->generateDisassembly(0, NULL));
+        		DPRINTF(csd, "(NEW %d)-- %s\n", i, microops[i]->generateDisassembly(0, NULL));
 		}
 	}
 	return 0;
