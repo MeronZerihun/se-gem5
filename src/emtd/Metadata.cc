@@ -356,30 +356,30 @@ void Metadata::load_ins_taints(const char *filename){
         //Get first arg, insn addr
         int pos = line.find("; ");
         long addr = strtol(line.substr(0, pos).c_str(), NULL, 16);
-        line.erase(0, pos + "; ".length());
+        line.erase(0, pos + 2);
 
         //Get second arg, is arith tainted
         pos = line.find("; ");
-        int arith_tainted = strtoi(line.substr(0, pos).c_str(), NULL, 16);
-        line.erase(0, pos + "; ".length());
+        int arith_tainted = strtol(line.substr(0, pos).c_str(), NULL, 10);
+        line.erase(0, pos + 2);
 
         //Get third arg, is memory access tainted
         pos = line.find("; ");
-        int mem_tainted = strtoi(line.substr(0, pos).c_str(), NULL, 16);
-        line.erase(0, pos + "; ".length());
+        int mem_tainted = strtol(line.substr(0, pos).c_str(), NULL, 10);
+        line.erase(0, pos + 2);
 
-	    insn_tags.insert(Emtd_InsnTaintEntry(addr, arith_tainted, mem_tainted));
-	    DPRINTF(priv, "Tainting instruction at 0x%x \n", addr);
+	insn_tags[addr] = Emtd_InsnTaintEntry(addr, (bool)arith_tainted, (bool)mem_tainted);
+	DPRINTF(priv, "Tainting instruction at 0x%x , %d, %d\n", addr, arith_tainted, mem_tainted);
     }
     ins_taints.close();
 }
 
 bool Metadata::isTainted(Addr pc){
-    for (auto const& value: (insn_tags)) {
+    auto it = insn_tags.find(pc);
+    if (it != insn_tags.end()){
        //fprintf(stderr, "tainted pc = %x current pc = %x \n",(unsigned int)value, (unsigned int)pc.pc());
-       if (value.insn_addr==pc)
-            return true;
-    }
+       return true;
+    }    
     return false;
 }
 
