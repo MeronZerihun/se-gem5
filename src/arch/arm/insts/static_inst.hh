@@ -192,7 +192,7 @@ class ArmStaticInst : public StaticInst
 
     //Begin EMTD
     void 
-    cTXAlterMicroops()
+    cTXAlterMicroops(bool arith_tainted, bool mem_tainted)
     {
         return;
     }

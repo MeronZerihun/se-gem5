@@ -383,6 +383,13 @@ bool Metadata::isTainted(Addr pc){
     return false;
 }
 
+Emtd_InsnTaintEntry Metadata::getInsnTaintEntry(Addr pc){
+    auto it = insn_tags.find(pc);
+    if (it != insn_tags.end()){
+       return insn_tags[pc];
+    }    
+    return NULL;
+}
 
 
 

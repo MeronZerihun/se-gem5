@@ -125,6 +125,7 @@ public:
 	void record_violation(Addr pc, std::string msg, std::string pc_msg);
 
 	bool isTainted(Addr pc);
+	Emtd_InsnTaintEntry getInsnTaintEntry(Addr pc);
 
 private:
 	std::string filename;

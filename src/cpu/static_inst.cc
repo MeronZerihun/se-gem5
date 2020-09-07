@@ -105,7 +105,7 @@ StaticInst::fetchMicroop(MicroPC upc) const
 
 //Begin EMTD
 int
-StaticInst::cTXAlterMicroops(){
+StaticInst::cTXAlterMicroops(bool arith_tainted, bool mem_tainted){
 	 panic("StaticInst::cTXAlterMicroops() called on instruction "
 	          "that is not microcoded.");
 }

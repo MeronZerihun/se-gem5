@@ -298,7 +298,7 @@ class StaticInst : public RefCounted, public StaticInstFlags
 	 * Go through the microOps of a macro op and perform some changes in
 	 * macroops
 	 */
-    virtual int cTXAlterMicroops() ;
+    virtual int cTXAlterMicroops(bool arith_tainted, bool mem_tainted) ;
 
     virtual int getDisp(){
 	    DPRINTF(csd, "(!) We should not be here, StaticInst::getDisp\n");
