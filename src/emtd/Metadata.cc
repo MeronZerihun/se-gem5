@@ -388,7 +388,7 @@ Emtd_InsnTaintEntry Metadata::getInsnTaintEntry(Addr pc){
     if (it != insn_tags.end()){
        return insn_tags[pc];
     }    
-    return NULL;
+    return Emtd_InsnTaintEntry();
 }
 
 

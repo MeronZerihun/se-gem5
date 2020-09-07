@@ -218,14 +218,14 @@ MacroopBase::cTXAlterMicroops(bool arith_tainted, bool mem_tainted)
 		int num_inj_microops = 0;
 		for(int i=0;i<numMicroops;i++){
 			DPRINTF(csd, "(OLD %d)-- %s\n", i, microops[i]->generateDisassembly(0, NULL));
-			if(microops[i]->isLoad())
+			if(microops[i]->isLoad() && mem_tainted)
 			{
 				num_inj_microops += countLoadMicros(microops[i]);
 			}
-			else if(microops[i]->isStore()){
+			else if(microops[i]->isStore() && mem_tainted){
 				num_inj_microops += countStoreMicros(microops[i]);
 			}
-			else{
+			else if(arith_tainted){
 				switch(microops[i]->opClass()){
 					case OpClass::IntAlu: microops[i]->setOpClass(OpClass::EncIntAlu); 
 						break;
