@@ -353,9 +353,23 @@ void Metadata::load_ins_taints(const char *filename){
 
     std::string line;
     while(getline(ins_taints, line)){
-	long addr = strtol(line.c_str(), NULL, 16);
-	insn_tags.insert(addr);
-	DPRINTF(priv, "Tainting instruction at 0x%x \n", addr);
+        //Get first arg, insn addr
+        int pos = line.find("; ");
+        long addr = strtol(line.substr(0, pos).c_str(), NULL, 16);
+        line.erase(0, pos + "; ".length());
+
+        //Get second arg, is arith tainted
+        pos = line.find("; ");
+        int arith_tainted = strtoi(line.substr(0, pos).c_str(), NULL, 16);
+        line.erase(0, pos + "; ".length());
+
+        //Get third arg, is memory access tainted
+        pos = line.find("; ");
+        int mem_tainted = strtoi(line.substr(0, pos).c_str(), NULL, 16);
+        line.erase(0, pos + "; ".length());
+
+	    insn_tags.insert(Emtd_InsnTaintEntry(addr, arith_tainted, mem_tainted));
+	    DPRINTF(priv, "Tainting instruction at 0x%x \n", addr);
     }
     ins_taints.close();
 }
@@ -363,7 +377,7 @@ void Metadata::load_ins_taints(const char *filename){
 bool Metadata::isTainted(Addr pc){
     for (auto const& value: (insn_tags)) {
        //fprintf(stderr, "tainted pc = %x current pc = %x \n",(unsigned int)value, (unsigned int)pc.pc());
-       if (value==pc)
+       if (value.insn_addr==pc)
             return true;
     }
     return false;

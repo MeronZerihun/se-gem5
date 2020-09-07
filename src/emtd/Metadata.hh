@@ -55,6 +55,19 @@ typedef struct
 	uint8_t tagbyte;	  // Tag stored in lower 2 bits of last byte
 } Emtd_MetadataEntry;
 
+
+// Define a struct that describes how instuction taint entries are stored in the binary file
+typedef struct
+{
+	memaddr_t insn_addr;  
+	bool arith_tainted;	  
+	bool mem_tainted; 
+
+	Emtd_InsnTaintEntry(memaddr_t insn, bool arith, bool mem){
+		insn_addr = insn; arith_tainted = arith; mem_tainted = mem;
+	}
+} Emtd_InsnTaintEntry;
+
 // Define enum for tag types
 enum Emtd_tag : uint8_t
 {
@@ -124,7 +137,7 @@ private:
 													 // NOTE: Register's hold their own tags (in regfile)
 
 	// Representation of insn taints / "enc_ins"
-	std::unordered_set<memaddr_t> insn_tags;  // Unordered_set chosen for efficiency 
+	std::unordered_set<Emtd_InsnTaintEntry> insn_tags;  // Unordered_set chosen for efficiency 
 
 	// // TODO:: Remove insns_consts_tags
 	// std::map<memaddr_t, Emtd_tag> insns_consts_tags; // Used to find tag of destination register in insns
