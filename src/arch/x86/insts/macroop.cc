@@ -82,7 +82,7 @@ MacroopBase::injectLoadMicros (StaticInstPtr load_microop){
 				env.scale, 							// uint8_t _scale
 				InstRegIndex(env.index), 			//InstRegIndex _index
 				ptr, 								//InstRegIndex _base
-				load_microop->getDisp() + 8,		// uint64_t _disp
+				load_microop->getDisp() + 0,		// uint64_t _disp
 				InstRegIndex(env.seg), 				//InstRegIndex _segment
 				dest,								// InstRegIndex _data
 				env.dataSize, 						//uint8_t _dataSize
@@ -118,7 +118,7 @@ MacroopBase::injectLoadMicros (StaticInstPtr load_microop){
 				env.scale, 							// uint8_t _scale
 				InstRegIndex(env.index), 			//InstRegIndex _index
 				ptr, 								//InstRegIndex _base
-				load_microop->getDisp() + 8,		// uint64_t _disp
+				load_microop->getDisp() + 0,		// uint64_t _disp
 				InstRegIndex(env.seg), 				//InstRegIndex _segment
 				dest,								// InstRegIndex _data
 				env.dataSize, 						//uint8_t _dataSize
@@ -193,7 +193,7 @@ MacroopBase::injectStoreMicros (StaticInstPtr store_microop){
 			env.scale, 							// uint8_t _scale
 			InstRegIndex(env.index), 			//InstRegIndex _index
 			ptr, 								//InstRegIndex _base
-			store_microop->getDisp() + 8,		// uint64_t _disp
+			store_microop->getDisp() + 0,		// uint64_t _disp
 			InstRegIndex(env.seg), 				//InstRegIndex _segment
 			dest,								// InstRegIndex _data
 			env.dataSize, 						//uint8_t _dataSize
