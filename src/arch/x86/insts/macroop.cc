@@ -11,6 +11,8 @@
 #include "arch/x86/isa_traits.hh"
 #include <iostream>
 #include "debug/csd.hh"
+#include "arch/x86/regs/float.hh"
+#include <string>
 
 namespace X86ISA
 {
@@ -165,9 +167,26 @@ std::vector<StaticInstPtr>
 MacroopBase::injectStoreMicros (StaticInstPtr store_microop){
 	std::vector<StaticInstPtr> result;
 
-    X86ISA::InstRegIndex dest = InstRegIndex(store_microop->destRegIdx(0).index());
+       std::__cxx11::string diss = store_microop->generateDisassembly(0, NULL);
+       /*DPRINTF(csd, "TESTS:: %d\n", store_microop->destRegIdx(0).index());
+       DPRINTF(csd, "TESTS:: %d\n", store_microop->destRegIdx(1).index());
+       DPRINTF(csd, "TESTS:: %d\n", store_microop->srcRegIdx(0).index());
+       DPRINTF(csd, "TESTS:: %d\n", store_microop->srcRegIdx(1).index());
+       DPRINTF(csd, "TESTS:: %d\n", env.base);
+       DPRINTF(csd, "TESTS:: %d\n", env.regm);
+       DPRINTF(csd, "TESTS:: %d\n", env.reg);*/
+
+
+
+    X86ISA::InstRegIndex dest = InstRegIndex(env.reg);
     X86ISA::InstRegIndex ptr = InstRegIndex(env.base);
 	//X86ISA::InstRegIndex ptr = InstRegIndex(load_microop->srcRegIdx(1).index());
+   if(diss.find("_low") != std::string::npos){
+   	   dest = InstRegIndex(FLOATREG_XMM_LOW(env.reg));
+   }
+   else if (diss.find("_high") != std::string::npos){
+	   dest = InstRegIndex(FLOATREG_XMM_HIGH(env.reg));
+   }
 
 
 	std::string opName = store_microop->getName();
