@@ -39,6 +39,10 @@ MacroopBase::countLoadMicros (StaticInstPtr load_microop){
 
 	X86ISA::InstRegIndex dest = InstRegIndex(load_microop->destRegIdx(0).index());
 	X86ISA::InstRegIndex ptr = InstRegIndex(env.base);
+	if (ptr.isZeroReg()){
+		ptr = InstRegIndex(load_microop->srcRegIdx(1).index());
+	}
+
 	if (dest == ptr) {return 2;}
 
 	return 1;
