@@ -52,7 +52,6 @@ MacroopBase::injectLoadMicros (StaticInstPtr load_microop){
 	X86ISA::InstRegIndex dest = InstRegIndex(load_microop->destRegIdx(0).index());
 	X86ISA::InstRegIndex ptr = InstRegIndex(env.base);
 	if (ptr.isZeroReg()){
-		DPRINTF(csd, "WARNING:: This microop has a zero ptr\n");
 		ptr = InstRegIndex(load_microop->srcRegIdx(1).index());
 	}
 	std::string opName = load_microop->getName();
@@ -123,7 +122,7 @@ MacroopBase::injectLoadMicros (StaticInstPtr load_microop){
 				load_microop->getDisp() + 8,		// uint64_t _disp
 				InstRegIndex(env.seg), 				//InstRegIndex _segment
 				dest,								// InstRegIndex _data
-				8, 						//uint8_t _dataSize
+				8, 									//uint8_t _dataSize
 				env.addressSize, 					//uint8_t _addressSize
 				0); 								//Request::FlagsType _memFlags
 		inj_load->setInjected();
@@ -141,7 +140,7 @@ MacroopBase::injectLoadMicros (StaticInstPtr load_microop){
 				load_microop->getDisp(),			// uint64_t _disp
 				InstRegIndex(env.seg), 				//InstRegIndex _segment
 				dest,								// InstRegIndex _data
-				8, 						//uint8_t _dataSize
+				8, 									//uint8_t _dataSize
 				env.addressSize, 					//uint8_t _addressSize
 				0); 								//Request::FlagsType _memFlags
 		existing_load->clearLastMicroop();
@@ -167,7 +166,6 @@ std::vector<StaticInstPtr>
 MacroopBase::injectStoreMicros (StaticInstPtr store_microop){
 	std::vector<StaticInstPtr> result;
 
-       std::__cxx11::string diss = store_microop->generateDisassembly(0, NULL);
        /*DPRINTF(csd, "TESTS:: %d\n", store_microop->destRegIdx(0).index());
        DPRINTF(csd, "TESTS:: %d\n", store_microop->destRegIdx(1).index());
        DPRINTF(csd, "TESTS:: %d\n", store_microop->srcRegIdx(0).index());
@@ -176,23 +174,37 @@ MacroopBase::injectStoreMicros (StaticInstPtr store_microop){
        DPRINTF(csd, "TESTS:: %d\n", env.regm);
        DPRINTF(csd, "TESTS:: %d\n", env.reg);*/
 
-
-
     X86ISA::InstRegIndex dest = InstRegIndex(env.reg);
     X86ISA::InstRegIndex ptr = InstRegIndex(env.base);
-	//X86ISA::InstRegIndex ptr = InstRegIndex(load_microop->srcRegIdx(1).index());
-   if(diss.find("_low") != std::string::npos){
-   	   dest = InstRegIndex(FLOATREG_XMM_LOW(env.reg));
-   }
-   else if (diss.find("_high") != std::string::npos){
-	   dest = InstRegIndex(FLOATREG_XMM_HIGH(env.reg));
-   }
 
+	std::__cxx11::string diss = store_microop->generateDisassembly(0, NULL);
+   	if(diss.find("_low") != std::string::npos){
+		dest = InstRegIndex(FLOATREG_XMM_LOW(env.reg));
+   	}
+   	else if (diss.find("_high") != std::string::npos){
+	   	dest = InstRegIndex(FLOATREG_XMM_HIGH(env.reg));
+   	}
 
 	std::string opName = store_microop->getName();
-
+		
+	//STORE constructor originates from microldstop.hh::100
 	if(opName.compare("st")==0){
-		//STORE constructor originates from microldstop.hh::100
+		StaticInstPtr inj_store = new X86ISAInst::St(
+				machInst, 							//ExtMachInst _machInst
+				"INT_ST",							//const char * instMnem
+				(1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, //uint64_t setFlags
+				env.scale, 							// uint8_t _scale
+				InstRegIndex(env.index), 			//InstRegIndex _index
+				ptr, 								//InstRegIndex _base
+				store_microop->getDisp() + 8,		// uint64_t _disp
+				InstRegIndex(env.seg), 				//InstRegIndex _segment
+				dest,								// InstRegIndex _data
+				env.dataSize, 						//uint8_t _dataSize
+				env.addressSize, 					//uint8_t _addressSize
+				0); 								//Request::FlagsType _memFlags
+		inj_store->clearLastMicroop();
+		result.push_back(inj_store);
+
 		StaticInstPtr existing_store = new X86ISAInst::St(
 				machInst, 							//ExtMachInst _machInst
 				"MOV_R_M",							//const char * instMnem
@@ -206,46 +218,27 @@ MacroopBase::injectStoreMicros (StaticInstPtr store_microop){
 				env.dataSize, 						//uint8_t _dataSize
 				env.addressSize, 					//uint8_t _addressSize
 				0); 								//Request::FlagsType _memFlags
+		existing_store->setInjected();
 		existing_store->clearLastMicroop();
 		result.push_back(existing_store);
-
-		//STORE constructor originates from microldstop.hh::100
-		StaticInstPtr inj_store = new X86ISAInst::St(
-				machInst, 							//ExtMachInst _machInst
-				"MOV_R_M",							//const char * instMnem
-				(1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, //uint64_t setFlags
-				env.scale, 							// uint8_t _scale
-				InstRegIndex(env.index), 			//InstRegIndex _index
-				ptr, 								//InstRegIndex _base
-				store_microop->getDisp() + 0,		// uint64_t _disp
-				InstRegIndex(env.seg), 				//InstRegIndex _segment
-				dest,								// InstRegIndex _data
-				env.dataSize, 						//uint8_t _dataSize
-				env.addressSize, 					//uint8_t _addressSize
-				0); 								//Request::FlagsType _memFlags
-		inj_store->setInjected();
-		inj_store->clearLastMicroop();
-		result.push_back(inj_store);
 	}
 	else if(opName.compare("stfp")==0){
-		//STORE constructor originates from microldstop.hh::100
 		StaticInstPtr inj_store = new X86ISAInst::Stfp(
 				machInst, 							//ExtMachInst _machInst
-				"MOV_R_M",							//const char * instMnem
+				"INT_ST",							//const char * instMnem
 				(1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, //uint64_t setFlags
 				env.scale, 							// uint8_t _scale
 				InstRegIndex(env.index), 			//InstRegIndex _index
 				ptr, 								//InstRegIndex _base
-				store_microop->getDisp() + 8,			// uint64_t _disp
+				store_microop->getDisp() + 8,		// uint64_t _disp
 				InstRegIndex(env.seg), 				//InstRegIndex _segment
 				dest,								// InstRegIndex _data
-				8, 						//uint8_t _dataSize
+				8, 									//uint8_t _dataSize
 				env.addressSize, 					//uint8_t _addressSize
 				0); 								//Request::FlagsType _memFlags
 		inj_store->clearLastMicroop();
 		result.push_back(inj_store);
 
-		//STORE constructor originates from microldstop.hh::100
 		StaticInstPtr existing_store = new X86ISAInst::Stfp(
 				machInst, 							//ExtMachInst _machInst
 				"MOV_R_M",							//const char * instMnem
@@ -253,10 +246,10 @@ MacroopBase::injectStoreMicros (StaticInstPtr store_microop){
 				env.scale, 							// uint8_t _scale
 				InstRegIndex(env.index), 			//InstRegIndex _index
 				ptr, 								//InstRegIndex _base
-				store_microop->getDisp() + 0,		// uint64_t _disp
+				store_microop->getDisp(),			// uint64_t _disp
 				InstRegIndex(env.seg), 				//InstRegIndex _segment
 				dest,								// InstRegIndex _data
-				8, 						//uint8_t _dataSize
+				8, 									//uint8_t _dataSize
 				env.addressSize, 					//uint8_t _addressSize
 				0); 								//Request::FlagsType _memFlags
 		existing_store->setInjected();
