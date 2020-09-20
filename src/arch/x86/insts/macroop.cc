@@ -180,6 +180,9 @@ MacroopBase::injectStoreMicros (StaticInstPtr store_microop){
 
     X86ISA::InstRegIndex dest = InstRegIndex(env.reg);
     X86ISA::InstRegIndex ptr = InstRegIndex(env.base);
+	if (ptr.isZeroReg()){
+		ptr = InstRegIndex(store_microop->srcRegIdx(1).index());
+	}
 
 	std::__cxx11::string diss = store_microop->generateDisassembly(0, NULL);
    	if(diss.find("_low") != std::string::npos){
@@ -217,7 +220,7 @@ MacroopBase::injectStoreMicros (StaticInstPtr store_microop){
 				ptr, 								//InstRegIndex _base
 				store_microop->getDisp() + 8,		// uint64_t _disp
 				InstRegIndex(env.seg), 				//InstRegIndex _segment
-				InstRegIndex(NUM_INTREGS+1),		// InstRegIndex _data
+				InstRegIndex(NUM_INTREGS),			// InstRegIndex _data
 				env.dataSize, 						//uint8_t _dataSize
 				env.addressSize, 					//uint8_t _addressSize
 				0); 								//Request::FlagsType _memFlags
@@ -268,7 +271,7 @@ MacroopBase::injectStoreMicros (StaticInstPtr store_microop){
 				ptr, 								//InstRegIndex _base
 				store_microop->getDisp() + 8,		// uint64_t _disp
 				InstRegIndex(env.seg), 				//InstRegIndex _segment
-				InstRegIndex(NUM_INTREGS+1),		// InstRegIndex _data
+				InstRegIndex(NUM_INTREGS),		// InstRegIndex _data
 				4, 									//uint8_t _dataSize
 				env.addressSize, 					//uint8_t _addressSize
 				0); 								//Request::FlagsType _memFlags
@@ -343,7 +346,7 @@ MacroopBase::cTXAlterMicroops(bool arith_tainted, bool mem_tainted)
 						break;
 					case OpClass::FloatSqrt : microops[i]->setOpClass(OpClass::EncFloatSqrt); 
 						break;
-					default: DPRINTF(csd, "WARNING:: OpClass not handled by switch in cTXAlterMicroops(): %d\n" microops[i]->opClass());
+					default: DPRINTF(csd, "WARNING:: OpClass not handled by switch in cTXAlterMicroops(): %d\n", microops[i]->opClass());
 						break;
 				}
 			}
