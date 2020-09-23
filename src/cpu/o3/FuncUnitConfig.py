@@ -48,8 +48,8 @@ ENC_LATENCY = 70
 
 #### BEGIN EMTD
 class EncryptDecrypt(FUDesc):
-    opList = [  OpDesc(opClass='Encrypt', opLat=20, pipelined=True),
-                OpDesc(opClass='Decrypt', opLat=20, pipelined=True),
+    opList = [  OpDesc(opClass='Encrypt', opLat=ENC_LATENCY, pipelined=True),
+                OpDesc(opClass='Decrypt', opLat=ENC_LATENCY, pipelined=True),
                 OpDesc(opClass='EncIntAlu', opLat=(1 + 2*ENC_LATENCY), pipelined=True),
                 OpDesc(opClass='EncIntMult', opLat=(3 + 2*ENC_LATENCY), pipelined=True),
                 OpDesc(opClass='EncIntDiv', opLat=(1 + 2*ENC_LATENCY), pipelined=False)]

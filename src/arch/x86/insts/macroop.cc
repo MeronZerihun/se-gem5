@@ -307,9 +307,11 @@ MacroopBase::injectStoreMicros (StaticInstPtr store_microop){
 
 
 int
-MacroopBase::cTXAlterMicroops(bool arith_tainted, bool mem_tainted)
+MacroopBase::cTXAlterMicroops(bool arith_tainted, bool mem_tainted, Addr pc)
 {
 	if(ctx_decoded==false){
+		
+		DPRINTF(csd, "MacroopBase::cTXAlterMicroops():: Altering microops of tainted instruction 0x%x\n", pc);
 
 		//Caculate total number of injected microops
 		int num_inj_microops = 0;
@@ -346,7 +348,7 @@ MacroopBase::cTXAlterMicroops(bool arith_tainted, bool mem_tainted)
 						break;
 					case OpClass::FloatSqrt : microops[i]->setOpClass(OpClass::EncFloatSqrt); 
 						break;
-					default: DPRINTF(csd, "WARNING:: OpClass not handled by switch in cTXAlterMicroops(): %d\n", microops[i]->opClass());
+					default: DPRINTF(csd, "WARNING:: OpClass not handled by switch in cTXAlterMicroops(): %d\n %s\n", microops[i]->opClass(), microops[i]->generateDisassembly(0, NULL));
 						break;
 				}
 			}

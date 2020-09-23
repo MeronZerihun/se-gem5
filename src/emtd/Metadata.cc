@@ -399,8 +399,7 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
     std::string opc = inst->getName();
 
     if(isTainted(pc)){
-        DPRINTF(csd, "Committing Tainted Instruction 0x%x\n", pc);
-        DPRINTF(csd, "---- %s\n", inst->generateDisassembly(pc, NULL));
+        DPRINTF(csd, "Committing Tainted Instruction 0x%x :: %s\n", pc, inst->generateDisassembly(pc, NULL));
     }
 
     try
