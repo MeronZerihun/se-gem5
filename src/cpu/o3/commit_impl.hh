@@ -1422,7 +1422,7 @@ DefaultCommit<Impl>::updateComInstStats(const DynInstPtr &inst)
         instsCommitted[tid]++;
     opsCommitted[tid]++;
 
-    if( metadata->isTainted(thisPC.instAddr())){
+    if( metadata->isTainted(inst->pc.instAddr())){
         if (!inst->isMicroop() || inst->isLastMicroop())
             instsCommittedTainted[tid]++;
         opsCommittedTainted[tid]++;

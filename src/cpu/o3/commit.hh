@@ -497,6 +497,10 @@ class DefaultCommit
     Stats::Vector instsCommitted;
     /** Total number of ops (including micro ops) committed. */
     Stats::Vector opsCommitted;
+    /** Total number of instructions committed. */
+    Stats::Vector instsCommittedTainted;
+    /** Total number of ops (including micro ops) committed. */
+    Stats::Vector opsCommittedTainted;
     /** Total number of software prefetches committed. */
     Stats::Vector statComSwp;
     /** Stat for the total number of committed memory references. */
