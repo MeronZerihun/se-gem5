@@ -44,7 +44,12 @@ from m5.params import *
 
 from m5.objects.FuncUnit import *
 
-ENC_LATENCY = 70
+AES_LATENCY = 40
+AES_NI_LATENCY = 70
+SIMON_LATENCY = 20
+QARMA_LATENCY = 12
+
+ENC_LATENCY = SIMON_LATENCY
 
 #### BEGIN EMTD
 # class EncryptDecrypt(FUDesc):
