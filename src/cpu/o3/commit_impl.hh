@@ -188,6 +188,20 @@ DefaultCommit<Impl>::regStats()
         .flags(total)
         ;
 
+    instsCommittedTainted
+        .init(cpu->numThreads)
+        .name(name() + ".committedInstsTainted")
+        .desc("Number of instructions committed with tainted PCs")
+        .flags(total)
+        ;
+
+    opsCommittedTainted
+        .init(cpu->numThreads)
+        .name(name() + ".committedOpsTainted")
+        .desc("Number of ops (including micro ops) committed with tainted PCs")
+        .flags(total)
+        ;
+
     statComSwp
         .init(cpu->numThreads)
         .name(name() + ".swp_count")
@@ -1407,6 +1421,12 @@ DefaultCommit<Impl>::updateComInstStats(const DynInstPtr &inst)
     if (!inst->isMicroop() || inst->isLastMicroop())
         instsCommitted[tid]++;
     opsCommitted[tid]++;
+
+    if( metadata->isTainted(thisPC.instAddr())){
+        if (!inst->isMicroop() || inst->isLastMicroop())
+            instsCommittedTainted[tid]++;
+        opsCommittedTainted[tid]++;
+    }
 
     // To match the old model, don't count nops and instruction
     // prefetches towards the total commit count.
