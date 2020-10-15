@@ -1,21 +1,23 @@
 # Notes on priv-gem5 branches #
-###naive-enc-impl
+
+### naive-enc-impl
 - Encryption associated with execution stage
 - Duplicate lds/sts are injected to accomidate extended ciphertexts 
 - Enc ops are redirected to an Enc functional unit with extra latency 
 
-###shadow-reg-impl
+### shadow-reg-impl
 - Encryption associated with load/st
 - Duplicate lds/sts are injected to accomidate extended ciphertexts 
 - Enc values incur latency on load (e.g., a tainted load takes +enc_latency longer)
   and on stores (e.g., a tainted load takes +(enc_latency - last_update) longer) 
   
-###shadow-cache-impl
+### shadow-cache-impl
 - Encryption associated with load/st (like shadow-reg), but this is reduced with a small cache that is flushed between context switches
 - Duplicate lds/sts are injected to accomidate extended ciphertexts 
 - Enc values incur latency on load (e.g., a tainted load takes +enc_latency longer)
   and on stores (e.g., a tainted load takes +(enc_latency - last_update) longer)   
   but if there is a HIT in the shadow cache, the latnecy is reduced 
+
 
 # EMTD gem5 #
 
