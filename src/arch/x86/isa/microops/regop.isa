@@ -755,11 +755,11 @@ let {{
     # EMTD
     class Enc(RegOp):
         op_class = 'EncryptOp'
-        code = 'DestReg = merge(SrcReg1, op2, dataSize)' #TODO
+        code = 'DestReg = merge(SrcReg1, op2, dataSize);' 
     
     class Dec(RegOp):
         op_class = 'DecryptOp'
-        code = 'DestReg = merge(SrcReg1, op2, dataSize)' #TODO
+        code = 'DestReg = DestReg;'
 
 
     # Shift instructions
