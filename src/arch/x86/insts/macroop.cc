@@ -211,10 +211,10 @@ MacroopBase::countStoreMicros (StaticInstPtr store_microop){
 
 StaticInstPtr MacroopBase::getInjInsn_Enc(InstRegIndex dest){
 		// ENC constructor originates from microregop.hh::8
-	DPRINTF(csd, "WARNING:: UNIMPLEMENTED\n");
+	DPRINTF(csd, "WARNING:: UNIMPLEMENTED %d\n", curTick());
 
 	StaticInstPtr inj_enc; 
-	int update_time=0;
+	int update_time= 0; 
 
 	//Placeholder
 	// if(0 >= metadata->get_enc_latency()){
@@ -315,7 +315,7 @@ StaticInstPtr MacroopBase::getInjInsn_EncFP(InstRegIndex dest){
 	StaticInstPtr inj_enc; 
 	int update_time=0;
 
-	DPRINTF(csd, "WARNING:: UNIMPLEMENTED\n");
+        DPRINTF(csd, "WARNING:: UNIMPLEMENTED %d\n", curTick());
 
 
 	//Placeholder
