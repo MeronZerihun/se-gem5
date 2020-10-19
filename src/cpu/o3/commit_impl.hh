@@ -1318,7 +1318,7 @@ DefaultCommit<Impl>::commitHead(const DynInstPtr &head_inst, unsigned inst_num)
     
     /* EMTD */
     assert(head_inst->staticInst);
-    metadata->propagate_result_tag_o3(thread[tid]->tc, head_inst->staticInst, head_inst->pc.instAddr(), head_inst->traceData);
+    metadata->commit_insn(thread[tid]->tc, head_inst->staticInst, head_inst->pc.instAddr(), head_inst->traceData);
     /* END OF EMTD*/
     
     if (head_inst->traceData) {

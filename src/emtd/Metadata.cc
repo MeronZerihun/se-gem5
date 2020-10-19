@@ -289,6 +289,21 @@ void Metadata::deallocate_stack_tags(){
 
 
 
+/******************************************************************/
+//  Helper functions for data encryption
+/******************************************************************/
+int Metadata::get_enc_latency(){
+    DPRINTF(csd, "Calling get_enc_latency()...\n");
+    return 40;
+}
+
+/******************************************************************/
+//  END: Helper functions for data encryption
+/******************************************************************/
+
+
+
+
 // Populates both the memory_tags and insns_consts_tags maps
 void Metadata::load_metadata_binary(const char *filename){
 
@@ -391,6 +406,20 @@ Emtd_InsnTaintEntry Metadata::getInsnTaintEntry(Addr pc){
     return Emtd_InsnTaintEntry();
 }
 
+
+void Metadata::commit_insn(ThreadContext *tc, StaticInstPtr inst, Addr pc, Trace::InstRecord *traceData){
+
+    X86Ops Ops;
+    std::string opc = inst->getName();
+
+    if(isTainted(pc)){
+        DPRINTF(csd, "Committing Tainted Instruction 0x%x :: %s\n", pc, inst->generateDisassembly(pc, NULL));
+    }
+
+    // Need to start register countdown... 
+    //inst->destRegIdx(0) 
+
+}
 
 
 void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Addr pc, Trace::InstRecord *traceData){

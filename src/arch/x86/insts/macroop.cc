@@ -588,6 +588,20 @@ MacroopBase::cTXAlterMicroops(bool arith_tainted, bool mem_tainted, Addr pc, Met
         		DPRINTF(csd, "(NEW %d)-- %s\n", i, microops[i]->generateDisassembly(0, NULL));
 		}
 	}
+
+	else if(mem_tainted){
+		// CAN NO LONGER EARLY EXIT CUZ TIME DIFFERS ON HIT/MISS, OR LAST REG UPDATE
+		// 
+		DPRINTF(csd, "WARNING:: UNIMPLEMENTED in cTXAlterMicroops():: \n");
+		//FIND AND REPLACE ENC LATENCY IF PRESENT
+		//Loop until you find an enc
+		// 	Get enc dest/src register
+		//  Replace instruction with new one with updated update_tiem
+		//  Use dest/src register to do this
+
+	}
+
+
 	return 0;
 
 }

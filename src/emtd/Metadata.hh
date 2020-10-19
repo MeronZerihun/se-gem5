@@ -119,6 +119,7 @@ public:
 	// Return an iterator to the memory tag map
 	const std::map<memaddr_t, Emtd_tag> *get_mem_map_ptr() { return (const std::map<memaddr_t, Emtd_tag> *)&memory_tags; }
 
+	void commit_insn(ThreadContext *tc, StaticInstPtr inst, Addr pc, Trace::InstRecord *traceData);
 	void propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Addr pc, Trace::InstRecord *traceData);
 
 	void write_violation_stats();
@@ -126,6 +127,10 @@ public:
 
 	bool isTainted(Addr pc);
 	Emtd_InsnTaintEntry getInsnTaintEntry(Addr pc);
+
+	// Encryption Helper Functions
+	int get_enc_latency();
+
 
 private:
 	std::string filename;

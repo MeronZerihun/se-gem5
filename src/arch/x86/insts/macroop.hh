@@ -47,6 +47,14 @@
 #include "mem/request.hh"
 #include "emtd/Metadata.hh"
 
+#define AES_LATENCY    40
+#define AES_NI_LATENCY 70
+#define SIMON_LATENCY  20
+#define QARMA_LATENCY  12
+
+#define ENC_LATENCY SIMON_LATENCY
+
+
 namespace X86ISA
 {
 // Base class for combinationally generated macroops
