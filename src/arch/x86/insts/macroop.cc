@@ -199,7 +199,7 @@ StaticInstPtr MacroopBase::getInjInsn_Enc(InstRegIndex dest){
 	// }
 
 	switch(update_time){
-		case 0: inj_enc = new X86ISAInst::Enc( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 8, 0); 
+		case 0: inj_enc = new X86ISAInst::Enc( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); 
 			break;
 		case 1: inj_enc = new X86ISAInst::Enc1( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0);   
 			break;
