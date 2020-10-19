@@ -526,7 +526,7 @@ MacroopBase::injectStoreMicros (StaticInstPtr store_microop){
 
 
 int
-MacroopBase::cTXAlterMicroops(bool arith_tainted, bool mem_tainted, Addr pc)
+MacroopBase::cTXAlterMicroops(bool arith_tainted, bool mem_tainted, Addr pc, Metadata* metadata)
 {
 	if(ctx_decoded==false){
 		

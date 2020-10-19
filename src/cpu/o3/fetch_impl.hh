@@ -1324,7 +1324,7 @@ DefaultFetch<Impl>::fetch(bool &status_change)
             if(curMacroop && metadata->isTainted(thisPC.instAddr())){
                 //DPRINTF(csd, "MacroopBase::cTXAlterMicroops():: Altering microops of tainted instruction 0x%x\n", thisPC.instAddr());
                 Emtd_InsnTaintEntry entry = metadata->getInsnTaintEntry(thisPC.instAddr());
-	        curMacroop->cTXAlterMicroops(entry.arith_tainted, entry.mem_tainted, thisPC.instAddr());
+	            curMacroop->cTXAlterMicroops(entry.arith_tainted, entry.mem_tainted, thisPC.instAddr(), metadata);
 	        }
             //End EMTD
 

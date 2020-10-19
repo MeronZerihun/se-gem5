@@ -45,6 +45,7 @@
 #include "arch/x86/types.hh"
 #include "arch/x86/insts/badmicroop.hh"
 #include "mem/request.hh"
+#include "emtd/Metadata.hh"
 
 namespace X86ISA
 {
@@ -75,7 +76,7 @@ class MacroopBase : public X86StaticInst
     StaticInstPtr               getInjInsn_EncFP  (InstRegIndex dest);
     std::vector<StaticInstPtr>  injectStoreMicros (StaticInstPtr store_microop);
 
-    int cTXAlterMicroops(bool arith_tainted, bool mem_tainted, Addr pc); //EMTD
+    int cTXAlterMicroops(bool arith_tainted, bool mem_tainted, Addr pc, Metadata* metadata); //EMTD
 
 
     StaticInstPtr

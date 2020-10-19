@@ -73,6 +73,9 @@ namespace Trace {
     class InstRecord;
 }
 
+//Forward-declaration of Metadata
+class Metadata; 
+
 /**
  * Base, ISA-independent static instruction class.
  *
@@ -298,7 +301,7 @@ class StaticInst : public RefCounted, public StaticInstFlags
 	 * Go through the microOps of a macro op and perform some changes in
 	 * macroops
 	 */
-    virtual int cTXAlterMicroops(bool arith_tainted, bool mem_tainted, Addr pc) ;
+    virtual int cTXAlterMicroops(bool arith_tainted, bool mem_tainted, Addr pc, Metadata* metadata) ;
 
     virtual int getDisp(){
 	    DPRINTF(csd, "(!) We should not be here, StaticInst::getDisp\n");
