@@ -42,16 +42,8 @@ from m5.SimObject import SimObject
 from m5.params import *
 
 class OpClass(Enum):
-    vals = ['No_OpClass', 'Encrypt', 'Decrypt', 'EncIntAlu', 'EncIntMult', 'EncIntDiv', 
-            'EncFloatAdd', 'EncFloatCmp', 'EncFloatCvt', 'EncFloatMult', 'EncFloatMultAcc', 'EncFloatDiv',
-            'EncFloatMisc', 'EncFloatSqrt',
-            'EncSimdAdd', 'EncSimdAddAcc', 'EncSimdAlu', 'EncSimdCmp', 'EncSimdCvt',
-            'EncSimdMisc', 'EncSimdMult', 'EncSimdMultAcc', 'EncSimdShift', 'EncSimdShiftAcc',
-            'EncSimdDiv', 'EncSimdSqrt', 'EncSimdFloatAdd', 'EncSimdFloatAlu',
-            'EncSimdFloatCmp', 'EncSimdFloatCvt', 'EncSimdFloatDiv', 'EncSimdFloatMisc',
-            'EncSimdFloatMult', 'EncSimdFloatMultAcc', 'EncSimdFloatSqrt',
-            'EncSimdReduceAdd', 'EncSimdReduceAlu', 'EncSimdReduceCmp',
-            'EncSimdFloatReduceAdd', 'EncSimdFloatReduceCmp',
+    vals = ['No_OpClass', 'Encrypt', 'Decrypt', 
+            
             'IntAlu', 'IntMult', 'IntDiv', 'FloatAdd',
             'FloatCmp', 'FloatCvt', 'FloatMult', 'FloatMultAcc', 'FloatDiv',
             'FloatMisc', 'FloatSqrt',
@@ -68,6 +60,17 @@ class OpClass(Enum):
             'SimdPredAlu',
             'MemRead', 'MemWrite', 'FloatMemRead', 'FloatMemWrite',
             'IprAccess', 'InstPrefetch']
+
+#             'EncIntAlu', 'EncIntMult', 'EncIntDiv', 
+#             'EncFloatAdd', 'EncFloatCmp', 'EncFloatCvt', 'EncFloatMult', 'EncFloatMultAcc', 'EncFloatDiv',
+#             'EncFloatMisc', 'EncFloatSqrt',
+#             'EncSimdAdd', 'EncSimdAddAcc', 'EncSimdAlu', 'EncSimdCmp', 'EncSimdCvt',
+#             'EncSimdMisc', 'EncSimdMult', 'EncSimdMultAcc', 'EncSimdShift', 'EncSimdShiftAcc',
+#             'EncSimdDiv', 'EncSimdSqrt', 'EncSimdFloatAdd', 'EncSimdFloatAlu',
+#             'EncSimdFloatCmp', 'EncSimdFloatCvt', 'EncSimdFloatDiv', 'EncSimdFloatMisc',
+#             'EncSimdFloatMult', 'EncSimdFloatMultAcc', 'EncSimdFloatSqrt',
+#             'EncSimdReduceAdd', 'EncSimdReduceAlu', 'EncSimdReduceCmp',
+#             'EncSimdFloatReduceAdd', 'EncSimdFloatReduceCmp',
 
 class OpDesc(SimObject):
     type = 'OpDesc'

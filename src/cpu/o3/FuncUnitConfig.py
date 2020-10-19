@@ -62,9 +62,9 @@ class IntALU(FUDesc):
     opList = [  OpDesc(opClass='IntAlu') ]
     count = 6
 
-class ENC_IntALU(FUDesc):
-    opList = [  OpDesc(opClass='EncIntAlu', opLat=1 + 2*ENC_LATENCY) ]
-    count = 6
+# class ENC_IntALU(FUDesc):
+#     opList = [  OpDesc(opClass='EncIntAlu', opLat=1 + 2*ENC_LATENCY) ]
+#     count = 6
 
 class IntMultDiv(FUDesc):
     opList = [ OpDesc(opClass='IntMult', opLat=3),
@@ -79,10 +79,10 @@ class IntMultDiv(FUDesc):
 
     count=2
 
-class ENC_IntMultDiv(FUDesc):
-    opList = [ OpDesc(opClass='EncIntMult', opLat=3 + 2*ENC_LATENCY),
-               OpDesc(opClass='EncIntDiv',  opLat=20 + 2*ENC_LATENCY, pipelined=False) ]
-    count=2
+# class ENC_IntMultDiv(FUDesc):
+#     opList = [ OpDesc(opClass='EncIntMult', opLat=3 + 2*ENC_LATENCY),
+#                OpDesc(opClass='EncIntDiv',  opLat=20 + 2*ENC_LATENCY, pipelined=False) ]
+#     count=2
 
 
 class FP_ALU(FUDesc):
@@ -91,11 +91,11 @@ class FP_ALU(FUDesc):
                OpDesc(opClass='FloatCvt',    opLat=2)]
     count = 4
 
-class ENC_FP_ALU(FUDesc):
-    opList = [ OpDesc(opClass='EncFloatAdd', opLat=2 + 2*ENC_LATENCY),
-               OpDesc(opClass='EncFloatCmp', opLat=2 + 2*ENC_LATENCY),
-               OpDesc(opClass='EncFloatCvt', opLat=2 + 2*ENC_LATENCY)  ]
-    count = 4
+# class ENC_FP_ALU(FUDesc):
+#     opList = [ OpDesc(opClass='EncFloatAdd', opLat=2 + 2*ENC_LATENCY),
+#                OpDesc(opClass='EncFloatCmp', opLat=2 + 2*ENC_LATENCY),
+#                OpDesc(opClass='EncFloatCvt', opLat=2 + 2*ENC_LATENCY)  ]
+#     count = 4
 
 class FP_MultDiv(FUDesc):
     opList = [ OpDesc(opClass='FloatMult',       opLat=4),
@@ -105,13 +105,13 @@ class FP_MultDiv(FUDesc):
                OpDesc(opClass='FloatSqrt',       opLat=24, pipelined=False) ]
     count = 2
 
-class ENC_FP_MultDiv(FUDesc):
-    opList = [ OpDesc(opClass='EncFloatMult',    opLat=4 + 2*ENC_LATENCY),
-               OpDesc(opClass='EncFloatMultAcc', opLat=5 + 2*ENC_LATENCY),
-               OpDesc(opClass='EncFloatMisc',    opLat=3 + 2*ENC_LATENCY),
-               OpDesc(opClass='EncFloatDiv',     opLat=12 + 2*ENC_LATENCY, pipelined=False),
-               OpDesc(opClass='EncFloatSqrt',    opLat=24 + 2*ENC_LATENCY, pipelined=False)]
-    count = 2
+# class ENC_FP_MultDiv(FUDesc):
+#     opList = [ OpDesc(opClass='EncFloatMult',    opLat=4 + 2*ENC_LATENCY),
+#                OpDesc(opClass='EncFloatMultAcc', opLat=5 + 2*ENC_LATENCY),
+#                OpDesc(opClass='EncFloatMisc',    opLat=3 + 2*ENC_LATENCY),
+#                OpDesc(opClass='EncFloatDiv',     opLat=12 + 2*ENC_LATENCY, pipelined=False),
+#                OpDesc(opClass='EncFloatSqrt',    opLat=24 + 2*ENC_LATENCY, pipelined=False)]
+#     count = 2
 
 
 class SIMD_Unit(FUDesc):
@@ -144,35 +144,35 @@ class SIMD_Unit(FUDesc):
                ]
     count = 4
 
-class ENC_SIMD_Unit(FUDesc):       
-    opList = [ OpDesc(opClass='EncSimdAdd',            opLat=1 + 2*ENC_LATENCY),
-               OpDesc(opClass='EncSimdAddAcc',         opLat=1 + 2*ENC_LATENCY),
-               OpDesc(opClass='EncSimdAlu',            opLat=1 + 2*ENC_LATENCY),
-               OpDesc(opClass='EncSimdCmp',            opLat=1 + 2*ENC_LATENCY),
-               OpDesc(opClass='EncSimdCvt',            opLat=1 + 2*ENC_LATENCY),
-               OpDesc(opClass='EncSimdMisc',           opLat=1 + 2*ENC_LATENCY),
-               OpDesc(opClass='EncSimdMult',           opLat=1 + 2*ENC_LATENCY),
-               OpDesc(opClass='EncSimdMultAcc',        opLat=1 + 2*ENC_LATENCY),
-               OpDesc(opClass='EncSimdShift',          opLat=1 + 2*ENC_LATENCY),
-               OpDesc(opClass='EncSimdShiftAcc',       opLat=1 + 2*ENC_LATENCY),
-               OpDesc(opClass='EncSimdDiv',            opLat=1 + 2*ENC_LATENCY),
-               OpDesc(opClass='EncSimdSqrt',           opLat=1 + 2*ENC_LATENCY),
-               OpDesc(opClass='EncSimdFloatAdd',       opLat=1 + 2*ENC_LATENCY),
-               OpDesc(opClass='EncSimdFloatAlu',       opLat=1 + 2*ENC_LATENCY),
-               OpDesc(opClass='EncSimdFloatCmp',       opLat=1 + 2*ENC_LATENCY),
-               OpDesc(opClass='EncSimdFloatCvt',       opLat=1 + 2*ENC_LATENCY),
-               OpDesc(opClass='EncSimdFloatDiv',       opLat=1 + 2*ENC_LATENCY),
-               OpDesc(opClass='EncSimdFloatMisc',      opLat=1 + 2*ENC_LATENCY),
-               OpDesc(opClass='EncSimdFloatMult',      opLat=1 + 2*ENC_LATENCY),
-               OpDesc(opClass='EncSimdFloatMultAcc',   opLat=1 + 2*ENC_LATENCY),
-               OpDesc(opClass='EncSimdFloatSqrt',      opLat=1 + 2*ENC_LATENCY),
-               OpDesc(opClass='EncSimdReduceAdd',      opLat=1 + 2*ENC_LATENCY),
-               OpDesc(opClass='EncSimdReduceAlu',      opLat=1 + 2*ENC_LATENCY),
-               OpDesc(opClass='EncSimdReduceCmp',      opLat=1 + 2*ENC_LATENCY),
-               OpDesc(opClass='EncSimdFloatReduceAdd', opLat=1 + 2*ENC_LATENCY),
-               OpDesc(opClass='EncSimdFloatReduceCmp', opLat=1 + 2*ENC_LATENCY)
-               ]
-    count = 4
+# class ENC_SIMD_Unit(FUDesc):       
+#     opList = [ OpDesc(opClass='EncSimdAdd',            opLat=1 + 2*ENC_LATENCY),
+#                OpDesc(opClass='EncSimdAddAcc',         opLat=1 + 2*ENC_LATENCY),
+#                OpDesc(opClass='EncSimdAlu',            opLat=1 + 2*ENC_LATENCY),
+#                OpDesc(opClass='EncSimdCmp',            opLat=1 + 2*ENC_LATENCY),
+#                OpDesc(opClass='EncSimdCvt',            opLat=1 + 2*ENC_LATENCY),
+#                OpDesc(opClass='EncSimdMisc',           opLat=1 + 2*ENC_LATENCY),
+#                OpDesc(opClass='EncSimdMult',           opLat=1 + 2*ENC_LATENCY),
+#                OpDesc(opClass='EncSimdMultAcc',        opLat=1 + 2*ENC_LATENCY),
+#                OpDesc(opClass='EncSimdShift',          opLat=1 + 2*ENC_LATENCY),
+#                OpDesc(opClass='EncSimdShiftAcc',       opLat=1 + 2*ENC_LATENCY),
+#                OpDesc(opClass='EncSimdDiv',            opLat=1 + 2*ENC_LATENCY),
+#                OpDesc(opClass='EncSimdSqrt',           opLat=1 + 2*ENC_LATENCY),
+#                OpDesc(opClass='EncSimdFloatAdd',       opLat=1 + 2*ENC_LATENCY),
+#                OpDesc(opClass='EncSimdFloatAlu',       opLat=1 + 2*ENC_LATENCY),
+#                OpDesc(opClass='EncSimdFloatCmp',       opLat=1 + 2*ENC_LATENCY),
+#                OpDesc(opClass='EncSimdFloatCvt',       opLat=1 + 2*ENC_LATENCY),
+#                OpDesc(opClass='EncSimdFloatDiv',       opLat=1 + 2*ENC_LATENCY),
+#                OpDesc(opClass='EncSimdFloatMisc',      opLat=1 + 2*ENC_LATENCY),
+#                OpDesc(opClass='EncSimdFloatMult',      opLat=1 + 2*ENC_LATENCY),
+#                OpDesc(opClass='EncSimdFloatMultAcc',   opLat=1 + 2*ENC_LATENCY),
+#                OpDesc(opClass='EncSimdFloatSqrt',      opLat=1 + 2*ENC_LATENCY),
+#                OpDesc(opClass='EncSimdReduceAdd',      opLat=1 + 2*ENC_LATENCY),
+#                OpDesc(opClass='EncSimdReduceAlu',      opLat=1 + 2*ENC_LATENCY),
+#                OpDesc(opClass='EncSimdReduceCmp',      opLat=1 + 2*ENC_LATENCY),
+#                OpDesc(opClass='EncSimdFloatReduceAdd', opLat=1 + 2*ENC_LATENCY),
+#                OpDesc(opClass='EncSimdFloatReduceCmp', opLat=1 + 2*ENC_LATENCY)
+#                ]
+#     count = 4
 
 
 
