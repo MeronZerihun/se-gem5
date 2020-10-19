@@ -34,6 +34,10 @@ MacroopBase::~MacroopBase()
 
 
 
+
+/***************************************************************/
+/*  	LOAD INJECTION										   */
+/***************************************************************/
 int 
 MacroopBase::countLoadMicros (StaticInstPtr load_microop){
 
@@ -174,11 +178,113 @@ MacroopBase::injectLoadMicros (StaticInstPtr load_microop){
 
 
 
-
+/***************************************************************/
+/*  	STORE INJECTION										   */
+/***************************************************************/
 int 
 MacroopBase::countStoreMicros (StaticInstPtr store_microop){
-	return 1;
+	return 2;
 }
+
+StaticInstPtr MacroopBase::getInjInsn_Enc(InstRegIndex dest){
+		// ENC constructor originates from microregop.hh::8
+
+	StaticInstPtr inj_enc; 
+	int update_time=0;
+
+	//Placeholder
+	// if(0 >= metadata->get_enc_latency()){
+	// 	inj_enc = new X86ISAInst::EncNone( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 8, 0); 
+	// 	return inj_enc;
+	// }
+
+	switch(update_time){
+		case 0: inj_enc = new X86ISAInst::Enc( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 8, 0); 
+			break;
+		case 1: inj_enc = new X86ISAInst::Enc1( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0);   
+			break;
+		case 2: inj_enc = new X86ISAInst::Enc2( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0);   
+			break;
+		case 3: inj_enc = new X86ISAInst::Enc3( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0);   
+			break;
+		case 4: inj_enc = new X86ISAInst::Enc4( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0);   
+			break;
+		case 5: inj_enc = new X86ISAInst::Enc5( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0);   
+			break;
+		case 6: inj_enc = new X86ISAInst::Enc6( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0);   
+			break;
+		case 7: inj_enc = new X86ISAInst::Enc7( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0);   
+			break;
+		case 8: inj_enc = new X86ISAInst::Enc8( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0);   
+			break;
+		case 9: inj_enc = new X86ISAInst::Enc9( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0);   
+			break;
+		case 10: inj_enc = new X86ISAInst::Enc10( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); 
+			break;
+		case 11: inj_enc = new X86ISAInst::Enc11( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); 
+			break;
+		case 12: inj_enc = new X86ISAInst::Enc12( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); 
+			break;
+		case 13: inj_enc = new X86ISAInst::Enc13( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); 
+			break;
+		case 14: inj_enc = new X86ISAInst::Enc14( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); 
+			break;
+		case 15: inj_enc = new X86ISAInst::Enc15( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); 
+			break;
+		case 16: inj_enc = new X86ISAInst::Enc16( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); 
+			break;
+		case 17: inj_enc = new X86ISAInst::Enc17( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); 
+			break;
+		case 18: inj_enc = new X86ISAInst::Enc18( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); 
+			break;
+		case 19: inj_enc = new X86ISAInst::Enc19( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); 
+			break;
+		case 20: inj_enc = new X86ISAInst::Enc20( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); 
+			break;
+		case 21: inj_enc = new X86ISAInst::Enc21( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); 
+			break;
+		case 22: inj_enc = new X86ISAInst::Enc22( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); 
+			break;
+		case 23: inj_enc = new X86ISAInst::Enc23( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); 
+			break;
+		case 24: inj_enc = new X86ISAInst::Enc24( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); 
+			break;
+		case 25: inj_enc = new X86ISAInst::Enc25( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); 
+			break;
+		case 26: inj_enc = new X86ISAInst::Enc26( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); 
+			break;
+		case 27: inj_enc = new X86ISAInst::Enc27( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); 
+			break;
+		case 28: inj_enc = new X86ISAInst::Enc28( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); 
+			break;
+		case 29: inj_enc = new X86ISAInst::Enc29( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); 
+			break;
+		case 30: inj_enc = new X86ISAInst::Enc30( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); 
+			break;
+		case 31: inj_enc = new X86ISAInst::Enc31( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); 
+			break;
+		case 32: inj_enc = new X86ISAInst::Enc32( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); 
+			break;
+		case 33: inj_enc = new X86ISAInst::Enc33( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); 
+			break;
+		case 34: inj_enc = new X86ISAInst::Enc34( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); 
+			break;
+		case 35: inj_enc = new X86ISAInst::Enc35( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); 
+			break;
+		case 36: inj_enc = new X86ISAInst::Enc36( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); 
+			break;
+		case 37: inj_enc = new X86ISAInst::Enc37( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); 
+			break;
+		case 38: inj_enc = new X86ISAInst::Enc38( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); 
+			break;
+		case 39: inj_enc = new X86ISAInst::Enc39( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); 
+			break;		
+		default: inj_enc = new X86ISAInst::Enc39( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); DPRINTF(csd, "WARNING:: Update time not handled by switch in cTXAlterMicroops()\n");
+			break;
+	}
+	return inj_enc; 
+}
+
 
 std::vector<StaticInstPtr> 
 MacroopBase::injectStoreMicros (StaticInstPtr store_microop){
@@ -199,7 +305,12 @@ MacroopBase::injectStoreMicros (StaticInstPtr store_microop){
    	}
 
 	std::string opName = store_microop->getName();
-		
+
+    StaticInstPtr inj_enc = getInjInsn_Enc(dest);
+    inj_enc->setInjected();
+    inj_enc->clearLastMicroop();
+    result.push_back(inj_enc);
+
 	//STORE constructor originates from microldstop.hh::100
 	if(opName.compare("st")==0){
 		StaticInstPtr inj_load = new X86ISAInst::Ld(

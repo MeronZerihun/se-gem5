@@ -71,6 +71,7 @@ class MacroopBase : public X86StaticInst
     std::vector<StaticInstPtr>  injectLoadMicros (StaticInstPtr load_microop);
 
     int                         countStoreMicros (StaticInstPtr store_microop);
+    StaticInstPtr               getInjInsn_Enc(InstRegIndex dest);
     std::vector<StaticInstPtr>  injectStoreMicros (StaticInstPtr store_microop);
 
     int cTXAlterMicroops(bool arith_tainted, bool mem_tainted, Addr pc); //EMTD
