@@ -64,6 +64,7 @@ MacroopBase::injectLoadMicros (StaticInstPtr load_microop){
 	}
 	std::string opName = load_microop->getName();
 
+
 	if(dest == ptr){
 	// MOV constructor originates from microregop.hh::85
 		StaticInstPtr inj_mov = new X86ISAInst::Mov(
@@ -159,6 +160,13 @@ MacroopBase::injectLoadMicros (StaticInstPtr load_microop){
 	}
 
 	// DEC constructor originates from microregop.hh::85
+	std::__cxx11::string diss = load_microop->generateDisassembly(0, NULL);
+   	if(diss.find("_low") != std::string::npos){
+		dest = InstRegIndex(FLOATREG_XMM_LOW(env.reg));
+   	}
+   	else if (diss.find("_high") != std::string::npos){
+	   	dest = InstRegIndex(FLOATREG_XMM_HIGH(env.reg));
+   	}
 	StaticInstPtr inj_dec = new X86ISAInst::Dec(
 				machInst, 							//ExtMachInst _machInst
 				"INJ_DEC", 							//const char * instMnem
