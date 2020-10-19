@@ -52,10 +52,10 @@ QARMA_LATENCY = 12
 ENC_LATENCY = SIMON_LATENCY
 
 #### BEGIN EMTD
-# class EncryptDecrypt(FUDesc):
-#     opList = [  OpDesc(opClass='Encrypt', opLat=ENC_LATENCY, pipelined=True),
-#                 OpDesc(opClass='Decrypt', opLat=ENC_LATENCY, pipelined=True)]
-#     count = 1
+class EncryptDecrypt(FUDesc):
+    opList = [  OpDesc(opClass='Encrypt', opLat=ENC_LATENCY, pipelined=True),
+                OpDesc(opClass='Decrypt', opLat=ENC_LATENCY, pipelined=True)]
+    count = 1
 #### END EMTD
 
 class IntALU(FUDesc):

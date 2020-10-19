@@ -42,8 +42,7 @@ from m5.SimObject import SimObject
 from m5.params import *
 
 class OpClass(Enum):
-    vals = ['No_OpClass', 'Encrypt', 'Decrypt', 
-            
+    vals = ['No_OpClass', 'Encrypt', 'Decrypt',             
             'IntAlu', 'IntMult', 'IntDiv', 'FloatAdd',
             'FloatCmp', 'FloatCvt', 'FloatMult', 'FloatMultAcc', 'FloatDiv',
             'FloatMisc', 'FloatSqrt',
