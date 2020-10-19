@@ -94,7 +94,8 @@ class EncryptDecrypt(FUDesc):
                 #OpDesc(opClass='Encrypt37', opLat=ENC_LATENCY-37,  pipelined=True),
                 #OpDesc(opClass='Encrypt38', opLat=ENC_LATENCY-38,  pipelined=True),
                 #OpDesc(opClass='Encrypt39', opLat=ENC_LATENCY-39,  pipelined=True),
-                OpDesc(opClass='EncryptNone',  opLat=1,             pipelined=True)     
+                OpDesc(opClass='EncryptNone',  opLat=1,             pipelined=True) 
+    ]    
 
     count = 1
 #### END EMTD
