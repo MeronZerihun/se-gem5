@@ -283,6 +283,168 @@ let {{
         op_class = 'DecryptOp'
         code = 'FpDestReg_uqw = FpSrcReg1_uqw;'
 
+    class Enc1FP(FpUnaryOp):
+        op_class = 'Encrypt1Op'
+        code = 'FpDestReg_uqw = FpSrcReg1_uqw;'
+
+    class Enc2FP(FpUnaryOp):
+        op_class = 'Encrypt2Op'
+        code = 'FpDestReg_uqw = FpSrcReg1_uqw;'
+
+    class Enc3FP(FpUnaryOp):
+        op_class = 'Encrypt3Op'
+        code = 'FpDestReg_uqw = FpSrcReg1_uqw;'
+        
+    class Enc4FP(FpUnaryOp):
+        op_class = 'Encrypt4Op'
+        code = 'FpDestReg_uqw = FpSrcReg1_uqw;'
+
+    class Enc5FP(FpUnaryOp):
+        op_class = 'Encrypt5Op'
+        code = 'FpDestReg_uqw = FpSrcReg1_uqw;'
+
+    class Enc6FP(FpUnaryOp):
+        op_class = 'Encrypt6Op'
+        code = 'FpDestReg_uqw = FpSrcReg1_uqw;'
+
+    class Enc7FP(FpUnaryOp):
+        op_class = 'Encrypt7Op'
+        code = 'FpDestReg_uqw = FpSrcReg1_uqw;'
+
+    class Enc8FP(FpUnaryOp):
+        op_class = 'Encrypt8Op'
+        code = 'FpDestReg_uqw = FpSrcReg1_uqw;'
+
+    class Enc9FP(FpUnaryOp):
+        op_class = 'Encrypt9Op'
+        code = 'FpDestReg_uqw = FpSrcReg1_uqw;'
+
+    class Enc10FP(FpUnaryOp):
+        op_class = 'Encrypt10Op'
+        code = 'FpDestReg_uqw = FpSrcReg1_uqw;'
+
+    class Enc11FP(FpUnaryOp):
+        op_class = 'Encrypt11Op'
+        code = 'FpDestReg_uqw = FpSrcReg1_uqw;'
+
+    class Enc12FP(FpUnaryOp):
+        op_class = 'Encrypt12Op'
+        code = 'FpDestReg_uqw = FpSrcReg1_uqw;'
+
+    class Enc13FP(FpUnaryOp):
+        op_class = 'Encrypt13Op'
+        code = 'FpDestReg_uqw = FpSrcReg1_uqw;'
+
+    class Enc14FP(FpUnaryOp):
+        op_class = 'Encrypt14Op'
+        code = 'FpDestReg_uqw = FpSrcReg1_uqw;'
+
+    class Enc15FP(FpUnaryOp):
+        op_class = 'Encrypt15Op'
+        code = 'FpDestReg_uqw = FpSrcReg1_uqw;'
+
+    class Enc16FP(FpUnaryOp):
+        op_class = 'Encrypt16Op'
+        code = 'FpDestReg_uqw = FpSrcReg1_uqw;'
+
+    class Enc17FP(FpUnaryOp):
+        op_class = 'Encrypt17Op'
+        code = 'FpDestReg_uqw = FpSrcReg1_uqw;'
+
+    class Enc18FP(FpUnaryOp):
+        op_class = 'Encrypt18Op'
+        code = 'FpDestReg_uqw = FpSrcReg1_uqw;'
+
+    class Enc19FP(FpUnaryOp):
+        op_class = 'Encrypt19Op'
+        code = 'FpDestReg_uqw = FpSrcReg1_uqw;'
+
+    class Enc20FP(FpUnaryOp):
+        op_class = 'Encrypt20Op'
+        code = 'FpDestReg_uqw = FpSrcReg1_uqw;'
+
+    class Enc21FP(FpUnaryOp):
+        op_class = 'Encrypt21Op'
+        code = 'FpDestReg_uqw = FpSrcReg1_uqw;'
+
+    class Enc22FP(FpUnaryOp):
+        op_class = 'Encrypt22Op'
+        code = 'FpDestReg_uqw = FpSrcReg1_uqw;'
+
+    class Enc23FP(FpUnaryOp):
+        op_class = 'Encrypt23Op'
+        code = 'FpDestReg_uqw = FpSrcReg1_uqw;'
+
+    class Enc24FP(FpUnaryOp):
+        op_class = 'Encrypt24Op'
+        code = 'FpDestReg_uqw = FpSrcReg1_uqw;'
+
+    class Enc25FP(FpUnaryOp):
+        op_class = 'Encrypt25Op'
+        code = 'FpDestReg_uqw = FpSrcReg1_uqw;'
+
+    class Enc26FP(FpUnaryOp):
+        op_class = 'Encrypt26Op'
+        code = 'FpDestReg_uqw = FpSrcReg1_uqw;'
+
+    class Enc27FP(FpUnaryOp):
+        op_class = 'Encrypt27Op'
+        code = 'FpDestReg_uqw = FpSrcReg1_uqw;'
+
+    class Enc28FP(FpUnaryOp):
+        op_class = 'Encrypt28Op'
+        code = 'FpDestReg_uqw = FpSrcReg1_uqw;'
+
+    class Enc29FP(FpUnaryOp):
+        op_class = 'Encrypt29Op'
+        code = 'FpDestReg_uqw = FpSrcReg1_uqw;'
+
+    class Enc30FP(FpUnaryOp):
+        op_class = 'Encrypt30Op'
+        code = 'FpDestReg_uqw = FpSrcReg1_uqw;'
+
+    class Enc31FP(FpUnaryOp):
+        op_class = 'Encrypt31Op'
+        code = 'FpDestReg_uqw = FpSrcReg1_uqw;'
+
+    class Enc32FP(FpUnaryOp):
+        op_class = 'Encrypt32Op'
+        code = 'FpDestReg_uqw = FpSrcReg1_uqw;'
+
+    class Enc33FP(FpUnaryOp):
+        op_class = 'Encrypt33Op'
+        code = 'FpDestReg_uqw = FpSrcReg1_uqw;'
+
+    class Enc34FP(FpUnaryOp):
+        op_class = 'Encrypt34Op'
+        code = 'FpDestReg_uqw = FpSrcReg1_uqw;'
+
+    class Enc35FP(FpUnaryOp):
+        op_class = 'Encrypt35Op'
+        code = 'FpDestReg_uqw = FpSrcReg1_uqw;'
+
+    class Enc36FP(FpUnaryOp):
+        op_class = 'Encrypt36Op'
+        code = 'FpDestReg_uqw = FpSrcReg1_uqw;'
+
+    class Enc37FP(FpUnaryOp):
+        op_class = 'Encrypt37Op'
+        code = 'FpDestReg_uqw = FpSrcReg1_uqw;'
+
+    class Enc38FP(FpUnaryOp):
+        op_class = 'Encrypt38Op'
+        code = 'FpDestReg_uqw = FpSrcReg1_uqw;'
+
+    class Enc39FP(FpUnaryOp):
+        op_class = 'Encrypt39Op'
+        code = 'FpDestReg_uqw = FpSrcReg1_uqw;'
+
+    class EncNoneFP(FpUnaryOp):
+        op_class = 'EncryptNoneOp'
+        code = 'FpDestReg_uqw = FpSrcReg1_uqw;'
+# END EMTD
+
+
     class Xorfp(FpBinaryOp):
         code = 'FpDestReg_uqw = FpSrcReg1_uqw ^ FpSrcReg2_uqw;'
 
