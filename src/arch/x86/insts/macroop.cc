@@ -118,6 +118,19 @@ MacroopBase::injectLoadMicros (StaticInstPtr load_microop){
 				0); 								//Request::FlagsType _memFlags
 		existing_load->clearLastMicroop();
 		result.push_back(existing_load);
+
+		StaticInstPtr inj_dec = new X86ISAInst::Dec(
+					machInst, 							//ExtMachInst _machInst
+					"INJ_DEC", 							//const char * instMnem
+					(1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, //uint64_t setFlags
+					dest, 								//InstRegIndex _src1
+					dest, 								//InstRegIndex _src2
+					dest, 								//InstRegIndex _dest
+					8, 									//uint8_t _dataSize
+					0); 								//uint16_t _ext
+		inj_dec->setInjected();
+		inj_dec->clearLastMicroop();
+		result.push_back(inj_dec);
 	}
 	else if(opName.compare("ldfp")==0){
 		//LOAD constructor originates from microldstop.hh::100
@@ -154,31 +167,33 @@ MacroopBase::injectLoadMicros (StaticInstPtr load_microop){
 				0); 								//Request::FlagsType _memFlags
 		existing_load->clearLastMicroop();
 		result.push_back(existing_load);
+
+		// DEC constructor originates from microregop.hh::85
+		std::__cxx11::string diss = load_microop->generateDisassembly(0, NULL);
+		if(diss.find("_low") != std::string::npos){
+			dest = InstRegIndex(FLOATREG_XMM_LOW(env.reg));
+		}
+		else if (diss.find("_high") != std::string::npos){
+			dest = InstRegIndex(FLOATREG_XMM_HIGH(env.reg));
+		}
+		StaticInstPtr inj_dec = new X86ISAInst::DecFP(
+					machInst, 							//ExtMachInst _machInst
+					"INJ_DEC", 							//const char * instMnem
+					(1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, //uint64_t setFlags
+					dest, 								//InstRegIndex _src1
+					dest, 								//InstRegIndex _src2
+					dest, 								//InstRegIndex _dest
+					8, 									//uint8_t _dataSize
+					0); 								//uint16_t _ext
+		inj_dec->setInjected();
+		inj_dec->clearLastMicroop();
+		result.push_back(inj_dec);
 	}
 	else{
 		DPRINTF(csd, "WARNING:: OpName not handled by load injection in cTXAlterMicroops():: %s\n", opName);
 	}
 
-	// DEC constructor originates from microregop.hh::85
-	std::__cxx11::string diss = load_microop->generateDisassembly(0, NULL);
-   	if(diss.find("_low") != std::string::npos){
-		dest = InstRegIndex(FLOATREG_XMM_LOW(env.reg));
-   	}
-   	else if (diss.find("_high") != std::string::npos){
-	   	dest = InstRegIndex(FLOATREG_XMM_HIGH(env.reg));
-   	}
-	StaticInstPtr inj_dec = new X86ISAInst::DecFP(
-				machInst, 							//ExtMachInst _machInst
-				"INJ_DEC", 							//const char * instMnem
-				(1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, //uint64_t setFlags
-				dest, 								//InstRegIndex _src1
-				dest, 								//InstRegIndex _src2
-				dest, 								//InstRegIndex _dest
-				8, 									//uint8_t _dataSize
-				0); 								//uint16_t _ext
-	inj_dec->setInjected();
-	inj_dec->clearLastMicroop();
-	result.push_back(inj_dec);
+
 
 	return result;
 }
