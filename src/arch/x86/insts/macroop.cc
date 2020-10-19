@@ -167,7 +167,7 @@ MacroopBase::injectLoadMicros (StaticInstPtr load_microop){
    	else if (diss.find("_high") != std::string::npos){
 	   	dest = InstRegIndex(FLOATREG_XMM_HIGH(env.reg));
    	}
-	StaticInstPtr inj_dec = new X86ISAInst::Dec(
+	StaticInstPtr inj_dec = new X86ISAInst::DecFP(
 				machInst, 							//ExtMachInst _machInst
 				"INJ_DEC", 							//const char * instMnem
 				(1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, //uint64_t setFlags

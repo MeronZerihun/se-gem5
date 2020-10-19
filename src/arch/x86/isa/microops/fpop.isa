@@ -274,6 +274,15 @@ let {{
                                      ecfBit | ezfBit, src2)"
         op_class = 'IntAluOp'
 
+    # EMTD
+    class EncFP(FpUnaryOp):
+        op_class = 'EncryptOp'
+        code = 'FpDestReg_uqw = FpSrcReg1_uqw;'
+    
+    class DecFP(FpUnaryOp):
+        op_class = 'DecryptOp'
+        code = 'FpDestReg_uqw = FpSrcReg1_uqw;'
+
     class Xorfp(FpBinaryOp):
         code = 'FpDestReg_uqw = FpSrcReg1_uqw ^ FpSrcReg2_uqw;'
 
