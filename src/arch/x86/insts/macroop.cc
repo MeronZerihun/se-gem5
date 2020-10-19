@@ -299,86 +299,8 @@ MacroopBase::cTXAlterMicroops(bool arith_tainted, bool mem_tainted, Addr pc)
 			else if(microops[i]->isStore() && mem_tainted){
 				num_inj_microops += countStoreMicros(microops[i]);
 			}
-			else if(arith_tainted){
-				switch(microops[i]->opClass()){
-					case OpClass::IntAlu: microops[i]->setOpClass(OpClass::EncIntAlu); 
-						break;
-					case OpClass::IntMult: microops[i]->setOpClass(OpClass::EncIntMult); 
-						break;
-					case OpClass::IntDiv: microops[i]->setOpClass(OpClass::EncIntDiv); 
-						break;
-					case OpClass::FloatAdd: microops[i]->setOpClass(OpClass::EncFloatAdd); 
-						break;
-					case OpClass::FloatCmp: microops[i]->setOpClass(OpClass::EncFloatCmp); 
-						break;
-					case OpClass::FloatCvt: microops[i]->setOpClass(OpClass::EncFloatCvt); 
-						break;
-					case OpClass::FloatMult : microops[i]->setOpClass(OpClass::EncFloatMult); 
-						break;
-					case OpClass::FloatMultAcc : microops[i]->setOpClass(OpClass::EncFloatMultAcc); 
-						break;
-					case OpClass::FloatDiv : microops[i]->setOpClass(OpClass::EncFloatDiv); 
-						break;
-					case OpClass::FloatMisc : microops[i]->setOpClass(OpClass::EncFloatMisc); 
-						break;
-					case OpClass::FloatSqrt : microops[i]->setOpClass(OpClass::EncFloatSqrt); 
-						break;
-					case OpClass::SimdAdd : microops[i]->setOpClass(OpClass::EncSimdAdd); 				
-						break;
-					case OpClass::SimdAddAcc : microops[i]->setOpClass(OpClass::EncSimdAddAcc); 						
-						break;
-					case OpClass::SimdAlu : microops[i]->setOpClass(OpClass::EncSimdAlu); 					
-						break;
-					case OpClass::SimdCmp : microops[i]->setOpClass(OpClass::EncSimdCmp); 					
-						break;
-					case OpClass::SimdCvt : microops[i]->setOpClass(OpClass::EncSimdCvt); 					
-						break;
-					case OpClass::SimdMisc : microops[i]->setOpClass(OpClass::EncSimdMisc); 					
-						break;
-					case OpClass::SimdMult : microops[i]->setOpClass(OpClass::EncSimdMult); 					
-						break;
-					case OpClass::SimdMultAcc : microops[i]->setOpClass(OpClass::EncSimdMultAcc); 					
-						break;
-					case OpClass::SimdShift : microops[i]->setOpClass(OpClass::EncSimdShift); 					
-						break;
-					case OpClass::SimdShiftAcc : microops[i]->setOpClass(OpClass::EncSimdShiftAcc); 					
-						break;
-					case OpClass::SimdDiv : microops[i]->setOpClass(OpClass::EncSimdDiv); 					
-						break;
-					case OpClass::SimdSqrt : microops[i]->setOpClass(OpClass::EncSimdSqrt); 					
-						break;
-					case OpClass::SimdReduceAdd : microops[i]->setOpClass(OpClass::EncSimdReduceAdd); 					
-						break;
-					case OpClass::SimdReduceAlu : microops[i]->setOpClass(OpClass::EncSimdReduceAlu); 					
-						break;
-					case OpClass::SimdReduceCmp : microops[i]->setOpClass(OpClass::EncSimdReduceCmp); 					
-						break;
-					case OpClass::SimdFloatAdd : microops[i]->setOpClass(OpClass::EncSimdFloatAdd); 					
-						break;
-					case OpClass::SimdFloatAlu : microops[i]->setOpClass(OpClass::EncSimdFloatAlu); 					
-						break;
-					case OpClass::SimdFloatCmp : microops[i]->setOpClass(OpClass::EncSimdFloatCmp); 					
-						break;
-					case OpClass::SimdFloatCvt : microops[i]->setOpClass(OpClass::EncSimdFloatCvt); 					
-						break;
-					case OpClass::SimdFloatDiv : microops[i]->setOpClass(OpClass::EncSimdFloatDiv); 					
-						break;
-					case OpClass::SimdFloatMisc : microops[i]->setOpClass(OpClass::EncSimdFloatMisc); 					
-						break;
-					case OpClass::SimdFloatMult : microops[i]->setOpClass(OpClass::EncSimdFloatMult); 					
-						break;
-					case OpClass::SimdFloatMultAcc : microops[i]->setOpClass(OpClass::EncSimdFloatMultAcc); 			
-						break;
-					case OpClass::SimdFloatSqrt : microops[i]->setOpClass(OpClass::EncSimdFloatSqrt); 					
-						break;
-					case OpClass::SimdFloatReduceCmp : microops[i]->setOpClass(OpClass::EncSimdFloatReduceCmp); 			
-						break;
-					case OpClass::SimdFloatReduceAdd : microops[i]->setOpClass(OpClass::EncSimdFloatReduceAdd); 		
-						break;											
-					default: DPRINTF(csd, "WARNING:: OpClass not handled by switch in cTXAlterMicroops(): %d\n %s\n", microops[i]->opClass(), microops[i]->generateDisassembly(0, NULL));
-						break;
-				}
-			}
+			// else if(arith_tainted){
+			// }
 
 
 		}
