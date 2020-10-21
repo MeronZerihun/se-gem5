@@ -492,14 +492,14 @@ void Metadata::commit_insn(ThreadContext *tc, StaticInstPtr inst, Addr pc, Trace
                     record_reg_update(RD, inst->isFloating(), is_tainted, true); // if(is_tainted) { DPRINTF(csd, "Recording FP Reg Update for Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
                 }
                 else{
-                    DPRINTF(csd, "PANIC:: LOAD is not FP or INT: Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL));
+                    DPRINTF(csd, "WARNING:: LOAD is not FP or INT: Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL));
                 }
             }
             else if (inst->isStore()){
                 return;
             }
             else {
-                DPRINTF(priv, "PANIC:: Unhandled mem ref case\n");
+                DPRINTF(priv, "WARNING:: Unhandled mem ref case\n");
                 return;
             }
             
@@ -524,7 +524,7 @@ void Metadata::commit_insn(ThreadContext *tc, StaticInstPtr inst, Addr pc, Trace
                 record_reg_update(RD, inst->isFloating(), is_tainted, false); // if(is_tainted) { DPRINTF(csd, "\t\t Recording FP Reg Update for Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
             }
             else {
-                DPRINTF(csd, "PANIC:: Insn is not FP or INT: Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL));
+                DPRINTF(csd, "WARNING:: Insn is not FP or INT: Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL));
                 return;
             }
 
