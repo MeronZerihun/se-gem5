@@ -301,19 +301,19 @@ int Metadata::get_reg_update_time_cycles(RegId regIdx, bool is_fp_op){
 
     //Returns how many cycles ago the last reg update was
     if (is_fp_op){
-        if (fp_reg_updates_ticks.count(regIdx) > 0){
-            int elapsed_ticks = curTick() - fp_reg_updates_ticks[regIdx];
+        if (fp_reg_updates_ticks.find(regIdx.index()) != fp_reg_updates_ticks.end()){
+            int elapsed_ticks = curTick() - fp_reg_updates_ticks[regIdx.index()];
             int elapsed_cycles = divCeil(elapsed_ticks, clock_period);
-            DPRINTF(csd, "\t\t GOT FP R%d update time, last ticks :: %d\n ", regIdx.index(), fp_reg_updates_ticks[regIdx]); 
+            DPRINTF(csd, "\t\t GOT FP R%d update time, last ticks :: %d\n ", regIdx.index(), fp_reg_updates_ticks[regIdx.index()]); 
             DPRINTF(csd, "\t\t GOT FP Reg update time, elapsed cycles :: %d\n ", elapsed_ticks); 
             return elapsed_cycles;
         }
     }
     else {
-        if (int_reg_updates_ticks.count(regIdx) > 0){
-            int elapsed_ticks = curTick() - int_reg_updates_ticks[regIdx];
+        if (int_reg_updates_ticks.find(regIdx.index()) != int_reg_updates_ticks.end()){
+            int elapsed_ticks = curTick() - int_reg_updates_ticks[regIdx.index()];
             int elapsed_cycles = divCeil(elapsed_ticks, clock_period);
-            DPRINTF(csd, "\t\t GOT INT R%d update time, last ticks :: %d\n ", regIdx.index(), int_reg_updates_ticks[regIdx]); 
+            DPRINTF(csd, "\t\t GOT INT R%d update time, last ticks :: %d\n ", regIdx.index(), int_reg_updates_ticks[regIdx.index()]); 
             DPRINTF(csd, "\t\t INT Reg update time, elapsed cycles :: %d\n ", elapsed_ticks); 
             return elapsed_cycles;
         }
@@ -330,22 +330,32 @@ void Metadata::record_reg_update(RegId regIdx, bool is_fp_op, bool is_tainted, b
 
     if (!regIdx.isZeroReg()){
         if (is_fp_op){
-            if(fp_reg_updates_ticks.count(regIdx) <= 0){
-                fp_reg_updates_ticks.insert(std::pair<RegId, uint64_t>(regIdx, update_time));
-            }
+            //Debug prints
+            if(fp_reg_updates_ticks.find(regIdx.index()) != fp_reg_updates_ticks.end()){
+                if(update_time != fp_reg_updates_ticks[regIdx.index()]){
+                    DPRINTF(csd, "\t\t SET FP R%d update time, last ticks :: %d\n ", regIdx.index(), fp_reg_updates_ticks[regIdx.index()]); 
+                }
+            }            
             else {
-                fp_reg_updates_ticks[regIdx] = update_time;
+                DPRINTF(csd, "\t\t INIT FP R%d update time, last ticks :: %d\n ", regIdx.index(), fp_reg_updates_ticks[regIdx.index()]); 
             }
-            DPRINTF(csd, "\t\t SET FP R%d update time, last ticks :: %d\n ", regIdx.index(), fp_reg_updates_ticks[regIdx]); 
+            //End debug prints
+
+            fp_reg_updates_ticks[regIdx.index()] = update_time;
         }
         else {
-            if(int_reg_updates_ticks.count(regIdx) > 0){
-                int_reg_updates_ticks.insert(std::pair<RegId, uint64_t>(regIdx, update_time));
-            }
+            //Debug prints
+            if(int_reg_updates_ticks.find(regIdx.index()) != int_reg_updates_ticks.end()){
+                if(update_time != int_reg_updates_ticks[regIdx.index()]){
+                    DPRINTF(csd, "\t\t SET FP R%d update time, last ticks :: %d\n ", regIdx.index(), int_reg_updates_ticks[regIdx.index()]); 
+                }
+            }            
             else {
-                int_reg_updates_ticks[regIdx] = update_time;
+                DPRINTF(csd, "\t\t INIT FP R%d update time, last ticks :: %d\n ", regIdx.index(), int_reg_updates_ticks[regIdx.index()]); 
             }
-            DPRINTF(csd, "\t\t SET INT R%d update time, last ticks :: %d\n ", regIdx.index(), int_reg_updates_ticks[regIdx]); 
+            //End debug prints
+            
+            int_reg_updates_ticks[regIdx.index()] = update_time;
         }
     }
 }

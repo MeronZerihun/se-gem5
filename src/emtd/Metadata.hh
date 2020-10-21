@@ -153,8 +153,8 @@ private:
 	// // TODO:: Remove insns_consts_tags
 	// std::map<memaddr_t, Emtd_tag> insns_consts_tags; // Used to find tag of destination register in insns
 
-	std::map<RegId, uint64_t> int_reg_updates_ticks;	
-	std::map<RegId, uint64_t> fp_reg_updates_ticks;	
+	std::map<uint16_t, uint64_t> int_reg_updates_ticks;	
+	std::map<uint16_t, uint64_t> fp_reg_updates_ticks;	
 
 
 	std::map<RegId, Emtd_tag> reg_tags;				  	// Register file tag
