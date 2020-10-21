@@ -454,7 +454,7 @@ void Metadata::commit_insn(ThreadContext *tc, StaticInstPtr inst, Addr pc, Trace
 
     bool is_tainted = false;
     if(taints.arith_tainted || taints.mem_tainted){
-        DPRINTF(csd, "Committing Tainted Instruction 0x%x :: %s\n", pc, inst->generateDisassembly(pc, NULL))
+        DPRINTF(csd, "Committing Tainted Instruction 0x%x :: %s\n", pc, inst->generateDisassembly(pc, NULL));
         is_tainted = true; 
     }
 
