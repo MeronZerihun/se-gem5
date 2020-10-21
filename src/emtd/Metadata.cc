@@ -304,7 +304,7 @@ int Metadata::get_reg_update_time_cycles(RegId regIdx, bool is_fp_op){
         if (fp_reg_updates_ticks.count(regIdx) > 0){
             int elapsed_ticks = curTick() - fp_reg_updates_ticks[regIdx];
             int elapsed_cycles = divCeil(elapsed_ticks, clock_period);
-            DPRINTF(csd, "\t\t FP Reg update time, elapsed cycles :: %d\n ", elapsed_ticks; }
+            DPRINTF(csd, "\t\t FP Reg update time, elapsed cycles :: %d\n ", elapsed_ticks); 
             return elapsed_cycles;
         }
     }
@@ -312,7 +312,7 @@ int Metadata::get_reg_update_time_cycles(RegId regIdx, bool is_fp_op){
         if (int_reg_updates_ticks.count(regIdx) > 0){
             int elapsed_ticks = curTick() - int_reg_updates_ticks[regIdx];
             int elapsed_cycles = divCeil(elapsed_ticks, clock_period);
-            DPRINTF(csd, "\t\t INT Reg update time, elapsed cycles :: %d\n ", elapsed_ticks; }
+            DPRINTF(csd, "\t\t INT Reg update time, elapsed cycles :: %d\n ", elapsed_ticks); 
             return elapsed_cycles;
         }
     }
