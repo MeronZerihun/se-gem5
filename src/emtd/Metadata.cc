@@ -304,6 +304,7 @@ int Metadata::get_reg_update_time_cycles(RegId regIdx, bool is_fp_op){
         if (fp_reg_updates_ticks.count(regIdx) > 0){
             int elapsed_ticks = curTick() - fp_reg_updates_ticks[regIdx];
             int elapsed_cycles = divCeil(elapsed_ticks, clock_period);
+            DPRINTF(csd, "\t\t FP Reg update time, elapsed cycles :: %d\n ", elapsed_ticks; }
             return elapsed_cycles;
         }
     }
@@ -311,6 +312,7 @@ int Metadata::get_reg_update_time_cycles(RegId regIdx, bool is_fp_op){
         if (int_reg_updates_ticks.count(regIdx) > 0){
             int elapsed_ticks = curTick() - int_reg_updates_ticks[regIdx];
             int elapsed_cycles = divCeil(elapsed_ticks, clock_period);
+            DPRINTF(csd, "\t\t INT Reg update time, elapsed cycles :: %d\n ", elapsed_ticks; }
             return elapsed_cycles;
         }
     }
@@ -470,7 +472,13 @@ void Metadata::commit_insn(ThreadContext *tc, StaticInstPtr inst, Addr pc, Trace
         /*** Stores: Take the tag of RS2 (reg being stored) and override the tag in memory
         **** Invalid Op: Address being used (RS1) is a ciphertext type 
         ***/
-        if (inst->isMemRef())
+
+		std::__cxx11::string diss = inst->generateDisassembly(0, NULL);
+		if((diss.find("enc") != std::string::npos) || (diss.find("dec") != std::string::npos)){
+            // Do not update for enc/dec instructions
+            return;
+        }
+        else if (inst->isMemRef())
         {
             // Propagate destination tag
             if (inst->isLoad()){
@@ -483,15 +491,17 @@ void Metadata::commit_insn(ThreadContext *tc, StaticInstPtr inst, Addr pc, Trace
                     if(is_tainted) { DPRINTF(csd, "Recording FP Reg Update for Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
                 }
                 else{
-                    DPRINTF(csd, "PANIC:: Insn is not FP or INT: Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL));
+                    DPRINTF(csd, "PANIC:: LOAD is not FP or INT: Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL));
                 }
             }
             else if (inst->isStore()){
+                return;
 
             }
             else{
                 // TODO PANIC
                 DPRINTF(priv, "PANIC:: Unhandled mem ref case\n");
+                return;
             }
             
         }
@@ -500,18 +510,20 @@ void Metadata::commit_insn(ThreadContext *tc, StaticInstPtr inst, Addr pc, Trace
         **** Invalid Op: Address being used (RS1 for JALR only...) is not a CODE_PTR
         ***/
         else if (inst->isControl()){     
+            return;
         }
 
         /*** Branches: Nothing happens here. The resulting PC is made by get_next_pc_tag later in execution
         **** Invalid Op: Using CODE as an operand
         ***/
-        else if (Ops.is_branch_op(opc))
-        {
+        else if (Ops.is_branch_op(opc)){
+            return;
         }
         /*** REG Arithmetic: Check tags of RS1 and RS2 for RD tag
         **** Invalid Ops: Check the header file. This depends on the source tags
         ***/
         else {
+            //DO NOT UPDATE IF ENC
             if(inst->isInteger() && !inst->isFloating()){
                 record_reg_update(RD, inst->isFloating(), is_tainted, false);
                 if(is_tainted) { DPRINTF(csd, "Recording INT Reg Update for Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
@@ -522,6 +534,7 @@ void Metadata::commit_insn(ThreadContext *tc, StaticInstPtr inst, Addr pc, Trace
             }
             else{
                 DPRINTF(csd, "PANIC:: Insn is not FP or INT: Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL));
+                return;
             }
 
         }
