@@ -550,11 +550,11 @@ void Metadata::commit_insn(ThreadContext *tc, StaticInstPtr inst, Addr pc, Trace
             //DO NOT UPDATE IF ENC
             if(inst->isInteger() && !inst->isFloating()){
                 record_reg_update(RD, inst->isFloating(), is_tainted, false);
-                if(is_tainted) { DPRINTF(csd, "Recording INT Reg Update for Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
+                if(is_tainted) { DPRINTF(csd, "\t\t Recording INT Reg Update for Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
             }
             else if(!inst->isInteger() && inst->isFloating()){
                 record_reg_update(RD, inst->isFloating(), is_tainted, false);
-                if(is_tainted) { DPRINTF(csd, "Recording FP Reg Update for Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
+                { DPRINTF(csd, "\t\t Recording FP Reg Update for Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
             }
             else{
                 //DPRINTF(csd, "PANIC:: Insn is not FP or INT: Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL));
