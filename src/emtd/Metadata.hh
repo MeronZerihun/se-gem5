@@ -129,13 +129,16 @@ public:
 	Emtd_InsnTaintEntry getInsnTaintEntry(Addr pc);
 
 	// Encryption Helper Functions
-	int get_enc_latency();
-
+	int 	 get_enc_latency();
+	void 	 record_reg_update(RegId regIdx, bool is_fp_op, bool is_tainted);
+	uint64_t get_reg_update_time_cycles(RegId regIdx, bool is_fp_op);
 
 private:
 	std::string filename;
 	std::string insfilename;
 	std::string progname;
+	int			clock_period;
+	int 		enc_latency;
 	// Addr libc_start;
 
 private:
@@ -150,8 +153,12 @@ private:
 	// // TODO:: Remove insns_consts_tags
 	// std::map<memaddr_t, Emtd_tag> insns_consts_tags; // Used to find tag of destination register in insns
 
-	std::map<RegId, Emtd_tag> reg_tags;				  // Register file tag
-	std::map<RegId, Emtd_status_tag> reg_tags_status; // Register file tag
+	std::map<RegId, uint64_4> int_reg_updates_ticks;	
+	std::map<RegId, uint64_4> fp_reg_updates_ticks;	
+
+
+	std::map<RegId, Emtd_tag> reg_tags;				  	// Register file tag
+	std::map<RegId, Emtd_status_tag> reg_tags_status; 	// Register file tag
 
 	std::map<Addr, int> pc_violation_counts;	   // Violation count
 	std::map<Addr, std::string> pc_violation_type; // Violation descriptions

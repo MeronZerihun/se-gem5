@@ -209,18 +209,17 @@ MacroopBase::countStoreMicros (StaticInstPtr store_microop){
 	return 2;
 }
 
-StaticInstPtr MacroopBase::getInjInsn_Enc(InstRegIndex dest){
-		// ENC constructor originates from microregop.hh::8
-	DPRINTF(csd, "WARNING:: UNIMPLEMENTED %d\n", curTick());
+StaticInstPtr MacroopBase::getInjInsn_Enc(InstRegIndex dest, Metadata* metadata){
+    DPRINTF(csd, "WARNING:: UNIMPLEMENTED %d\n", curTick());
 
 	StaticInstPtr inj_enc; 
-	int update_time= 0; 
+	int update_time = metadata->get_reg_update_time_cycles(dest, false);
 
-	//Placeholder
-	// if(0 >= metadata->get_enc_latency()){
-	// 	inj_enc = new X86ISAInst::EncNone( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 8, 0); 
-	// 	return inj_enc;
-	// }
+	if(update_time >= metadata->get_enc_latency()){
+		inj_enc = new X86ISAInst::EncNone( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); 
+		return inj_enc;
+	}
+
 
 	switch(update_time){
 		case 0: inj_enc = new X86ISAInst::Enc( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); 
@@ -303,26 +302,22 @@ StaticInstPtr MacroopBase::getInjInsn_Enc(InstRegIndex dest){
 			break;
 		case 39: inj_enc = new X86ISAInst::Enc39( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); 
 			break;		
-		default: inj_enc = new X86ISAInst::Enc39( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); DPRINTF(csd, "WARNING:: Update time not handled by switch in cTXAlterMicroops()\n");
+		default: inj_enc = new X86ISAInst::EncNone( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); DPRINTF(csd, "WARNING:: Update time not handled by switch in cTXAlterMicroops()\n");
 			break;
 	}
 	return inj_enc; 
 }
 
-StaticInstPtr MacroopBase::getInjInsn_EncFP(InstRegIndex dest){
-		// ENC constructor originates from microregop.hh::8
+StaticInstPtr MacroopBase::getInjInsn_EncFP(InstRegIndex dest, Metadata* metadata){
+    DPRINTF(csd, "WARNING:: UNIMPLEMENTED %d\n", curTick());
 
 	StaticInstPtr inj_enc; 
-	int update_time=0;
+	int update_time = metadata->get_reg_update_time_cycles(dest, true);
 
-        DPRINTF(csd, "WARNING:: UNIMPLEMENTED %d\n", curTick());
-
-
-	//Placeholder
-	// if(0 >= metadata->get_enc_latency()){
-	// 	inj_enc = new X86ISAInst::EncNone( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 8, 0); 
-	// 	return inj_enc;
-	// }
+	if(update_time >= metadata->get_enc_latency()){
+		inj_enc = new X86ISAInst::EncNoneFP( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); 
+		return inj_enc;
+	}
 
 	switch(update_time){
 		case 0: inj_enc = new X86ISAInst::EncFP ( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); 	
@@ -405,7 +400,7 @@ StaticInstPtr MacroopBase::getInjInsn_EncFP(InstRegIndex dest){
 			break;
 		case 39: inj_enc = new X86ISAInst::Enc39FP( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); 	
 			break;		
-		default: inj_enc = new X86ISAInst::Enc39FP( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); DPRINTF(csd, "WARNING:: Update time not handled by switch in cTXAlterMicroops()\n");
+		default: inj_enc = new X86ISAInst::EncNoneFP( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); DPRINTF(csd, "WARNING:: Update time not handled by switch in cTXAlterMicroops()\n");
 			break;
 	}
 	return inj_enc; 
@@ -414,7 +409,7 @@ StaticInstPtr MacroopBase::getInjInsn_EncFP(InstRegIndex dest){
 
 
 std::vector<StaticInstPtr> 
-MacroopBase::injectStoreMicros (StaticInstPtr store_microop){
+MacroopBase::injectStoreMicros (StaticInstPtr store_microop, Metadata* metadata){
 	std::vector<StaticInstPtr> result;
 
     X86ISA::InstRegIndex dest = InstRegIndex(env.reg);
@@ -436,7 +431,7 @@ MacroopBase::injectStoreMicros (StaticInstPtr store_microop){
 
 	//STORE constructor originates from microldstop.hh::100
 	if(opName.compare("st")==0){
-		StaticInstPtr inj_enc = getInjInsn_Enc(dest);
+		StaticInstPtr inj_enc = getInjInsn_Enc(dest, metadata);
 		inj_enc->setInjected();
 		inj_enc->clearLastMicroop();
 		result.push_back(inj_enc);
@@ -476,7 +471,7 @@ MacroopBase::injectStoreMicros (StaticInstPtr store_microop){
 		result.push_back(existing_store);
 	}
 	else if(opName.compare("stfp")==0){
-		StaticInstPtr inj_enc = getInjInsn_EncFP(dest);
+		StaticInstPtr inj_enc = getInjInsn_EncFP(dest, metadata);
 		inj_enc->setInjected();
 		inj_enc->clearLastMicroop();
 		result.push_back(inj_enc);
@@ -565,7 +560,7 @@ MacroopBase::cTXAlterMicroops(bool arith_tainted, bool mem_tainted, Addr pc, Met
 					temp_index = temp_index + toInject.size(); //Skip injected microops
 				}
 				else if(microops[i]->isStore()){
-					std::vector<StaticInstPtr> toInject = injectStoreMicros(microops[i]);
+					std::vector<StaticInstPtr> toInject = injectStoreMicros(microops[i], metadata);
 					for(int j=0; j<toInject.size(); j++){
 						temp_microops[temp_index+j] = toInject.at(j); 
 					}
@@ -598,6 +593,9 @@ MacroopBase::cTXAlterMicroops(bool arith_tainted, bool mem_tainted, Addr pc, Met
 		// 	Get enc dest/src register
 		//  Replace instruction with new one with updated update_tiem
 		//  Use dest/src register to do this
+
+		// important stuff here
+		// no comment so it breaks; 
 
 	}
 

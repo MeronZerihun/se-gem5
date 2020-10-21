@@ -26,7 +26,8 @@
 #include "debug/priv.hh"
 #include "debug/csd.hh"
 
-Metadata::Metadata(MetadataParams *params) : SimObject(params), filename(params->filename), insfilename(params->insfilename),  progname(params->progname)
+Metadata::Metadata(MetadataParams *params) : SimObject(params), filename(params->filename), insfilename(params->insfilename),  
+    progname(params->progname), clock_period(params->clock), enc_latency(params->enc_latency)
 {
     // Do some error checking on this path: See it exists
     if (access(filename.c_str(), F_OK) != 0)
@@ -290,15 +291,52 @@ void Metadata::deallocate_stack_tags(){
 
 
 /******************************************************************/
-//  Helper functions for data encryption
+//  Helper functions for shadow register encryption
 /******************************************************************/
 int Metadata::get_enc_latency(){
-    DPRINTF(csd, "Calling get_enc_latency()...\n");
-    return 40;
+    return enc_latency;
 }
 
+int Metadata::get_reg_update_time_cycles(RegId regIdx, bool is_fp_op){
+
+    //Returns how many cycles ago the last reg update was
+    if (is_fp_op){
+        if (fp_reg_updates_ticks.count(regIdx) > 0){
+            int elapsed_ticks = curTick() - fp_reg_updates_ticks[regIdx];
+            int elapsed_cycles = divCeil(elapsed_ticks, clock_period);
+            return elapsed_cycles;
+        }
+    }
+    else {
+        if (int_reg_updates_ticks.count(regIdx) > 0){
+            int elapsed_ticks = curTick() - int_reg_updates_ticks[regIdx];
+            int elapsed_cycles = divCeil(elapsed_ticks, clock_period);
+            return elapsed_cycles;
+        }
+    }
+    return 0;
+}
+
+
+// Set status tag for register
+void Metadata::record_reg_update(RegId regIdx, bool is_fp_op, bool is_tainted, bool is_load){
+    // If insn is not tainted, no delay for store path, shadow register is duplicate
+    // If load, delay for store path is modeled by dec injection, so no added delay here (load followed by immediate store)
+    int update_time = (is_load || !is_tainted) ? 1 : curTick();
+
+    if (!regIdx.isZeroReg()){
+        if (is_fp_op){
+            fp_reg_updates_ticks[regIdx] = update_time;
+        }
+        else {
+            int_reg_updates_ticks[regIdx] = update_time;
+        }
+    }
+}
+
+
 /******************************************************************/
-//  END: Helper functions for data encryption
+//  END: Helper functions for shadow register encryption
 /******************************************************************/
 
 
@@ -411,13 +449,87 @@ void Metadata::commit_insn(ThreadContext *tc, StaticInstPtr inst, Addr pc, Trace
 
     X86Ops Ops;
     std::string opc = inst->getName();
+    Emtd_InsnTaintEntry taints = getInsnTaintEntry(pc);
 
-    if(isTainted(pc)){
-        DPRINTF(csd, "Committing Tainted Instruction 0x%x :: %s\n", pc, inst->generateDisassembly(pc, NULL));
+
+    bool is_tainted = false;
+    if(taints.arith_tainted || taints.mem_tainted){
+        DPRINTF(csd, "Committing Tainted Instruction 0x%x :: %s\n", pc, inst->generateDisassembly(pc, NULL))
+        is_tainted = true; 
     }
 
-    // Need to start register countdown... 
-    //inst->destRegIdx(0) 
+    // WHAT IF REG IS UPDATED BY UNTAINTED INSN... SHOULD IT OVERRIDE SHADOW REG?? 
+    // IF UNTAINTED, UPDATE REG TIME > ENC_LATENCY SO THAT THIS IS NO ST PATH DELAY
+
+
+    try
+    {
+        /*** Loads: Take the tag from memory and override the RD tag
+        **** Invalid Op: Address being used (RS1) is a ciphertext type
+        ***/
+        /*** Stores: Take the tag of RS2 (reg being stored) and override the tag in memory
+        **** Invalid Op: Address being used (RS1) is a ciphertext type 
+        ***/
+        if (inst->isMemRef())
+        {
+            // Propagate destination tag
+            if (inst->isLoad()){
+                if(inst->isInteger() && !inst->isFloating()){
+                    record_reg_update(RD, inst->isFloating(), is_tainted, true);
+                    if(is_tainted) { DPRINTF(csd, "Recording INT Reg Update for Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
+                }
+                else if(!inst->isInteger() && inst->isFloating()){
+                    record_reg_update(RD, inst->isFloating(), is_tainted, true);
+                    if(is_tainted) { DPRINTF(csd, "Recording FP Reg Update for Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
+                }
+                else{
+                    DPRINTF(csd, "PANIC:: Insn is not FP or INT: Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL));
+                }
+            }
+            else if (inst->isStore()){
+
+            }
+            else{
+                // TODO PANIC
+                DPRINTF(priv, "PANIC:: Unhandled mem ref case\n");
+            }
+            
+        }
+
+        /*** Jumps: Move tag of NPC into RD (saves a return addr)
+        **** Invalid Op: Address being used (RS1 for JALR only...) is not a CODE_PTR
+        ***/
+        else if (inst->isControl()){     
+        }
+
+        /*** Branches: Nothing happens here. The resulting PC is made by get_next_pc_tag later in execution
+        **** Invalid Op: Using CODE as an operand
+        ***/
+        else if (Ops.is_branch_op(opc))
+        {
+        }
+        /*** REG Arithmetic: Check tags of RS1 and RS2 for RD tag
+        **** Invalid Ops: Check the header file. This depends on the source tags
+        ***/
+        else {
+            if(inst->isInteger() && !inst->isFloating()){
+                record_reg_update(RD, inst->isFloating(), is_tainted, false);
+                if(is_tainted) { DPRINTF(csd, "Recording INT Reg Update for Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
+            }
+            else if(!inst->isInteger() && inst->isFloating()){
+                record_reg_update(RD, inst->isFloating(), is_tainted, false);
+                if(is_tainted) { DPRINTF(csd, "Recording FP Reg Update for Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
+            }
+            else{
+                DPRINTF(csd, "PANIC:: Insn is not FP or INT: Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL));
+            }
+
+        }
+    }
+    catch (int e)
+    {
+        exit(e);
+    }
 
 }
 

@@ -47,12 +47,6 @@
 #include "mem/request.hh"
 #include "emtd/Metadata.hh"
 
-#define AES_LATENCY    40
-#define AES_NI_LATENCY 70
-#define SIMON_LATENCY  20
-#define QARMA_LATENCY  12
-
-#define ENC_LATENCY SIMON_LATENCY
 
 
 namespace X86ISA
@@ -80,9 +74,9 @@ class MacroopBase : public X86StaticInst
     std::vector<StaticInstPtr>  injectLoadMicros (StaticInstPtr load_microop);
 
     int                         countStoreMicros  (StaticInstPtr store_microop);
-    StaticInstPtr               getInjInsn_Enc    (InstRegIndex dest);
-    StaticInstPtr               getInjInsn_EncFP  (InstRegIndex dest);
-    std::vector<StaticInstPtr>  injectStoreMicros (StaticInstPtr store_microop);
+    StaticInstPtr               getInjInsn_Enc    (InstRegIndex dest, Metadata* metadata);
+    StaticInstPtr               getInjInsn_EncFP  (InstRegIndex dest, Metadata* metadata);
+    std::vector<StaticInstPtr>  injectStoreMicros (StaticInstPtr store_microop, Metadata* metadata);
 
     int cTXAlterMicroops(bool arith_tainted, bool mem_tainted, Addr pc, Metadata* metadata); //EMTD
 
