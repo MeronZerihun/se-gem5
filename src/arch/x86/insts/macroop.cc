@@ -210,7 +210,7 @@ MacroopBase::countStoreMicros (StaticInstPtr store_microop){
 }
 
 StaticInstPtr MacroopBase::getInjInsn_Enc(InstRegIndex dest, Metadata* metadata){
-    DPRINTF(csd, "WARNING:: UNIMPLEMENTED %d\n", curTick());
+    // DPRINTF(csd, "WARNING:: UNIMPLEMENTED %d\n", curTick());
 
 	StaticInstPtr inj_enc; 
 	int update_time = metadata->get_reg_update_time_cycles(dest, false);
@@ -309,10 +309,12 @@ StaticInstPtr MacroopBase::getInjInsn_Enc(InstRegIndex dest, Metadata* metadata)
 }
 
 StaticInstPtr MacroopBase::getInjInsn_EncFP(InstRegIndex dest, Metadata* metadata){
-    DPRINTF(csd, "WARNING:: UNIMPLEMENTED %d\n", curTick());
 
 	StaticInstPtr inj_enc; 
 	int update_time = metadata->get_reg_update_time_cycles(dest, true);
+
+    // DPRINTF(csd, "WARNING:: UNIMPLEMENTED %d\n", curTick());
+
 
 	if(update_time >= metadata->get_enc_latency()){
 		inj_enc = new X86ISAInst::EncNoneFP( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); 
@@ -587,7 +589,7 @@ MacroopBase::cTXAlterMicroops(bool arith_tainted, bool mem_tainted, Addr pc, Met
 	else if(mem_tainted){
 		// CAN NO LONGER EARLY EXIT CUZ TIME DIFFERS ON HIT/MISS, OR LAST REG UPDATE
 		// 
-		DPRINTF(csd, "WARNING:: UNIMPLEMENTED in cTXAlterMicroops():: \n");
+		// DPRINTF(csd, "WARNING:: UNIMPLEMENTED in cTXAlterMicroops():: \n");
 		//FIND AND REPLACE ENC LATENCY IF PRESENT
 		//Loop until you find an enc
 		// 	Get enc dest/src register
