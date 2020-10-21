@@ -304,8 +304,8 @@ int Metadata::get_reg_update_time_cycles(RegId regIdx, bool is_fp_op){
         if (fp_reg_updates_ticks.find(regIdx.index()) != fp_reg_updates_ticks.end()){
             int elapsed_ticks = curTick() - fp_reg_updates_ticks[regIdx.index()];
             int elapsed_cycles = divCeil(elapsed_ticks, clock_period);
-            DPRINTF(csd, "\t\t GOT FP R%d update time, last ticks :: %d\n ", regIdx.index(), fp_reg_updates_ticks[regIdx.index()]); 
-            DPRINTF(csd, "\t\t GOT FP Reg update time, elapsed cycles :: %d\n ", elapsed_cycles); 
+            // DPRINTF(csd, "\t\t GOT FP R%d update time, last ticks :: %d\n ", regIdx.index(), fp_reg_updates_ticks[regIdx.index()]); 
+            // DPRINTF(csd, "\t\t GOT FP Reg update time, elapsed cycles :: %d\n ", elapsed_cycles); 
             return elapsed_cycles;
         }
     }
@@ -313,8 +313,8 @@ int Metadata::get_reg_update_time_cycles(RegId regIdx, bool is_fp_op){
         if (int_reg_updates_ticks.find(regIdx.index()) != int_reg_updates_ticks.end()){
             int elapsed_ticks = curTick() - int_reg_updates_ticks[regIdx.index()];
             int elapsed_cycles = divCeil(elapsed_ticks, clock_period);
-            DPRINTF(csd, "\t\t GOT INT R%d update time, last ticks :: %d\n ", regIdx.index(), int_reg_updates_ticks[regIdx.index()]); 
-            DPRINTF(csd, "\t\t INT Reg update time, elapsed cycles :: %d\n ", elapsed_cycles); 
+            // DPRINTF(csd, "\t\t GOT INT R%d update time, last ticks :: %d\n ", regIdx.index(), int_reg_updates_ticks[regIdx.index()]); 
+            // DPRINTF(csd, "\t\t INT Reg update time, elapsed cycles :: %d\n ", elapsed_cycles); 
             return elapsed_cycles;
         }
     }
@@ -331,30 +331,18 @@ void Metadata::record_reg_update(RegId regIdx, bool is_fp_op, bool is_tainted, b
     if (!regIdx.isZeroReg()){
         if (is_fp_op){
             //Debug prints
-            if(fp_reg_updates_ticks.find(regIdx.index()) != fp_reg_updates_ticks.end()){
-                if(update_time != fp_reg_updates_ticks[regIdx.index()]){
-                    DPRINTF(csd, "\t\t SET FP R%d update time, last ticks :: %d\n ", regIdx.index(), update_time); 
-                }
-            }            
-            else {
-                DPRINTF(csd, "\t\t INIT FP R%d update time, last ticks :: %d\n ", regIdx.index(), update_time); 
-            }
+            // if(fp_reg_updates_ticks.find(regIdx.index()) != fp_reg_updates_ticks.end()){
+            //     if(update_time != fp_reg_updates_ticks[regIdx.index()]){ DPRINTF(csd, "\t\t SET FP R%d update time, last ticks :: %d\n ", regIdx.index(), update_time); }
+            // } else { DPRINTF(csd, "\t\t INIT FP R%d update time, last ticks :: %d\n ", regIdx.index(), update_time); }
             //End debug prints
-
             fp_reg_updates_ticks[regIdx.index()] = update_time;
         }
         else {
             //Debug prints
-            if(int_reg_updates_ticks.find(regIdx.index()) != int_reg_updates_ticks.end()){
-                if(update_time != int_reg_updates_ticks[regIdx.index()]){
-                    DPRINTF(csd, "\t\t SET FP R%d update time, last ticks :: %d\n ", regIdx.index(), int_reg_updates_ticks[regIdx.index()]); 
-                }
-            }            
-            else {
-                DPRINTF(csd, "\t\t INIT FP R%d update time, last ticks :: %d\n ", regIdx.index(), int_reg_updates_ticks[regIdx.index()]); 
-            }
+            // if(int_reg_updates_ticks.find(regIdx.index()) != int_reg_updates_ticks.end()){
+            //     if(update_time != int_reg_updates_ticks[regIdx.index()]){ DPRINTF(csd, "\t\t SET FP R%d update time, last ticks :: %d\n ", regIdx.index(), int_reg_updates_ticks[regIdx.index()]); }
+            // } else { DPRINTF(csd, "\t\t INIT FP R%d update time, last ticks :: %d\n ", regIdx.index(), int_reg_updates_ticks[regIdx.index()]); }
             //End debug prints
-            
             int_reg_updates_ticks[regIdx.index()] = update_time;
         }
     }
@@ -477,87 +465,66 @@ void Metadata::commit_insn(ThreadContext *tc, StaticInstPtr inst, Addr pc, Trace
     std::string opc = inst->getName();
     Emtd_InsnTaintEntry taints = getInsnTaintEntry(pc);
 
-
     bool is_tainted = false;
     if(taints.arith_tainted || taints.mem_tainted){
         DPRINTF(csd, "Committing Tainted Instruction 0x%x :: %s\n", pc, inst->generateDisassembly(pc, NULL));
         is_tainted = true; 
     }
 
-    // WHAT IF REG IS UPDATED BY UNTAINTED INSN... SHOULD IT OVERRIDE SHADOW REG?? 
-    // IF UNTAINTED, UPDATE REG TIME > ENC_LATENCY SO THAT THIS IS NO ST PATH DELAY
-
-
     try
     {
-        /*** Loads: Take the tag from memory and override the RD tag
-        **** Invalid Op: Address being used (RS1) is a ciphertext type
-        ***/
-        /*** Stores: Take the tag of RS2 (reg being stored) and override the tag in memory
-        **** Invalid Op: Address being used (RS1) is a ciphertext type 
-        ***/
-
 		std::__cxx11::string diss = inst->generateDisassembly(0, NULL);
+
+        /*** Enc/Dec ***/
 		if((diss.find("enc") != std::string::npos) || (diss.find("dec") != std::string::npos)){
             // Do not update for enc/dec instructions
             return;
         }
+    
+        /*** Loads/Stores ***/
         else if (inst->isMemRef())
         {
-            // Propagate destination tag
             if (inst->isLoad()){
                 if(inst->isInteger() && !inst->isFloating()){
-                    record_reg_update(RD, inst->isFloating(), is_tainted, true);
-                    if(is_tainted) { DPRINTF(csd, "Recording INT Reg Update for Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
+                    record_reg_update(RD, inst->isFloating(), is_tainted, true); // if(is_tainted) { DPRINTF(csd, "Recording INT Reg Update for Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
                 }
                 else if(!inst->isInteger() && inst->isFloating()){
-                    record_reg_update(RD, inst->isFloating(), is_tainted, true);
-                    if(is_tainted) { DPRINTF(csd, "Recording FP Reg Update for Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
+                    record_reg_update(RD, inst->isFloating(), is_tainted, true); // if(is_tainted) { DPRINTF(csd, "Recording FP Reg Update for Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
                 }
                 else{
-                    //DPRINTF(csd, "PANIC:: LOAD is not FP or INT: Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL));
+                    DPRINTF(csd, "PANIC:: LOAD is not FP or INT: Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL));
                 }
             }
             else if (inst->isStore()){
                 return;
-
             }
-            else{
-                // TODO PANIC
+            else {
                 DPRINTF(priv, "PANIC:: Unhandled mem ref case\n");
                 return;
             }
             
         }
 
-        /*** Jumps: Move tag of NPC into RD (saves a return addr)
-        **** Invalid Op: Address being used (RS1 for JALR only...) is not a CODE_PTR
-        ***/
+        /*** Jumps ***/
         else if (inst->isControl()){     
             return;
         }
 
-        /*** Branches: Nothing happens here. The resulting PC is made by get_next_pc_tag later in execution
-        **** Invalid Op: Using CODE as an operand
-        ***/
+        /*** Branches ***/
         else if (Ops.is_branch_op(opc)){
             return;
         }
-        /*** REG Arithmetic: Check tags of RS1 and RS2 for RD tag
-        **** Invalid Ops: Check the header file. This depends on the source tags
-        ***/
+
+        /*** REG Arithmetic ***/
         else {
-            //DO NOT UPDATE IF ENC
             if(inst->isInteger() && !inst->isFloating()){
-                record_reg_update(RD, inst->isFloating(), is_tainted, false);
-                if(is_tainted) { DPRINTF(csd, "\t\t Recording INT Reg Update for Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
+                record_reg_update(RD, inst->isFloating(), is_tainted, false); // if(is_tainted) { DPRINTF(csd, "\t\t Recording INT Reg Update for Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
             }
             else if(!inst->isInteger() && inst->isFloating()){
-                record_reg_update(RD, inst->isFloating(), is_tainted, false);
-                { DPRINTF(csd, "\t\t Recording FP Reg Update for Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
+                record_reg_update(RD, inst->isFloating(), is_tainted, false); // if(is_tainted) { DPRINTF(csd, "\t\t Recording FP Reg Update for Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
             }
-            else{
-                //DPRINTF(csd, "PANIC:: Insn is not FP or INT: Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL));
+            else {
+                DPRINTF(csd, "PANIC:: Insn is not FP or INT: Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL));
                 return;
             }
 

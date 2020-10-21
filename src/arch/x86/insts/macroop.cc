@@ -210,16 +210,17 @@ MacroopBase::countStoreMicros (StaticInstPtr store_microop){
 }
 
 StaticInstPtr MacroopBase::getInjInsn_Enc(InstRegIndex dest, Metadata* metadata){
-    // DPRINTF(csd, "WARNING:: UNIMPLEMENTED %d\n", curTick());
 
 	StaticInstPtr inj_enc; 
 	int update_time = metadata->get_reg_update_time_cycles(dest, false);
+	
+	DPRINTF(csd, "--------- R%d Elapsed Cycles is %d\n", dest.index(), update_time);
 
 	if(update_time >= metadata->get_enc_latency()){
 		inj_enc = new X86ISAInst::EncNone( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); 
+		DPRINTF(csd, "--------- Injecting %s\n", inj_enc->generateDisassembly(0, NULL));
 		return inj_enc;
 	}
-
 
 	switch(update_time){
 		case 0: inj_enc = new X86ISAInst::Enc( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); 
@@ -305,6 +306,8 @@ StaticInstPtr MacroopBase::getInjInsn_Enc(InstRegIndex dest, Metadata* metadata)
 		default: inj_enc = new X86ISAInst::EncNone( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); DPRINTF(csd, "WARNING:: Update time not handled by switch in cTXAlterMicroops()\n");
 			break;
 	}
+	
+	DPRINTF(csd, "--------- Injecting %s\n", inj_enc->generateDisassembly(0, NULL));
 	return inj_enc; 
 }
 
@@ -312,12 +315,12 @@ StaticInstPtr MacroopBase::getInjInsn_EncFP(InstRegIndex dest, Metadata* metadat
 
 	StaticInstPtr inj_enc; 
 	int update_time = metadata->get_reg_update_time_cycles(dest, true);
-
-    // DPRINTF(csd, "WARNING:: UNIMPLEMENTED %d\n", curTick());
-
+	
+	DPRINTF(csd, "--------- R%d Elapsed Cycles is %d\n", dest.index(), update_time);
 
 	if(update_time >= metadata->get_enc_latency()){
 		inj_enc = new X86ISAInst::EncNoneFP( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); 
+		DPRINTF(csd, "--------- Injecting %s\n", inj_enc->generateDisassembly(0, NULL));
 		return inj_enc;
 	}
 
@@ -405,6 +408,8 @@ StaticInstPtr MacroopBase::getInjInsn_EncFP(InstRegIndex dest, Metadata* metadat
 		default: inj_enc = new X86ISAInst::EncNoneFP( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); DPRINTF(csd, "WARNING:: Update time not handled by switch in cTXAlterMicroops()\n");
 			break;
 	}
+
+	DPRINTF(csd, "--------- Injecting %s\n", inj_enc->generateDisassembly(0, NULL));
 	return inj_enc; 
 }
 
@@ -542,8 +547,6 @@ MacroopBase::cTXAlterMicroops(bool arith_tainted, bool mem_tainted, Addr pc, Met
 			}
 			// else if(arith_tainted){
 			// }
-
-
 		}
 		
 		//Perform microop injection
