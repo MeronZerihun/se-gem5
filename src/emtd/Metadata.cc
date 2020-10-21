@@ -328,10 +328,22 @@ void Metadata::record_reg_update(RegId regIdx, bool is_fp_op, bool is_tainted, b
 
     if (!regIdx.isZeroReg()){
         if (is_fp_op){
-            fp_reg_updates_ticks[regIdx] = update_time;
+            if(fp_reg_updates_ticks.count(regIdx) > 0){
+                fp_reg_updates_ticks.insert(std::pair<RegId, uint64_t>(regIdx, update_time));
+                DPRINTF(csd, "\t\t SET FP Reg update time, last ticks :: %d\n ", fp_reg_updates_ticks[regIdx]); 
+            }
+            else {
+                fp_reg_updates_ticks[regIdx] = update_time;
+            }
         }
         else {
-            int_reg_updates_ticks[regIdx] = update_time;
+            if(int_reg_updates_ticks.count(regIdx) > 0){
+                int_reg_updates_ticks.insert(std::pair<RegId, uint64_t>(regIdx, update_time));
+                DPRINTF(csd, "\t\t SET FP Reg update time, last ticks :: %d\n ", int_reg_updates_ticks[regIdx]); 
+            }
+            else {
+                int_reg_updates_ticks[regIdx] = update_time;
+            }
         }
     }
 }
@@ -491,7 +503,7 @@ void Metadata::commit_insn(ThreadContext *tc, StaticInstPtr inst, Addr pc, Trace
                     if(is_tainted) { DPRINTF(csd, "Recording FP Reg Update for Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
                 }
                 else{
-                    DPRINTF(csd, "PANIC:: LOAD is not FP or INT: Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL));
+                    //DPRINTF(csd, "PANIC:: LOAD is not FP or INT: Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL));
                 }
             }
             else if (inst->isStore()){
@@ -533,7 +545,7 @@ void Metadata::commit_insn(ThreadContext *tc, StaticInstPtr inst, Addr pc, Trace
                 if(is_tainted) { DPRINTF(csd, "Recording FP Reg Update for Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
             }
             else{
-                DPRINTF(csd, "PANIC:: Insn is not FP or INT: Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL));
+                //DPRINTF(csd, "PANIC:: Insn is not FP or INT: Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL));
                 return;
             }
 
