@@ -303,23 +303,21 @@ uint64_t Metadata::get_reg_update_time_cycles(RegId regIdx, bool is_fp_op){
     if (is_fp_op){
         if (fp_reg_updates_ticks.find(regIdx.index()) != fp_reg_updates_ticks.end()){
             uint64_t elapsed_ticks = curTick() - fp_reg_updates_ticks[regIdx.index()];
-            if(curTick() < fp_reg_updates_ticks[regIdx.index()]) {DPRINTF(csd, "\t\t WARNING TIME IS GOING BACKWARD:: R%d update time, cur, stored, elapsed ticks :: %d %d %d\n ", regIdx.index(), curTick(), fp_reg_updates_ticks[regIdx.index()], elapsed_ticks);}
-	    //uint64_t elapsed_cycles = divCeil(elapsed_ticks, clock_period);
-	    uint64_t elapsed_cycles_handcalc = (elapsed_ticks + clock_period - 1) / clock_period;
+	        //uint64_t elapsed_cycles = divCeil(elapsed_ticks, clock_period);
+	        uint64_t elapsed_cycles = (elapsed_ticks + clock_period - 1) / clock_period;
             // DPRINTF(csd, "\t\t GOT FP R%d update time, last ticks :: %d\n ", regIdx.index(), fp_reg_updates_ticks[regIdx.index()]); 
             // DPRINTF(csd, "\t\t GOT FP Reg update time, elapsed cycles :: %d\n ", elapsed_cycles); 
-            return elapsed_cycles_handcalc;
+            return elapsed_cycles;
         }
     }
     else {
         if (int_reg_updates_ticks.find(regIdx.index()) != int_reg_updates_ticks.end()){
             uint64_t elapsed_ticks = curTick() - int_reg_updates_ticks[regIdx.index()];
-            if(curTick() < int_reg_updates_ticks[regIdx.index()]) {DPRINTF(csd, "\t\t WARNING TIME IS GOING BACKWARD:: R%d update time, last ticks :: %d\n ", regIdx.index(), elapsed_ticks);}
             //int64_t elapsed_cycles = divCeil(elapsed_ticks, clock_period);
-            uint64_t elapsed_cycles_handcalc = (elapsed_ticks + clock_period - 1) / clock_period;
+            uint64_t elapsed_cycles = (elapsed_ticks + clock_period - 1) / clock_period;
             // DPRINTF(csd, "\t\t GOT INT R%d update time, last ticks :: %d\n ", regIdx.index(), int_reg_updates_ticks[regIdx.index()]); 
             // DPRINTF(csd, "\t\t INT Reg update time, elapsed cycles :: %d\n ", elapsed_cycles); 
-            return elapsed_cycles_handcalc;
+            return elapsed_cycles;
         }
     }
     return 0;
@@ -336,7 +334,7 @@ void Metadata::record_reg_update(RegId regIdx, bool is_fp_op, bool is_tainted, b
         if (is_fp_op){
             //Debug prints
             // if(fp_reg_updates_ticks.find(regIdx.index()) != fp_reg_updates_ticks.end()){
-            if(update_time != fp_reg_updates_ticks[regIdx.index()]){ DPRINTF(csd, "\t\t SET FP R%d update time, last ticks :: %d\n ", regIdx.index(), update_time); }
+            // if(update_time != fp_reg_updates_ticks[regIdx.index()]){ DPRINTF(csd, "\t\t SET FP R%d update time, last ticks :: %d\n ", regIdx.index(), update_time); }
             // } else { DPRINTF(csd, "\t\t INIT FP R%d update time, last ticks :: %d\n ", regIdx.index(), update_time); }
             //End debug prints
             fp_reg_updates_ticks[regIdx.index()] = update_time;
@@ -344,7 +342,7 @@ void Metadata::record_reg_update(RegId regIdx, bool is_fp_op, bool is_tainted, b
         else {
             //Debug prints
             // if(int_reg_updates_ticks.find(regIdx.index()) != int_reg_updates_ticks.end()){
-            if(update_time != int_reg_updates_ticks[regIdx.index()]){ DPRINTF(csd, "\t\t SET FP R%d update time, last ticks :: %d\n ", regIdx.index(), int_reg_updates_ticks[regIdx.index()]); }
+            // if(update_time != int_reg_updates_ticks[regIdx.index()]){ DPRINTF(csd, "\t\t SET FP R%d update time, last ticks :: %d\n ", regIdx.index(), int_reg_updates_ticks[regIdx.index()]); }
             // } else { DPRINTF(csd, "\t\t INIT FP R%d update time, last ticks :: %d\n ", regIdx.index(), int_reg_updates_ticks[regIdx.index()]); }
             //End debug prints
             int_reg_updates_ticks[regIdx.index()] = update_time;
@@ -500,25 +498,20 @@ void Metadata::commit_insn(ThreadContext *tc, StaticInstPtr inst, Addr pc, Trace
         else if (inst->isMemRef())
         {
             if (inst->isLoad()){
-                //if(inst->isInteger() && !inst->isFloating()){
                 if(diss.find(" t") != std::string::npos){
-                    { DPRINTF(csd, "IGNORING Reg Update for TEMP register in Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
+                    if(is_tainted) { DPRINTF(csd, "WARNING:: IGNORING Reg Update for TEMP register in Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
                     return;
                 }
 
                 if(diss.find("ldfp ") != std::string::npos){
-                    //record_reg_update(RD, true, is_tainted, true); 
-                    void_reg_update(RD, true);
-                    if(is_tainted) { DPRINTF(csd, "Recording FP Reg Update for Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
+                    void_reg_update(RD, true);   // if(is_tainted) { DPRINTF(csd, "Recording FP Reg Update for Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
                 }
-                //else if(!inst->isInteger() && inst->isFloating()){
                 else if(diss.find("ld ") != std::string::npos){
-                    //record_reg_update(RD, false, is_tainted, true); 
-                    void_reg_update(RD, false);
-                    if(is_tainted) { DPRINTF(csd, "Recording INT Reg Update for Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
+                    void_reg_update(RD, false);  // if(is_tainted) { DPRINTF(csd, "Recording INT Reg Update for Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
                 }
                 else if (is_tainted){
                     DPRINTF(csd, "WARNING:: LOAD is not FP or INT: Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL));
+                    return;
                 }
             }
             else if (inst->isStore()){
