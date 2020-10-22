@@ -592,15 +592,38 @@ MacroopBase::cTXAlterMicroops(bool arith_tainted, bool mem_tainted, Addr pc, Met
 	else if(mem_tainted){
 		// CAN NO LONGER EARLY EXIT CUZ TIME DIFFERS ON HIT/MISS, OR LAST REG UPDATE
 		// 
-		// DPRINTF(csd, "WARNING:: UNIMPLEMENTED in cTXAlterMicroops():: \n");
 		//FIND AND REPLACE ENC LATENCY IF PRESENT
 		//Loop until you find an enc
 		// 	Get enc dest/src register
 		//  Replace instruction with new one with updated update_tiem
 		//  Use dest/src register to do this
 
-		// important stuff here
-		// no comment so it breaks; 
+		for(int i=0;i<numMicroops;i++){
+
+			std::__cxx11::string diss = microops[i]->generateDisassembly(0, NULL);
+			if(diss.find("enc") != std::string::npos){
+        		
+				DPRINTF(csd, "(REP %d)-- %s\n", i, microops[i]->generateDisassembly(0, NULL));
+				
+				X86ISA::InstRegIndex dest = InstRegIndex(env.reg);
+				if(diss.find("_low") != std::string::npos){
+					dest = InstRegIndex(FLOATREG_XMM_LOW(env.reg));
+				}
+				else if (diss.find("_high") != std::string::npos){
+					dest = InstRegIndex(FLOATREG_XMM_HIGH(env.reg));
+				}
+
+				// Replace enc function with new latency
+				if(diss.find("fp") != std::string::npos){
+					microops[i] = getInjInsn_EncFP(dest, metadata);
+				}
+				else {
+					microops[i] = getInjInsn_Enc(dest, metadata);
+				}
+				DPRINTF(csd, "(NEW %d)-- %s\n", i, microops[i]->generateDisassembly(0, NULL));
+			}
+		}
+		
 
 	}
 
