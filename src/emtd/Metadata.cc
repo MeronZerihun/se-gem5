@@ -312,7 +312,9 @@ int Metadata::get_reg_update_time_cycles(RegId regIdx, bool is_fp_op){
     else {
         if (int_reg_updates_ticks.find(regIdx.index()) != int_reg_updates_ticks.end()){
             int elapsed_ticks = curTick() - int_reg_updates_ticks[regIdx.index()];
+            if(elapsed_ticks < 0) {DPRINTF(csd, "\t\t WARNING ELAPSED_TICKS IS NEGATIVE:: R%d update time, last ticks :: %d\n ", regIdx.index(), elapsed_ticks);}
             int elapsed_cycles = divCeil(elapsed_ticks, clock_period);
+            if(elapsed_cycles < 0) {DPRINTF(csd, "\t\t WARNING ELAPSED_TICKS IS NEGATIVE:: R%d update time, last ticks :: %d\n ", regIdx.index(), elapsed_cycles);}
             // DPRINTF(csd, "\t\t GOT INT R%d update time, last ticks :: %d\n ", regIdx.index(), int_reg_updates_ticks[regIdx.index()]); 
             // DPRINTF(csd, "\t\t INT Reg update time, elapsed cycles :: %d\n ", elapsed_cycles); 
             return elapsed_cycles;
@@ -497,6 +499,11 @@ void Metadata::commit_insn(ThreadContext *tc, StaticInstPtr inst, Addr pc, Trace
         {
             if (inst->isLoad()){
                 //if(inst->isInteger() && !inst->isFloating()){
+                if(diss.find(" t") != std::string::npos){
+                    { DPRINTF(csd, "IGNORING Reg Update for TEMP register in Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
+                    return;
+                }
+
                 if(diss.find("ldfp ") != std::string::npos){
                     //record_reg_update(RD, true, is_tainted, true); 
                     void_reg_update(RD, true);
