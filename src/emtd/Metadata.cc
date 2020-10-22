@@ -293,17 +293,17 @@ void Metadata::deallocate_stack_tags(){
 /******************************************************************/
 //  Helper functions for shadow register encryption
 /******************************************************************/
-int Metadata::get_enc_latency(){
+uint64_t Metadata::get_enc_latency(){
     return enc_latency;
 }
 
-int Metadata::get_reg_update_time_cycles(RegId regIdx, bool is_fp_op){
+uint64_t Metadata::get_reg_update_time_cycles(RegId regIdx, bool is_fp_op){
 
     //Returns how many cycles ago the last reg update was
     if (is_fp_op){
         if (fp_reg_updates_ticks.find(regIdx.index()) != fp_reg_updates_ticks.end()){
-            int elapsed_ticks = curTick() - fp_reg_updates_ticks[regIdx.index()];
-            int elapsed_cycles = divCeil(elapsed_ticks, clock_period);
+            int64_t elapsed_ticks = curTick() - fp_reg_updates_ticks[regIdx.index()];
+            int64_t elapsed_cycles = divCeil(elapsed_ticks, clock_period);
             // DPRINTF(csd, "\t\t GOT FP R%d update time, last ticks :: %d\n ", regIdx.index(), fp_reg_updates_ticks[regIdx.index()]); 
             // DPRINTF(csd, "\t\t GOT FP Reg update time, elapsed cycles :: %d\n ", elapsed_cycles); 
             return elapsed_cycles;
@@ -311,13 +311,15 @@ int Metadata::get_reg_update_time_cycles(RegId regIdx, bool is_fp_op){
     }
     else {
         if (int_reg_updates_ticks.find(regIdx.index()) != int_reg_updates_ticks.end()){
-            int elapsed_ticks = curTick() - int_reg_updates_ticks[regIdx.index()];
+            uint64_t elapsed_ticks = curTick() - int_reg_updates_ticks[regIdx.index()];
+            if(curTick() < int_reg_updates_ticks[regIdx.index()]) {DPRINTF(csd, "\t\t WARNING TIME IS GOING BACKWARD:: R%d update time, last ticks :: %d\n ", regIdx.index(), elapsed_ticks);}
             if(elapsed_ticks < 0) {DPRINTF(csd, "\t\t WARNING ELAPSED_TICKS IS NEGATIVE:: R%d update time, last ticks :: %d\n ", regIdx.index(), elapsed_ticks);}
-            int elapsed_cycles = divCeil(elapsed_ticks, clock_period);
-            if(elapsed_cycles < 0) {DPRINTF(csd, "\t\t WARNING ELAPSED_TICKS IS NEGATIVE:: R%d update time, last ticks :: %d\n ", regIdx.index(), elapsed_cycles);}
+            //int64_t elapsed_cycles = divCeil(elapsed_ticks, clock_period);
+            uint64_t elapsed_cycles_handcalc = (elapsed_ticks + clock_period - 1) / clock_period;
+            if(elapsed_cycles_handcalc < 0) {DPRINTF(csd, "\t\t WARNING ELAPSED_TICKS IS NEGATIVE:: R%d update time, last ticks :: %d\n ", regIdx.index(), elapsed_cycles);}
             // DPRINTF(csd, "\t\t GOT INT R%d update time, last ticks :: %d\n ", regIdx.index(), int_reg_updates_ticks[regIdx.index()]); 
             // DPRINTF(csd, "\t\t INT Reg update time, elapsed cycles :: %d\n ", elapsed_cycles); 
-            return elapsed_cycles;
+            return elapsed_cycles_handcalc;
         }
     }
     return 0;

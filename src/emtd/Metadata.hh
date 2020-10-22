@@ -129,17 +129,17 @@ public:
 	Emtd_InsnTaintEntry getInsnTaintEntry(Addr pc);
 
 	// Encryption Helper Functions
-	int 	get_enc_latency();
-	void 	record_reg_update(RegId regIdx, bool is_fp_op, bool is_tainted, bool is_load);
-	void  	void_reg_update(RegId regIdx, bool is_fp_op);
-	int 	get_reg_update_time_cycles(RegId regIdx, bool is_fp_op);
+	uint64_t 	get_enc_latency();
+	void 		record_reg_update(RegId regIdx, bool is_fp_op, bool is_tainted, bool is_load);
+	void  		void_reg_update(RegId regIdx, bool is_fp_op);
+	uint64_t 	get_reg_update_time_cycles(RegId regIdx, bool is_fp_op);
 
 private:
 	std::string filename;
 	std::string insfilename;
 	std::string progname;
-	int			clock_period;
-	int 		enc_latency;
+	uint64_t	clock_period;
+	uint64_t 	enc_latency;
 	// Addr libc_start;
 
 private:
