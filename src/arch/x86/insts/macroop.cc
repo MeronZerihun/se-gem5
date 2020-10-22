@@ -590,13 +590,15 @@ MacroopBase::cTXAlterMicroops(bool arith_tainted, bool mem_tainted, Addr pc, Met
 	}
 
 	else if(mem_tainted){
-		// CAN NO LONGER EARLY EXIT CUZ TIME DIFFERS ON HIT/MISS, OR LAST REG UPDATE
-		// 
-		//FIND AND REPLACE ENC LATENCY IF PRESENT
-		//Loop until you find an enc
-		// 	Get enc dest/src register
-		//  Replace instruction with new one with updated update_tiem
-		//  Use dest/src register to do this
+		// Can no longer early-exit here (Previously early-exit on first FETCH of insn)
+		// ENC/DEC have already been injected, but their latencies will differ
+		// based on when the dest register was last updated. This timing may
+		// differ from the first FETCH of this insn, so we must check again
+
+		// We determine ENC/DEC latency at insn FETCH, but it is possible the latency
+		// would change/differ if other insns w/ the same dest register are committed 
+		// between now (the FETCH stage) and the EX/WB stage of this insn. We assume
+		// this case is infrequent so we ignore its influence... 
 
 		DPRINTF(csd, "MacroopBase::cTXAlterMicroops():: Modifying microops of tainted instruction 0x%x\n", pc);
 
@@ -622,7 +624,7 @@ MacroopBase::cTXAlterMicroops(bool arith_tainted, bool mem_tainted, Addr pc, Met
 				else {
 					microops[i] = getInjInsn_Enc(dest, metadata);
 				}
-				//microops[i]->clearLastMicroop(); //DO WE NEED T HIS
+				//microops[i]->clearLastMicroop(); //DO WE NEED THIS
 				DPRINTF(csd, "(NEW %d)-- %s\n", i, microops[i]->generateDisassembly(0, NULL));
 			}
 		}
