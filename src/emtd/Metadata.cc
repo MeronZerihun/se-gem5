@@ -348,6 +348,17 @@ void Metadata::record_reg_update(RegId regIdx, bool is_fp_op, bool is_tainted, b
     }
 }
 
+void Metadata::void_reg_update(RegId regIdx, bool is_fp_op){
+
+    if (!regIdx.isZeroReg()){
+        if (is_fp_op){
+            fp_reg_updates_ticks[regIdx.index()] = 1;
+        }
+        else {
+            int_reg_updates_ticks[regIdx.index()] = 1;
+        }
+    }
+}
 
 /******************************************************************/
 //  END: Helper functions for shadow register encryption
@@ -487,12 +498,14 @@ void Metadata::commit_insn(ThreadContext *tc, StaticInstPtr inst, Addr pc, Trace
             if (inst->isLoad()){
                 //if(inst->isInteger() && !inst->isFloating()){
                 if(diss.find("ldfp ") != std::string::npos){
-                    record_reg_update(RD, true, is_tainted, true); 
+                    //record_reg_update(RD, true, is_tainted, true); 
+                    void_reg_update(RD, true);
                     if(is_tainted) { DPRINTF(csd, "Recording FP Reg Update for Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
                 }
                 //else if(!inst->isInteger() && inst->isFloating()){
                 else if(diss.find("ld ") != std::string::npos){
-                    record_reg_update(RD, false, is_tainted, true); 
+                    //record_reg_update(RD, false, is_tainted, true); 
+                    void_reg_update(RD, false)
                     if(is_tainted) { DPRINTF(csd, "Recording INT Reg Update for Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
                 }
                 else if (is_tainted){

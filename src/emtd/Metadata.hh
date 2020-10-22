@@ -131,6 +131,7 @@ public:
 	// Encryption Helper Functions
 	int 	get_enc_latency();
 	void 	record_reg_update(RegId regIdx, bool is_fp_op, bool is_tainted, bool is_load);
+	void  	void_reg_update(RegId regIdx, bool is_fp_op);
 	int 	get_reg_update_time_cycles(RegId regIdx, bool is_fp_op);
 
 private:
