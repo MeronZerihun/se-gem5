@@ -505,7 +505,7 @@ void Metadata::commit_insn(ThreadContext *tc, StaticInstPtr inst, Addr pc, Trace
                 //else if(!inst->isInteger() && inst->isFloating()){
                 else if(diss.find("ld ") != std::string::npos){
                     //record_reg_update(RD, false, is_tainted, true); 
-                    void_reg_update(RD, false)
+                    void_reg_update(RD, false);
                     if(is_tainted) { DPRINTF(csd, "Recording INT Reg Update for Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
                 }
                 else if (is_tainted){
