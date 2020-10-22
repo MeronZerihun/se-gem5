@@ -598,6 +598,8 @@ MacroopBase::cTXAlterMicroops(bool arith_tainted, bool mem_tainted, Addr pc, Met
 		//  Replace instruction with new one with updated update_tiem
 		//  Use dest/src register to do this
 
+		DPRINTF(csd, "MacroopBase::cTXAlterMicroops():: Modifying microops of tainted instruction 0x%x\n", pc);
+
 		for(int i=0;i<numMicroops;i++){
 
 			std::__cxx11::string diss = microops[i]->generateDisassembly(0, NULL);
@@ -620,6 +622,7 @@ MacroopBase::cTXAlterMicroops(bool arith_tainted, bool mem_tainted, Addr pc, Met
 				else {
 					microops[i] = getInjInsn_Enc(dest, metadata);
 				}
+				//microops[i]->clearLastMicroop(); //DO WE NEED T HIS
 				DPRINTF(csd, "(NEW %d)-- %s\n", i, microops[i]->generateDisassembly(0, NULL));
 			}
 		}
