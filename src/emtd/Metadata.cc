@@ -487,11 +487,11 @@ void Metadata::commit_insn(ThreadContext *tc, StaticInstPtr inst, Addr pc, Trace
             if (inst->isLoad()){
                 //if(inst->isInteger() && !inst->isFloating()){
                 if(diss.find("ld") != std::string::npos){
-                    record_reg_update(RD, inst->isFloating(), is_tainted, true); // if(is_tainted) { DPRINTF(csd, "Recording INT Reg Update for Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
+                    record_reg_update(RD, false, is_tainted, true); // if(is_tainted) { DPRINTF(csd, "Recording INT Reg Update for Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
                 }
                 //else if(!inst->isInteger() && inst->isFloating()){
                 else if(diss.find("ldfp") != std::string::npos){
-                    record_reg_update(RD, inst->isFloating(), is_tainted, true); // if(is_tainted) { DPRINTF(csd, "Recording FP Reg Update for Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
+                    record_reg_update(RD, true, is_tainted, true); // if(is_tainted) { DPRINTF(csd, "Recording FP Reg Update for Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
                 }
                 else{
                     DPRINTF(csd, "WARNING:: LOAD is not FP or INT: Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL));
