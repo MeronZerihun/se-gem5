@@ -10,5 +10,5 @@ class Metadata(SimObject):
     progname = Param.String('', "EMTD program file name") 
     libc_start = Param.Addr("PC of libc, any PCs below (<) are from the program")
     clock = Param.Int(400, "Clock period in ticks, e.g. 2.5Ghz = 400 clock period")
-    enc_latency = Param.Int(40, "Encryption latency in cycles")
+    enc_latency = Param.Int(20, "Encryption latency in cycles")
 

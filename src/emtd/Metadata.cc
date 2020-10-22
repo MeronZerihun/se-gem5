@@ -495,7 +495,7 @@ void Metadata::commit_insn(ThreadContext *tc, StaticInstPtr inst, Addr pc, Trace
                     record_reg_update(RD, false, is_tainted, true); 
                     if(is_tainted) { DPRINTF(csd, "Recording INT Reg Update for Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
                 }
-                else{
+                else if (is_tainted){
                     DPRINTF(csd, "WARNING:: LOAD is not FP or INT: Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL));
                 }
             }
