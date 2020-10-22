@@ -293,17 +293,18 @@ void Metadata::deallocate_stack_tags(){
 /******************************************************************/
 //  Helper functions for shadow register encryption
 /******************************************************************/
-int Metadata::get_enc_latency(){
+uint64_t Metadata::get_enc_latency(){
     return enc_latency;
 }
 
-int Metadata::get_reg_update_time_cycles(RegId regIdx, bool is_fp_op){
+uint64_t Metadata::get_reg_update_time_cycles(RegId regIdx, bool is_fp_op){
 
     //Returns how many cycles ago the last reg update was
     if (is_fp_op){
         if (fp_reg_updates_ticks.find(regIdx.index()) != fp_reg_updates_ticks.end()){
-            int elapsed_ticks = curTick() - fp_reg_updates_ticks[regIdx.index()];
-            int elapsed_cycles = divCeil(elapsed_ticks, clock_period);
+            uint64_t elapsed_ticks = curTick() - fp_reg_updates_ticks[regIdx.index()];
+	        //uint64_t elapsed_cycles = divCeil(elapsed_ticks, clock_period);
+	        uint64_t elapsed_cycles = (elapsed_ticks + clock_period - 1) / clock_period;
             // DPRINTF(csd, "\t\t GOT FP R%d update time, last ticks :: %d\n ", regIdx.index(), fp_reg_updates_ticks[regIdx.index()]); 
             // DPRINTF(csd, "\t\t GOT FP Reg update time, elapsed cycles :: %d\n ", elapsed_cycles); 
             return elapsed_cycles;
@@ -311,8 +312,9 @@ int Metadata::get_reg_update_time_cycles(RegId regIdx, bool is_fp_op){
     }
     else {
         if (int_reg_updates_ticks.find(regIdx.index()) != int_reg_updates_ticks.end()){
-            int elapsed_ticks = curTick() - int_reg_updates_ticks[regIdx.index()];
-            int elapsed_cycles = divCeil(elapsed_ticks, clock_period);
+            uint64_t elapsed_ticks = curTick() - int_reg_updates_ticks[regIdx.index()];
+            //int64_t elapsed_cycles = divCeil(elapsed_ticks, clock_period);
+            uint64_t elapsed_cycles = (elapsed_ticks + clock_period - 1) / clock_period;
             // DPRINTF(csd, "\t\t GOT INT R%d update time, last ticks :: %d\n ", regIdx.index(), int_reg_updates_ticks[regIdx.index()]); 
             // DPRINTF(csd, "\t\t INT Reg update time, elapsed cycles :: %d\n ", elapsed_cycles); 
             return elapsed_cycles;
@@ -326,13 +328,13 @@ int Metadata::get_reg_update_time_cycles(RegId regIdx, bool is_fp_op){
 void Metadata::record_reg_update(RegId regIdx, bool is_fp_op, bool is_tainted, bool is_load){
     // If insn is not tainted, no delay for store path, shadow register is duplicate
     // If load, delay for store path is modeled by dec injection, so no added delay here (load followed by immediate store)
-    int update_time = (is_load || !is_tainted) ? 1 : curTick();
+    uint64_t update_time = (is_load || !is_tainted) ? 1 : curTick();
 
     if (!regIdx.isZeroReg()){
         if (is_fp_op){
             //Debug prints
             // if(fp_reg_updates_ticks.find(regIdx.index()) != fp_reg_updates_ticks.end()){
-            //     if(update_time != fp_reg_updates_ticks[regIdx.index()]){ DPRINTF(csd, "\t\t SET FP R%d update time, last ticks :: %d\n ", regIdx.index(), update_time); }
+            // if(update_time != fp_reg_updates_ticks[regIdx.index()]){ DPRINTF(csd, "\t\t SET FP R%d update time, last ticks :: %d\n ", regIdx.index(), update_time); }
             // } else { DPRINTF(csd, "\t\t INIT FP R%d update time, last ticks :: %d\n ", regIdx.index(), update_time); }
             //End debug prints
             fp_reg_updates_ticks[regIdx.index()] = update_time;
@@ -340,7 +342,7 @@ void Metadata::record_reg_update(RegId regIdx, bool is_fp_op, bool is_tainted, b
         else {
             //Debug prints
             // if(int_reg_updates_ticks.find(regIdx.index()) != int_reg_updates_ticks.end()){
-            //     if(update_time != int_reg_updates_ticks[regIdx.index()]){ DPRINTF(csd, "\t\t SET FP R%d update time, last ticks :: %d\n ", regIdx.index(), int_reg_updates_ticks[regIdx.index()]); }
+            // if(update_time != int_reg_updates_ticks[regIdx.index()]){ DPRINTF(csd, "\t\t SET FP R%d update time, last ticks :: %d\n ", regIdx.index(), int_reg_updates_ticks[regIdx.index()]); }
             // } else { DPRINTF(csd, "\t\t INIT FP R%d update time, last ticks :: %d\n ", regIdx.index(), int_reg_updates_ticks[regIdx.index()]); }
             //End debug prints
             int_reg_updates_ticks[regIdx.index()] = update_time;
@@ -348,6 +350,17 @@ void Metadata::record_reg_update(RegId regIdx, bool is_fp_op, bool is_tainted, b
     }
 }
 
+void Metadata::void_reg_update(RegId regIdx, bool is_fp_op){
+
+    if (!regIdx.isZeroReg()){
+        if (is_fp_op){
+            fp_reg_updates_ticks[regIdx.index()] = 1;
+        }
+        else {
+            int_reg_updates_ticks[regIdx.index()] = 1;
+        }
+    }
+}
 
 /******************************************************************/
 //  END: Helper functions for shadow register encryption
@@ -485,18 +498,20 @@ void Metadata::commit_insn(ThreadContext *tc, StaticInstPtr inst, Addr pc, Trace
         else if (inst->isMemRef())
         {
             if (inst->isLoad()){
-                //if(inst->isInteger() && !inst->isFloating()){
-                if(diss.find("ldfp ") != std::string::npos){
-                    record_reg_update(RD, true, is_tainted, true); 
-                    if(is_tainted) { DPRINTF(csd, "Recording FP Reg Update for Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
+                if(diss.find(" t") != std::string::npos){
+                    if(is_tainted) { DPRINTF(csd, "WARNING:: IGNORING Reg Update for TEMP register in Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
+                    return;
                 }
-                //else if(!inst->isInteger() && inst->isFloating()){
+
+                if(diss.find("ldfp ") != std::string::npos){
+                    void_reg_update(RD, true);   // if(is_tainted) { DPRINTF(csd, "Recording FP Reg Update for Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
+                }
                 else if(diss.find("ld ") != std::string::npos){
-                    record_reg_update(RD, false, is_tainted, true); 
-                    if(is_tainted) { DPRINTF(csd, "Recording INT Reg Update for Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
+                    void_reg_update(RD, false);  // if(is_tainted) { DPRINTF(csd, "Recording INT Reg Update for Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
                 }
                 else if (is_tainted){
                     DPRINTF(csd, "WARNING:: LOAD is not FP or INT: Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL));
+                    return;
                 }
             }
             else if (inst->isStore()){

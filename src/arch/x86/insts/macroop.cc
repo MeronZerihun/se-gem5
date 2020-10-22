@@ -212,7 +212,7 @@ MacroopBase::countStoreMicros (StaticInstPtr store_microop){
 StaticInstPtr MacroopBase::getInjInsn_Enc(InstRegIndex dest, Metadata* metadata){
 
 	StaticInstPtr inj_enc; 
-	int update_time = metadata->get_reg_update_time_cycles(dest, false);
+	uint64_t update_time = metadata->get_reg_update_time_cycles(dest, false);
 	
 	DPRINTF(csd, "--------- R%d Elapsed Cycles is %d\n", dest.index(), update_time);
 
@@ -314,7 +314,7 @@ StaticInstPtr MacroopBase::getInjInsn_Enc(InstRegIndex dest, Metadata* metadata)
 StaticInstPtr MacroopBase::getInjInsn_EncFP(InstRegIndex dest, Metadata* metadata){
 
 	StaticInstPtr inj_enc; 
-	int update_time = metadata->get_reg_update_time_cycles(dest, true);
+	uint64_t update_time = metadata->get_reg_update_time_cycles(dest, true);
 	
 	DPRINTF(csd, "--------- R%d Elapsed Cycles is %d\n", dest.index(), update_time);
 
