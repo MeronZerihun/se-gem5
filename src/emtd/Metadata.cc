@@ -27,7 +27,8 @@
 #include "debug/csd.hh"
 
 Metadata::Metadata(MetadataParams *params) : SimObject(params), filename(params->filename), insfilename(params->insfilename),  
-    progname(params->progname), clock_period(params->clock), enc_latency(params->enc_latency)
+    progname(params->progname), clock_period(params->clock), enc_latency(params->enc_latency), cache_lines(params->cache_lines),
+    cache_ways(params->cache_ways)
 {
     // Do some error checking on this path: See it exists
     if (access(filename.c_str(), F_OK) != 0)
@@ -369,6 +370,84 @@ void Metadata::void_reg_update(RegId regIdx, bool is_fp_op){
 
 
 
+/******************************************************************/
+//  Helper functions for shadow cache/cam
+/******************************************************************/
+
+//Returns line in cache
+int	    Metadata::get_shadow_cache_line_no(uint64_t counter){
+    int line_no = 1;
+    assert(line_no < cache_lines);
+    return line_no;
+}	
+
+
+//Adds counter to Cache
+void    Metadata::update_shadow_cache(uint64_t counter){
+    int line_no= get_shadow_cache_line_no(counter);
+    //Do something
+} 	
+
+
+//Adds counter to CAM
+void    Metadata::update_shadow_cam(uint64_t counter){}
+
+
+//Checks if counter is in Cache
+bool    Metadata::index_shadow_cache(uint64_t counter){
+    int line_no= get_shadow_cache_line_no(counter);
+    for(int i=0; i<cache_ways; i++){
+        if(shadow_cache[line_no][i] == counter){
+            return true;
+        }
+    }
+    return false;
+}
+
+
+//Checks if counter is in CAM
+bool    Metadata::index_shadow_cam(uint64_t counter){ return false; }
+
+
+bool    Metadata::access_shadow_cache(memaddr_t eff_addr){
+    //Retrieves counter from memory_counters, indexes/updates Cache using counter, Returns hit
+    if (memory_counters.find(eff_addr) != memory_counters.end()){
+        uint64_t counter = memory_counters[eff_addr];
+        bool counter_present = index_shadow_cache(counter);
+        if(counter_present){
+            // DO something? Update LRU chain?
+            return true;
+        }
+        else{
+            // Update Cache?? Or not until later??
+            return false;
+        }
+    }
+    else{
+        DPRINTF(csd, "WARNING:: Effective Address 0x%x is not tracked in MemoryCounters::\n ", eff_addr);
+        return false;
+    }
+}
+
+
+//Retrieves counter from memory_counters, indexes/updates CAM using counter, Returns hit
+bool    Metadata::access_shadow_cam(memaddr_t eff_addr){ return false; }
+    
+/******************************************************************/
+//  END: Helper functions for shadow cache/cam
+/******************************************************************/
+
+
+
+
+
+
+
+
+
+
+
+
 // Populates both the memory_tags and insns_consts_tags maps
 void Metadata::load_metadata_binary(const char *filename){
 
@@ -497,6 +576,8 @@ void Metadata::commit_insn(ThreadContext *tc, StaticInstPtr inst, Addr pc, Trace
         /*** Loads/Stores ***/
         else if (inst->isMemRef())
         {
+            Addr eff_addr = get_mem_addr(inst, traceData);
+
             if (inst->isLoad()){
                 if(diss.find(" t") != std::string::npos){
                     if(is_tainted) { DPRINTF(csd, "WARNING:: IGNORING Reg Update for TEMP register in Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
@@ -515,6 +596,12 @@ void Metadata::commit_insn(ThreadContext *tc, StaticInstPtr inst, Addr pc, Trace
                 }
             }
             else if (inst->isStore()){
+                // Add eff_addr to memory_counters
+                memory_counters[eff_addr] = global_counter; 
+                // Increment coutner
+                global_counter++; 
+                // Add counter to cache
+                update_shadow_cache(memory_counters[eff_addr])
                 return;
             }
             else {

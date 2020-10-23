@@ -134,13 +134,35 @@ public:
 	void  		void_reg_update(RegId regIdx, bool is_fp_op);
 	uint64_t 	get_reg_update_time_cycles(RegId regIdx, bool is_fp_op);
 
+
 private:
 	std::string filename;
 	std::string insfilename;
 	std::string progname;
 	uint64_t	clock_period;
 	uint64_t 	enc_latency;
+	uint64_t 	cache_lines;
+	uint64_t	cache_ways;
 	// Addr libc_start;
+
+
+	// Shadow Cache/CAM Helper Functions
+private:
+	std::map<memaddr_t, uint64_t> 	memory_counters;		// Current state of memory counters 
+	uint64_t 	global_counter = 0; 
+	uint64_t 	shadow_cache[cache_lines][cache_ways];
+	uint64_t 	shadow_cam[cache_lines];
+	int			get_shadow_cache_line_no(uint64_t counter);	//Returns line in cache
+	void		update_shadow_cache(uint64_t counter); 		//Adds counter to Cache
+	void		update_shadow_cam(uint64_t counter);		//Adds counter to CAM
+	bool		index_shadow_cache(uint64_t counter); 		//Checks if counter is in Cache
+	bool		index_shadow_cam(uint64_t counter);			//Checks if counter is in CAM
+public:
+	bool		access_shadow_cache(memaddr_t eff_addr);	//Retrieves counter from memory_counters, indexes/updates Cache using counter, Returns hit
+	bool		access_shadow_cam(memaddr_t eff_addr);		//Retrieves counter from memory_counters, indexes/updates CAM using counter, Returns hit
+
+
+
 
 private:
 	// Some nice string representations of tags
