@@ -53,8 +53,9 @@ ENC_LATENCY = SIMON_LATENCY
 
 #### BEGIN EMTD
 class EncryptDecrypt(FUDesc):
-    opList = [  OpDesc(opClass='Encrypt', opLat=ENC_LATENCY, pipelined=True),
-                OpDesc(opClass='Decrypt', opLat=ENC_LATENCY, pipelined=True),
+    opList = [  OpDesc(opClass='Encrypt',    opLat=ENC_LATENCY, pipelined=True),
+                OpDesc(opClass='Decrypt',    opLat=ENC_LATENCY, pipelined=True),
+                OpDesc(opClass='DecryptHit', opLat=2,           pipelined=True),  ##TODO:: Lookup Latency?
                 OpDesc(opClass='Encrypt1',  opLat=ENC_LATENCY-1,  pipelined=True),
                 OpDesc(opClass='Encrypt2',  opLat=ENC_LATENCY-2,  pipelined=True),
                 OpDesc(opClass='Encrypt3',  opLat=ENC_LATENCY-3,  pipelined=True),

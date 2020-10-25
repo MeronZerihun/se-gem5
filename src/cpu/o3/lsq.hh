@@ -1048,6 +1048,10 @@ class LSQ
     /** The IEW stage pointer. */
     IEW *iewStage;
 
+    //Begin EMTD
+    Metadata *metadata;
+    //END EMTD
+
     /** Is D-cache blocked? */
     bool cacheBlocked() const;
     /** Set D-cache blocked status */

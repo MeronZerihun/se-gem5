@@ -57,11 +57,13 @@
 #include "debug/Writeback.hh"
 #include "params/DerivO3CPU.hh"
 
+#include "emtd/Metadata.hh"
+
 using namespace std;
 
 template <class Impl>
 LSQ<Impl>::LSQ(O3CPU *cpu_ptr, IEW *iew_ptr, DerivO3CPUParams *params)
-    : cpu(cpu_ptr), iewStage(iew_ptr),
+    : cpu(cpu_ptr), iewStage(iew_ptr), metadata(params->metadata),
       _cacheBlocked(false),
       cacheStorePorts(params->cacheStorePorts), usedStorePorts(0),
       cacheLoadPorts(params->cacheLoadPorts), usedLoadPorts(0),
@@ -739,6 +741,14 @@ LSQ<Impl>::pushRequest(const DynInstPtr& inst, bool isLoad, uint8_t *data,
             inst->effAddr = req->getVaddr();
             inst->effSize = size;
             inst->effAddrValid(true);
+
+            //BEGIN EMTD
+            if(inst->macroop && metadata->isTainted(inst->instAddr())){
+                //DPRINTF(csd, "MacroopBase::cTXCheckShadowCache():: Accessing ShadowCache for tainted instruction 0x%x\n", inst->instAddr());
+                Emtd_InsnTaintEntry entry = metadata->getInsnTaintEntry(thisPC.instAddr());
+                inst->macroop->cTXCheckShadowCache(entry.arith_tainted, entry.mem_tainted, inst->instAddr(), inst->effAddr, metadata);
+            }
+            //END EMTD           
 
             if (cpu->checker) {
                 inst->reqToVerify = std::make_shared<Request>(*req->request());

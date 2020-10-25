@@ -109,6 +109,12 @@ StaticInst::cTXAlterMicroops(bool arith_tainted, bool mem_tainted, Addr pc, Meta
 	 panic("StaticInst::cTXAlterMicroops() called on instruction "
 	          "that is not microcoded.");
 }
+
+int
+StaticInst::cTXCheckShadowCache(bool arith_tainted, bool mem_tainted, Addr pc, Addr effAddr, Metadata* metadata){
+	 panic("StaticInst::cTXCheckShadowCache() called on instruction "
+	          "that is not microcoded.");
+}
 //End EMTD
 
 TheISA::PCState

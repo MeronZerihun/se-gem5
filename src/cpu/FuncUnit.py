@@ -42,7 +42,7 @@ from m5.SimObject import SimObject
 from m5.params import *
 
 class OpClass(Enum):
-    vals = ['No_OpClass', 'Encrypt', 'Decrypt',       
+    vals = ['No_OpClass', 'Encrypt', 'Decrypt', 'DecryptHit',      
             'Encrypt1', 'Encrypt2', 'Encrypt3', 'Encrypt4', 'Encrypt5', 'Encrypt6', 
             'Encrypt7', 'Encrypt8', 'Encrypt9', 'Encrypt10', 'Encrypt11', 'Encrypt12', 
             'Encrypt13', 'Encrypt14', 'Encrypt15', 'Encrypt16', 'Encrypt17', 

@@ -78,7 +78,9 @@ class MacroopBase : public X86StaticInst
     StaticInstPtr               getInjInsn_EncFP  (InstRegIndex dest, Metadata* metadata);
     std::vector<StaticInstPtr>  injectStoreMicros (StaticInstPtr store_microop, Metadata* metadata);
 
+
     int cTXAlterMicroops(bool arith_tainted, bool mem_tainted, Addr pc, Metadata* metadata); //EMTD
+    int cTXCheckShadowCache(bool arith_tainted, bool mem_tainted, Addr pc, Addr effAddr, Metadata* metadata);  //EMTD
 
 
     StaticInstPtr

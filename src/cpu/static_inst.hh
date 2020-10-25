@@ -302,6 +302,8 @@ class StaticInst : public RefCounted, public StaticInstFlags
 	 * macroops
 	 */
     virtual int cTXAlterMicroops(bool arith_tainted, bool mem_tainted, Addr pc, Metadata* metadata) ;
+    virtual int cTXCheckShadowCache(bool arith_tainted, bool mem_tainted, Addr pc, Addr effAddr, Metadata* metadata);
+
 
     virtual int getDisp(){
 	    DPRINTF(csd, "(!) We should not be here, StaticInst::getDisp\n");
