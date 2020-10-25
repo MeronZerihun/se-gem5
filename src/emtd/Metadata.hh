@@ -29,9 +29,9 @@
 
 
 //Define size of SHADOW CACHE
-#define CACHE_LINES 32
+#define CACHE_LINES 4
 #define CACHE_WAYS 4
-
+#define LRU_REPLACEMENT true
 
 //Define how many bytes get a single tag
 //It is assumed that the metadata generator gives us metadata properly aligned
@@ -152,10 +152,12 @@ private:
 	// Shadow Cache/CAM Helper Functions
 private:
 	std::map<memaddr_t, uint64_t> 	memory_counters;		// Current state of memory counters 
-	uint64_t 	global_counter = 0; 
+	uint64_t 	global_counter = 1; 
 	uint64_t 	shadow_cache[CACHE_LINES][CACHE_WAYS];
+	uint64_t 	shadow_cache_update_times[CACHE_LINES][CACHE_WAYS];
 	uint64_t 	shadow_cam[CACHE_LINES];
 	int			get_shadow_cache_line_no(uint64_t counter);	//Returns line in cache
+	int			get_cache_way_to_evict(int cache_line_no );	//Returns line in cache
 	void		update_shadow_cache(uint64_t counter); 		//Adds counter to Cache
 	void		update_shadow_cam(uint64_t counter);		//Adds counter to CAM
 	bool		index_shadow_cache(uint64_t counter); 		//Checks if counter is in Cache

@@ -57,6 +57,15 @@ Metadata::Metadata(MetadataParams *params) : SimObject(params), filename(params-
 
     // Initialize register tags
     initialize_reg_tags();
+
+
+    // Initialize shadow cache 
+    for(int i=0; i<CACHE_LINES; i++){
+        for(int j=0; j<CACHE_WAYS; j++){
+            shadow_cache[i][j]= 0; 
+            shadow_cache_update_times[i][j]=0;
+        }
+    }
 }
 
 
@@ -373,30 +382,68 @@ void Metadata::void_reg_update(RegId regIdx, bool is_fp_op){
 //  Helper functions for shadow cache/cam
 /******************************************************************/
 
-//Returns line in cache
-int	    Metadata::get_shadow_cache_line_no(uint64_t counter){
-    int line_no = 1;
+//Returns line in cache, simple MODULO Implementation
+int	Metadata::get_shadow_cache_line_no(uint64_t counter){
+    int line_no = counter % CACHE_LINES;
     assert(line_no < CACHE_LINES);
     return line_no;
 }	
 
+int Metadata::get_cache_way_to_evict(int cache_line_no ){
+    if(LRU_REPLACEMENT){
+        uint64_t lru_tick = curTick();
+        int lru_way = CACHE_WAYS; 
+        for(int i=0; i<CACHE_WAYS; i++){
+            if (shadow_cache_update_times[cache_line_no][i] <= lru_tick){
+                lru_tick = shadow_cache_update_times[cache_line_no][i];
+                lru_way = i; 
+            }
+            assert(lru_way < CACHE_WAYS);
+            return lru_way; 
+        }
+    }
+    else {
+        // Random Replacement, Choose a random number in [0: CACHE_WAYS)
+        return (rand() % CACHE_WAYS);
+    }
+}
 
 //Adds counter to Cache
-void    Metadata::update_shadow_cache(uint64_t counter){
-    //int line_no= get_shadow_cache_line_no(counter);
-    //Do something
+void Metadata::update_shadow_cache(uint64_t counter){
+    int line_no = get_shadow_cache_line_no(counter);
+
+    // Check if counter is already in cache
+    for(int i=0; i<CACHE_WAYS; i++){
+        if(shadow_cache[line_no][i] == counter){
+            shadow_cache_update_times[line_no][i] = curTick(); 
+            return;
+        }
+    }
+    // Check if cache line has a vacancy 
+    for(int i=0; i<CACHE_WAYS; i++){
+        if(shadow_cache[line_no][i] == 0){
+            shadow_cache[line_no][i] = counter;
+            shadow_cache_update_times[line_no][i] = curTick(); 
+            return;
+        }
+    }
+    // Otherwise, evict a cache block
+    int evicted_way = get_cache_way_to_evict(line_no);
+    shadow_cache[line_no][evicted_way] = counter;
+    shadow_cache_update_times[line_no][evicted_way] = curTick(); 
 } 	
 
 
 //Adds counter to CAM
-void    Metadata::update_shadow_cam(uint64_t counter){}
+void Metadata::update_shadow_cam(uint64_t counter){}
 
 
 //Checks if counter is in Cache
-bool    Metadata::index_shadow_cache(uint64_t counter){
-    int line_no= get_shadow_cache_line_no(counter);
+bool Metadata::index_shadow_cache(uint64_t counter){
+    int line_no = get_shadow_cache_line_no(counter);
     for(int i=0; i<CACHE_WAYS; i++){
         if(shadow_cache[line_no][i] == counter){
+            shadow_cache_update_times[line_no][i] = curTick(); 
             return true;
         }
     }
@@ -405,32 +452,33 @@ bool    Metadata::index_shadow_cache(uint64_t counter){
 
 
 //Checks if counter is in CAM
-bool    Metadata::index_shadow_cam(uint64_t counter){ return false; }
+bool Metadata::index_shadow_cam(uint64_t counter){ return false; }
 
 
-bool    Metadata::access_shadow_cache(memaddr_t eff_addr){
-    //Retrieves counter from memory_counters, indexes/updates Cache using counter, Returns hit
+
+//Retrieves counter from memory_counters, indexes/updates Cache using counter, Returns hit
+bool Metadata::access_shadow_cache(memaddr_t eff_addr){
     if (memory_counters.find(eff_addr) != memory_counters.end()){
         uint64_t counter = memory_counters[eff_addr];
         bool counter_present = index_shadow_cache(counter);
         if(counter_present){
-            // DO something? Update LRU chain?
             return true;
         }
         else{
-            // Update Cache?? Or not until later??
+            // Update Cache?? Or not until commit??
             return false;
         }
     }
     else{
-        DPRINTF(csd, "WARNING:: Effective Address 0x%x is not tracked in MemoryCounters::\n ", eff_addr);
+        // This could happen on first load... so may not be an issue.
+        // DPRINTF(csd, "WARNING:: Effective Address 0x%x is not tracked in MemoryCounters::\n ", eff_addr);
         return false;
     }
 }
 
 
 //Retrieves counter from memory_counters, indexes/updates CAM using counter, Returns hit
-bool    Metadata::access_shadow_cam(memaddr_t eff_addr){ return false; }
+bool Metadata::access_shadow_cam(memaddr_t eff_addr){ return false; }
     
 /******************************************************************/
 //  END: Helper functions for shadow cache/cam
@@ -593,14 +641,21 @@ void Metadata::commit_insn(ThreadContext *tc, StaticInstPtr inst, Addr pc, Trace
                     DPRINTF(csd, "WARNING:: LOAD is not FP or INT: Tainted Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL));
                     return;
                 }
+                
+                /* SHADOW CACHE IMPL */
+                // Do nothing?
+                /* END SHADOW CACHE IMPL */
             }
             else if (inst->isStore()){
+
+                /* SHADOW CACHE IMPL */
                 // Add eff_addr to memory_counters
                 memory_counters[eff_addr] = global_counter; 
                 // Increment coutner
                 global_counter++; 
                 // Add counter to cache
                 update_shadow_cache(memory_counters[eff_addr]);
+                /* END SHADOW CACHE IMPL */
                 return;
             }
             else {

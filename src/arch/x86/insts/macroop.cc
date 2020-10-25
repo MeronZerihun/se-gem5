@@ -641,22 +641,17 @@ MacroopBase::cTXAlterMicroops(bool arith_tainted, bool mem_tainted, Addr pc, Met
 int 
 MacroopBase::cTXCheckShadowCache(bool arith_tainted, bool mem_tainted, Addr pc, Addr effAddr, Metadata* metadata){
 
-	DPRINTF(csd, "MacroopBase::cTXCheckShadowCache():: TESTING microops of tainted instruction 0x%x\n", pc);
 	for(int i=0;i<numMicroops;i++){
-			DPRINTF(csd, "(TEST %d)-- %s\n", i, microops[i]->generateDisassembly(0, NULL));
-
 			std::__cxx11::string diss = microops[i]->generateDisassembly(0, NULL);
-			if((diss.find("dec") != std::string::npos) && (diss.find("testdec") == std::string::npos)){
-        						
-//				X86ISA::InstRegIndex dest = InstRegIndex(env.reg);
 
-				// Replace enc function with new latency
-				//microops[i] = 	new X86ISAInst::TestDec( machInst, "TEST_DEC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, InstRegIndex(NUM_INTREGS), InstRegIndex(NUM_INTREGS), InstRegIndex(NUM_INTREGS), 4, 0); 
-				microops[i]->setOpClass(OpClass::DecryptHit);
-				//microops[i]->clearLastMicroop(); //DO WE NEED THIS
-				DPRINTF(csd, "(NEW %d)-- %s\n", i, microops[i]->generateDisassembly(0, NULL));
+			if((diss.find("dec") != std::string::npos) && (diss.find("INJ_DEC") == std::string::npos)){
+        		DPRINTF(csd, "MacroopBase::cTXCheckShadowCache():: Accessing shadow cache for microops of tainted instruction 0x%x\n", pc);
+				if(metadata->access_shadow_cache(effAddr)){
+					// Hit in shadow cache, replace OpClass with reduced-latency decrypt 
+					microops[i]->setOpClass(OpClass::DecryptHit);
+					PRINTF(csd, "(HIT %d)-- %s\n", i, microops[i]->generateDisassembly(0, NULL));
+				}
 			}
-
 	}
 	return 0;
 }
