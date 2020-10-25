@@ -644,7 +644,7 @@ MacroopBase::cTXCheckShadowCache(bool arith_tainted, bool mem_tainted, Addr pc, 
 	for(int i=0;i<numMicroops;i++){
 			std::__cxx11::string diss = microops[i]->generateDisassembly(0, NULL);
 
-			if((diss.find("dec") != std::string::npos) && (diss.find("INJ_DEC") == std::string::npos)){
+			if((diss.find("dec") != std::string::npos) && (diss.find("INJ_DEC") != std::string::npos)){
         		DPRINTF(csd, "MacroopBase::cTXCheckShadowCache():: Accessing shadow cache for microops of tainted instruction 0x%x\n", pc);
 				if(metadata->access_shadow_cache(effAddr)){
 					// Hit in shadow cache, replace OpClass with reduced-latency decrypt 
