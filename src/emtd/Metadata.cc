@@ -627,7 +627,8 @@ void Metadata::commit_insn(ThreadContext *tc, StaticInstPtr inst, Addr pc, Trace
 
             if (inst->isLoad()){
                 if(diss.find(" t") != std::string::npos){
-                    if(is_tainted) { DPRINTF(csd, "WARNING:: IGNORING Reg Update for TEMP register in Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
+                    // If this instruction is tainted and NOT injected (e.g., INJ_FAUX_ST), warning! 
+                    if(is_tainted && (diss.find("INJ") == std::string::npos)) { DPRINTF(csd, "WARNING:: IGNORING Reg Update for TEMP register in Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
                     return;
                 }
 
