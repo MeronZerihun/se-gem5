@@ -28,6 +28,11 @@
 #include <unordered_set>
 
 
+//Define size of SHADOW CACHE
+#define CACHE_LINES 32
+#define CACHE_WAYS 4
+
+
 //Define how many bytes get a single tag
 //It is assumed that the metadata generator gives us metadata properly aligned
 #define EMTD_CODE_TAG_GRANULARITY 4
@@ -141,8 +146,6 @@ private:
 	std::string progname;
 	uint64_t	clock_period;
 	uint64_t 	enc_latency;
-	uint64_t 	cache_lines;
-	uint64_t	cache_ways;
 	// Addr libc_start;
 
 
@@ -150,8 +153,8 @@ private:
 private:
 	std::map<memaddr_t, uint64_t> 	memory_counters;		// Current state of memory counters 
 	uint64_t 	global_counter = 0; 
-	uint64_t 	shadow_cache[cache_lines][cache_ways];
-	uint64_t 	shadow_cam[cache_lines];
+	uint64_t 	shadow_cache[CACHE_LINES][CACHE_WAYS];
+	uint64_t 	shadow_cam[CACHE_LINES];
 	int			get_shadow_cache_line_no(uint64_t counter);	//Returns line in cache
 	void		update_shadow_cache(uint64_t counter); 		//Adds counter to Cache
 	void		update_shadow_cam(uint64_t counter);		//Adds counter to CAM

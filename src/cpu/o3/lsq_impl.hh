@@ -745,7 +745,7 @@ LSQ<Impl>::pushRequest(const DynInstPtr& inst, bool isLoad, uint8_t *data,
             //BEGIN EMTD
             if(inst->macroop && metadata->isTainted(inst->instAddr())){
                 //DPRINTF(csd, "MacroopBase::cTXCheckShadowCache():: Accessing ShadowCache for tainted instruction 0x%x\n", inst->instAddr());
-                Emtd_InsnTaintEntry entry = metadata->getInsnTaintEntry(thisPC.instAddr());
+                Emtd_InsnTaintEntry entry = metadata->getInsnTaintEntry(inst->instAddr());
                 inst->macroop->cTXCheckShadowCache(entry.arith_tainted, entry.mem_tainted, inst->instAddr(), inst->effAddr, metadata);
             }
             //END EMTD           

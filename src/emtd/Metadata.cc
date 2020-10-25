@@ -27,8 +27,7 @@
 #include "debug/csd.hh"
 
 Metadata::Metadata(MetadataParams *params) : SimObject(params), filename(params->filename), insfilename(params->insfilename),  
-    progname(params->progname), clock_period(params->clock), enc_latency(params->enc_latency), cache_lines(params->cache_lines),
-    cache_ways(params->cache_ways)
+    progname(params->progname), clock_period(params->clock), enc_latency(params->enc_latency)
 {
     // Do some error checking on this path: See it exists
     if (access(filename.c_str(), F_OK) != 0)
@@ -377,14 +376,14 @@ void Metadata::void_reg_update(RegId regIdx, bool is_fp_op){
 //Returns line in cache
 int	    Metadata::get_shadow_cache_line_no(uint64_t counter){
     int line_no = 1;
-    assert(line_no < cache_lines);
+    assert(line_no < CACHE_LINES);
     return line_no;
 }	
 
 
 //Adds counter to Cache
 void    Metadata::update_shadow_cache(uint64_t counter){
-    int line_no= get_shadow_cache_line_no(counter);
+    //int line_no= get_shadow_cache_line_no(counter);
     //Do something
 } 	
 
@@ -396,7 +395,7 @@ void    Metadata::update_shadow_cam(uint64_t counter){}
 //Checks if counter is in Cache
 bool    Metadata::index_shadow_cache(uint64_t counter){
     int line_no= get_shadow_cache_line_no(counter);
-    for(int i=0; i<cache_ways; i++){
+    for(int i=0; i<CACHE_WAYS; i++){
         if(shadow_cache[line_no][i] == counter){
             return true;
         }
@@ -601,7 +600,7 @@ void Metadata::commit_insn(ThreadContext *tc, StaticInstPtr inst, Addr pc, Trace
                 // Increment coutner
                 global_counter++; 
                 // Add counter to cache
-                update_shadow_cache(memory_counters[eff_addr])
+                update_shadow_cache(memory_counters[eff_addr]);
                 return;
             }
             else {
