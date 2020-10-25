@@ -471,6 +471,7 @@ bool Metadata::access_shadow_cache(memaddr_t eff_addr){
     }
     else{
         // This could happen on first load... so may not be an issue.
+        // Cache is updated on LOAD/DEC COMMIT ONLY, because "ciphertext/plaintext" is not known at this point
         // DPRINTF(csd, "WARNING:: Effective Address 0x%x is not tracked in MemoryCounters::\n ", eff_addr);
         return false;
     }
@@ -644,7 +645,18 @@ void Metadata::commit_insn(ThreadContext *tc, StaticInstPtr inst, Addr pc, Trace
                 }
                 
                 /* SHADOW CACHE IMPL */
-                // Do nothing?
+                // If eff_addr is already tracked, that means there was a prior store to or load from this address
+                // We don't want to change the counter because this value is NOT MODIFIED by the load
+                // If eff_addr is NOT tracked, we can assume this is the first time a load/store occurs to this
+                // address. Thus, we initalize the memory_counter and cache location for it accordingly 
+                if (memory_counters.find(eff_addr) == memory_counters.end()){
+                    // Add eff_addr to memory_counters
+                    memory_counters[eff_addr] = global_counter; 
+                    // Increment coutner
+                    global_counter++; 
+                    // Add counter to cache
+                    update_shadow_cache(memory_counters[eff_addr]);
+                }
                 /* END SHADOW CACHE IMPL */
             }
             else if (inst->isStore()){
