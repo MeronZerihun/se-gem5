@@ -649,7 +649,7 @@ MacroopBase::cTXCheckShadowCache(bool arith_tainted, bool mem_tainted, Addr pc, 
 				if(metadata->access_shadow_cache(effAddr)){
 					// Hit in shadow cache, replace OpClass with reduced-latency decrypt 
 					microops[i]->setOpClass(OpClass::DecryptHit);
-					PRINTF(csd, "(HIT %d)-- %s\n", i, microops[i]->generateDisassembly(0, NULL));
+					DPRINTF(csd, "(HIT %d)-- %s\n", i, microops[i]->generateDisassembly(0, NULL));
 				}
 			}
 	}

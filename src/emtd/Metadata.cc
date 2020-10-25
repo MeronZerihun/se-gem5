@@ -398,9 +398,9 @@ int Metadata::get_cache_way_to_evict(int cache_line_no ){
                 lru_tick = shadow_cache_update_times[cache_line_no][i];
                 lru_way = i; 
             }
-            assert(lru_way < CACHE_WAYS);
-            return lru_way; 
-        }
+	}
+        assert(lru_way < CACHE_WAYS);
+        return lru_way;  
     }
     else {
         // Random Replacement, Choose a random number in [0: CACHE_WAYS)
