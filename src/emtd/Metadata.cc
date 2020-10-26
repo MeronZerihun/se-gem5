@@ -69,9 +69,8 @@ Metadata::Metadata(MetadataParams *params) : SimObject(params), filename(params-
 }
 
 
-template <class Impl>
 void
-Metadata<Impl>::regStats()
+Metadata::regStats()
 {
     using namespace Stats;
 
@@ -95,17 +94,17 @@ Metadata<Impl>::regStats()
         .desc("Number of times the shadow cache was updated and a block was evicted (updates on ld/st commit only)")
         .prereq(shadowCacheEvictions)
         ;
-	committedTaintedInsns;
+	committedTaintedInsns
         .name(name() + ".committedTaintedInsns")
         .desc("Number of committed instructions that are tainted")
         .prereq(committedTaintedInsns)
         ;    
-	committedTaintedLoadsStoreOps;
+	committedTaintedLoadsStoreOps
         .name(name() + ".committedTaintedLoadsStoreOps")
         .desc("Number of committed load/store ops that are tainted")
         .prereq(committedTaintedLoadsStoreOps)
         ;
-	committedEncryptDecryptOps;
+	committedEncryptDecryptOps
         .name(name() + ".committedEncryptDecryptOps")
         .desc("Number of committed encrypt/decrypt ops")
         .prereq(committedEncryptDecryptOps)
