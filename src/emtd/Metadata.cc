@@ -69,6 +69,62 @@ Metadata::Metadata(MetadataParams *params) : SimObject(params), filename(params-
 }
 
 
+template <class Impl>
+void
+Metadata<Impl>::regStats()
+{
+    using namespace Stats;
+
+    shadowCacheHits
+        .name(name() + ".shadowCacheHits")
+        .desc("Number of times the shadow cache was accessed and it was a hit")
+        .prereq(shadowCacheHits)
+        ;
+	shadowCacheMisses
+        .name(name() + ".shadowCacheMisses")
+        .desc("Number of times the shadow cache was accessed and it was a miss")
+        .prereq(shadowCacheMisses)
+        ;
+	shadowCacheAccesses
+        .name(name() + ".shadowCacheAccesses")
+        .desc("Total number of times the shadow cache was accessed")
+        .prereq(shadowCacheAccesses)
+        ;
+	shadowCacheEvictions
+        .name(name() + ".shadowCacheEvictions")
+        .desc("Number of times the shadow cache was updated and a block was evicted (updates on ld/st commit only)")
+        .prereq(shadowCacheEvictions)
+        ;
+	committedTaintedInsns;
+        .name(name() + ".committedTaintedInsns")
+        .desc("Number of committed instructions that are tainted")
+        .prereq(committedTaintedInsns)
+        ;    
+	committedTaintedLoadsStoreOps;
+        .name(name() + ".committedTaintedLoadsStoreOps")
+        .desc("Number of committed load/store ops that are tainted")
+        .prereq(committedTaintedLoadsStoreOps)
+        ;
+	committedEncryptDecryptOps;
+        .name(name() + ".committedEncryptDecryptOps")
+        .desc("Number of committed encrypt/decrypt ops")
+        .prereq(committedEncryptDecryptOps)
+        ;
+    // instsCommittedTainted //VECTOR
+    //     .init(cpu->numThreads)
+    //     .name(name() + ".committedInstsTainted")
+    //     .desc("Number of instructions committed with tainted PCs")
+    //     .flags(total)
+    //     ;
+    // timesIdled //SCALAR
+    //     .name(name() + ".timesIdled")
+    //     .desc("Number of times that the entire CPU went into an idle state and"
+    //           " unscheduled itself")
+    //     .prereq(timesIdled)
+    //     ;
+
+}
+
 
 void Metadata::initialize_reg_tags()
 {
@@ -428,6 +484,7 @@ void Metadata::update_shadow_cache(uint64_t counter){
         }
     }
     // Otherwise, evict a cache block
+    shadowCacheEvictions++;
     int evicted_way = get_cache_way_to_evict(line_no);
     shadow_cache[line_no][evicted_way] = counter;
     shadow_cache_update_times[line_no][evicted_way] = curTick(); 
@@ -458,14 +515,17 @@ bool Metadata::index_shadow_cam(uint64_t counter){ return false; }
 
 //Retrieves counter from memory_counters, indexes/updates Cache using counter, Returns hit
 bool Metadata::access_shadow_cache(memaddr_t eff_addr){
+    shadowCacheAccesses++;
     if (memory_counters.find(eff_addr) != memory_counters.end()){
         uint64_t counter = memory_counters[eff_addr];
         bool counter_present = index_shadow_cache(counter);
         if(counter_present){
+            shadowCacheHits++; 
             return true;
         }
         else{
             // Update Cache?? Or not until commit??
+            shadowCacheMisses++;
             return false;
         }
     }
@@ -473,6 +533,7 @@ bool Metadata::access_shadow_cache(memaddr_t eff_addr){
         // This could happen on first load... so may not be an issue.
         // Cache is updated on LOAD/DEC COMMIT ONLY, because "ciphertext/plaintext" is not known at this point
         // DPRINTF(csd, "WARNING:: Effective Address 0x%x is not tracked in MemoryCounters::\n ", eff_addr);
+        shadowCacheMisses++;
         return false;
     }
 }
@@ -607,6 +668,7 @@ void Metadata::commit_insn(ThreadContext *tc, StaticInstPtr inst, Addr pc, Trace
 
     bool is_tainted = false;
     if(taints.arith_tainted || taints.mem_tainted){
+        committedTaintedInsns++;
         DPRINTF(csd, "Committing Tainted Instruction 0x%x :: %s\n", pc, inst->generateDisassembly(pc, NULL));
         is_tainted = true; 
     }
@@ -618,6 +680,7 @@ void Metadata::commit_insn(ThreadContext *tc, StaticInstPtr inst, Addr pc, Trace
         /*** Enc/Dec ***/
 		if((diss.find("enc") != std::string::npos) || (diss.find("dec") != std::string::npos)){
             // Do not update for enc/dec instructions
+            committedEncryptDecryptOps++;
             return;
         }
     
@@ -627,6 +690,10 @@ void Metadata::commit_insn(ThreadContext *tc, StaticInstPtr inst, Addr pc, Trace
             Addr eff_addr = get_mem_addr(inst, traceData);
 
             if (inst->isLoad()){
+                if(is_tainted){
+                    committedTaintedLoadsStoreOps++;
+                }
+
                 if(diss.find(" t") != std::string::npos){
                     // If this instruction is tainted and NOT injected (e.g., INJ_FAUX_ST), warning! 
                     if(is_tainted && (diss.find("INJ") == std::string::npos)) { DPRINTF(csd, "WARNING:: IGNORING Reg Update for TEMP register in Instruction 0x%x :: %s\n ", pc, inst->generateDisassembly(pc, NULL)); }
@@ -654,20 +721,23 @@ void Metadata::commit_insn(ThreadContext *tc, StaticInstPtr inst, Addr pc, Trace
                     memory_counters[eff_addr] = global_counter; 
                     // Increment coutner
                     global_counter++; 
-                    // Add counter to cache
-                    update_shadow_cache(memory_counters[eff_addr]);
+                    // Add counter to cache ONLY IF INSTRUCTION IS TAINTED 
+                    if(is_tainted) { update_shadow_cache(memory_counters[eff_addr]); }
                 }
                 /* END SHADOW CACHE IMPL */
             }
             else if (inst->isStore()){
+                if(is_tainted){
+                    committedTaintedLoadsStoreOps++;
+                }
 
                 /* SHADOW CACHE IMPL */
                 // Add eff_addr to memory_counters
                 memory_counters[eff_addr] = global_counter; 
                 // Increment coutner
                 global_counter++; 
-                // Add counter to cache
-                update_shadow_cache(memory_counters[eff_addr]);
+                // Add counter to cache ONLY IF INSTRUCTION IS TAINTED (don't track untainted stores cuz they don't matter!)
+                if(is_tainted) { update_shadow_cache(memory_counters[eff_addr]); }
                 /* END SHADOW CACHE IMPL */
                 return;
             }

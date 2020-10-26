@@ -107,6 +107,7 @@ public:
 	//~Metadata();
 
 	/** Stats registering */
+	void regStats();
 	int warning_count = 0;
 
 	// Get a tag, given an addr. If tag not yet declared, give UNTAGGED
@@ -219,6 +220,18 @@ private:
 	// Helper variables used for metadata binary loading
 	uint8_t tag_bits_mask;
 	uint8_t tag_type_bits_mask;
+
+
+
+
+	/** Total number of instructions committed. */
+    Stats::Scalar shadowCacheHits;
+	Stats::Scalar shadowCacheMisses;
+	Stats::Scalar shadowCacheAccesses;
+	Stats::Scalar shadowCacheEvictions;
+	Stats::Scalar committedTaintedInsns;
+	Stats::Scalar committedTaintedLoadsStoreOps;
+	Stats::Scalar committedEncryptDecryptOps;
 };
 
 #endif // _EMTD_METADATA_H
