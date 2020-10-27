@@ -52,10 +52,8 @@ QARMA_LATENCY = 12
 ENC_LATENCY = SIMON_LATENCY
 
 #### BEGIN EMTD
-class EncryptDecrypt(FUDesc):
-    opList = [  OpDesc(opClass='Encrypt',    opLat=ENC_LATENCY, pipelined=True),
-                OpDesc(opClass='Decrypt',    opLat=ENC_LATENCY, pipelined=True),
-                OpDesc(opClass='DecryptHit', opLat=2,           pipelined=True),  ##TODO:: Lookup Latency?
+class Encrypt(FUDesc):
+    opList = [  OpDesc(opClass='Encrypt',   opLat=ENC_LATENCY, pipelined=True),
                 OpDesc(opClass='Encrypt1',  opLat=ENC_LATENCY-1,  pipelined=True),
                 OpDesc(opClass='Encrypt2',  opLat=ENC_LATENCY-2,  pipelined=True),
                 OpDesc(opClass='Encrypt3',  opLat=ENC_LATENCY-3,  pipelined=True),
@@ -96,6 +94,13 @@ class EncryptDecrypt(FUDesc):
                 #OpDesc(opClass='Encrypt38', opLat=ENC_LATENCY-38,  pipelined=True),
                 #OpDesc(opClass='Encrypt39', opLat=ENC_LATENCY-39,  pipelined=True),
                 OpDesc(opClass='EncryptNone',  opLat=1,             pipelined=True) 
+    ]    
+
+    count = 1
+
+class Decrypt(FUDesc):
+    opList = [  OpDesc(opClass='Decrypt',    opLat=ENC_LATENCY,   pipelined=True),
+                OpDesc(opClass='DecryptHit', opLat=1,             pipelined=True)
     ]    
 
     count = 1

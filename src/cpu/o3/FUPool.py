@@ -49,5 +49,5 @@ class FUPool(SimObject):
     FUList = VectorParam.FUDesc("list of FU's for this pool")
 
 class DefaultFUPool(FUPool):
-    FUList = [ EncryptDecrypt(), IntALU(), IntMultDiv(), FP_ALU(), FP_MultDiv(), ReadPort(),
+    FUList = [ Encrypt(), Decrypt(), IntALU(), IntMultDiv(), FP_ALU(), FP_MultDiv(), ReadPort(),
                SIMD_Unit(), PredALU(), WritePort(), RdWrPort(), IprPort()]
