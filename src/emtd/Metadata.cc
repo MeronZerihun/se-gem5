@@ -668,7 +668,7 @@ void Metadata::commit_insn(ThreadContext *tc, StaticInstPtr inst, Addr pc, Trace
     bool is_tainted = false;
     if(taints.arith_tainted || taints.mem_tainted){
         committedTaintedInsns++;
-        DPRINTF(csd, "Committing Tainted Instruction 0x%x :: %s\n", pc, inst->generateDisassembly(pc, NULL));
+        //DPRINTF(csd, "Committing Tainted Instruction 0x%x :: %s\n", pc, inst->generateDisassembly(pc, NULL));
         is_tainted = true; 
     }
 
@@ -785,9 +785,9 @@ void Metadata::propagate_result_tag_o3(ThreadContext *tc, StaticInstPtr inst, Ad
     X86Ops Ops;
     std::string opc = inst->getName();
 
-    if(isTainted(pc)){
+    /*if(isTainted(pc)){
         DPRINTF(csd, "Committing Tainted Instruction 0x%x :: %s\n", pc, inst->generateDisassembly(pc, NULL));
-    }
+    }*/
 
     try
     {

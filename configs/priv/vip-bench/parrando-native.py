@@ -66,9 +66,9 @@ isa = str(m5.defines.buildEnv['TARGET_ISA']).lower()
 
 # Default to running 'hello', use the compiled ISA to find the binary
 #binary = 'tests/test-progs/hello/bin/' + isa + '/linux/hello'
-binary = ['editdist-enc-do']
+binary = ['parrando.na']
 input_file = [''] #['-I./lib', 'checkspam.pl', '2500', '5', '25', '11', '150', '1', '1', '1', '1']
-output_file = 'editdist-enc-do.out'
+output_file = 'parrando.na.out'
 
 # Check if there was a binary passed in via the command line and error if
 # there are too many arguments
@@ -99,7 +99,7 @@ system.cpu = DerivO3CPU(fetchWidth = systemWidth, decodeWidth = systemWidth, ren
 system.metadata = Metadata()
 system.metadata.filename = binary[0] + '.metadata.bin'
 system.metadata.insfilename = binary[0] + '.taints'
-system.metadata.progname = 'editdist-enc-do'
+system.metadata.progname = 'parrando.na'
 system.metadata.libc_start = 0x0016704c
 system.cpu.metadata = system.metadata
 

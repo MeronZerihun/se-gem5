@@ -1,4 +1,4 @@
-maxinst=3000000000
+maxinst=10000000000
 L1_cache_miss_latency=2
 L1_cache_access_latency=2
 L1_Icache_size='16kB'
