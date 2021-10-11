@@ -214,11 +214,11 @@ StaticInstPtr MacroopBase::getInjInsn_Enc(InstRegIndex dest, Metadata* metadata)
 	StaticInstPtr inj_enc; 
 	uint64_t update_time = metadata->get_reg_update_time_cycles(dest, false);
 	
-	DPRINTF(csd, "--------- R%d Elapsed Cycles is %d\n", dest.index(), update_time);
+	//DPRINTF(csd, "--------- R%d Elapsed Cycles is %d\n", dest.index(), update_time);
 
 	if(update_time >= metadata->get_enc_latency()){
 		inj_enc = new X86ISAInst::EncNone( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); 
-		DPRINTF(csd, "--------- Injecting %s\n", inj_enc->generateDisassembly(0, NULL));
+		//DPRINTF(csd, "--------- Injecting %s\n", inj_enc->generateDisassembly(0, NULL));
 		return inj_enc;
 	}
 
@@ -307,7 +307,7 @@ StaticInstPtr MacroopBase::getInjInsn_Enc(InstRegIndex dest, Metadata* metadata)
 			break;
 	}
 	
-	DPRINTF(csd, "--------- Injecting %s\n", inj_enc->generateDisassembly(0, NULL));
+	//DPRINTF(csd, "--------- Injecting %s\n", inj_enc->generateDisassembly(0, NULL));
 	return inj_enc; 
 }
 
@@ -316,11 +316,11 @@ StaticInstPtr MacroopBase::getInjInsn_EncFP(InstRegIndex dest, Metadata* metadat
 	StaticInstPtr inj_enc; 
 	uint64_t update_time = metadata->get_reg_update_time_cycles(dest, true);
 	
-	DPRINTF(csd, "--------- R%d Elapsed Cycles is %d\n", dest.index(), update_time);
+	//DPRINTF(csd, "--------- R%d Elapsed Cycles is %d\n", dest.index(), update_time);
 
 	if(update_time >= metadata->get_enc_latency()){
 		inj_enc = new X86ISAInst::EncNoneFP( machInst, "INJ_ENC", (1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, dest, dest, dest, 4, 0); 
-		DPRINTF(csd, "--------- Injecting %s\n", inj_enc->generateDisassembly(0, NULL));
+		//DPRINTF(csd, "--------- Injecting %s\n", inj_enc->generateDisassembly(0, NULL));
 		return inj_enc;
 	}
 
@@ -409,7 +409,7 @@ StaticInstPtr MacroopBase::getInjInsn_EncFP(InstRegIndex dest, Metadata* metadat
 			break;
 	}
 
-	DPRINTF(csd, "--------- Injecting %s\n", inj_enc->generateDisassembly(0, NULL));
+	//DPRINTF(csd, "--------- Injecting %s\n", inj_enc->generateDisassembly(0, NULL));
 	return inj_enc; 
 }
 
@@ -600,7 +600,7 @@ MacroopBase::cTXAlterMicroops(bool arith_tainted, bool mem_tainted, Addr pc, Met
 		// between now (the FETCH stage) and the EX/WB stage of this insn. We assume
 		// this case is infrequent so we ignore its influence... 
 
-		DPRINTF(csd, "MacroopBase::cTXAlterMicroops():: Modifying microops of tainted instruction 0x%x\n", pc);
+		//DPRINTF(csd, "MacroopBase::cTXAlterMicroops():: Modifying microops of tainted instruction 0x%x\n", pc);
 
 		for(int i=0;i<numMicroops;i++){
 
@@ -645,11 +645,11 @@ MacroopBase::cTXCheckShadowCache(bool arith_tainted, bool mem_tainted, Addr pc, 
 			std::__cxx11::string diss = microops[i]->generateDisassembly(0, NULL);
 
 			if((diss.find("dec") != std::string::npos) && (diss.find("INJ_DEC") != std::string::npos)){
-        		DPRINTF(csd, "MacroopBase::cTXCheckShadowCache():: Accessing shadow cache for microops of tainted instruction 0x%x\n", pc);
+        		//DPRINTF(csd, "MacroopBase::cTXCheckShadowCache():: Accessing shadow cache for microops of tainted instruction 0x%x\n", pc);
 				if(metadata->access_shadow_cache(effAddr)){
 					// Hit in shadow cache, replace OpClass with reduced-latency decrypt 
 					microops[i]->setOpClass(OpClass::DecryptHit);
-					DPRINTF(csd, "(HIT %d)-- %s\n", i, microops[i]->generateDisassembly(0, NULL));
+					//DPRINTF(csd, "(HIT %d)-- %s\n", i, microops[i]->generateDisassembly(0, NULL));
 				}
 			}
 	}
