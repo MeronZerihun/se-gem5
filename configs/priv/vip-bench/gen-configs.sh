@@ -1,5 +1,7 @@
-BENCHMARK_DIRS="boyer-moore-search bubble-sort edit-distance eulers-number-approx fft-int kepler-calc mersenne mnist-cnn nonlinear-nn nr-solver parrando rad-to-degree scalar-gwas-chi2 tea-cipher vector-gwas-chi2"
-#BENCHMARK_DIRS="boyer-moore-search bubble-sort"
+BENCHMARK_DIRS="distinctness filtered-query flood-fill gradient-descent kadane minspan primal-test shortest-path tea-cipher"
+#"bubble-sort edit-distance eulers-number-approx fft-int kepler-calc mersenne nonlinear-nn nr-solver parrando rad-to-degree lda triangle-count mnist-cnn"
+#BENCHMARK_DIRS="string-search bubble-sort edit-distance eulers-number-approx fft-int kepler-calc mersenne mnist-cnn nonlinear-nn nr-solver parrando rad-to-degree scalar-gwas-chi2 tea-cipher vector-gwas-chi2"
+#BENCHMARK_DIRS="string-search bubble-sort"
 
 
 for dir in  $BENCHMARK_DIRS; do
