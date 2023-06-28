@@ -1,22 +1,23 @@
-# Notes on priv-gem5 branches #
+# se-gem5 #
+## Branches 
 
-### naive-enc-impl
-- Encryption associated with execution stage
+### naive-se
+- Implements timing for a naive design of the SE enclave (i.e., a functional unit bookended with cipher engines)
+- Contains new gem5 functional units with added cipher latencies 
+- SE instructions are redirected to these functional units 
 - Duplicate lds/sts are injected to accomidate extended ciphertexts 
-- Enc ops are redirected to an Enc functional unit with extra latency 
 
-### shadow-reg-impl
-- Encryption associated with load/st
+### opt-se
+- Implements timing for an optimized design of the SE enclave, including the register cache (also called shadow register file) and decryption cache (also called shadow cache)
+- Contains new gem5 functional units with added cipher latencies 
 - Duplicate lds/sts are injected to accomidate extended ciphertexts 
-- Enc values incur latency on load (e.g., a tainted load takes +enc_latency longer)
-  and on stores (e.g., a tainted load takes +(enc_latency - last_update) longer) 
-  
-### shadow-cache-impl
-- Encryption associated with load/st (like shadow-reg), but this is reduced with a small cache that is flushed between context switches
-- Duplicate lds/sts are injected to accomidate extended ciphertexts 
-- Enc values incur latency on load (e.g., a tainted load takes +enc_latency longer)
-  and on stores (e.g., a tainted load takes +(enc_latency - last_update) longer)   
-  but if there is a HIT in the shadow cache, the latnecy is reduced 
+- Encrypted values incur latency on load (e.g., a tainted load takes +enc_latency longer)
+  and on stores (e.g., a tainted load takes +(enc_latency - last_update) longer), modeling accurate latency between data dependencies
+- Load latency is reduced if there is a HIT in the decryption cache
+
+## Configuring encryption latencies in se-gem5
+- Cipher latencies can be configured by modifying the file src/cpu/o3/FuncUnitConfig.py
+
 
 
 # EMTD gem5 #
