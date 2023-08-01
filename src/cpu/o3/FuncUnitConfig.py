@@ -44,12 +44,15 @@ from m5.params import *
 
 from m5.objects.FuncUnit import *
 
-AES_LATENCY = 40
-AES_NI_LATENCY = 70
-SIMON_LATENCY = 20
-QARMA_LATENCY = 12
+AES128_LATENCY    = 40
+AES128_NI_LATENCY = 70
+SIMON128_LATENCY  = 20
+QARMA128_LATENCY  = 12
+QARMA192_LATENCY  = 14
+QARMA256_LATENCY  = 16
+HASH_LATENCY      = 0 #No added exposed latency because 1c hash is run in parallel with op computation
 
-ENC_LATENCY = QARMA_LATENCY
+ENC_LATENCY = QARMA128_LATENCY + HASH_LATENCY
 
 #### BEGIN EMTD
 class Encrypt(FUDesc):
