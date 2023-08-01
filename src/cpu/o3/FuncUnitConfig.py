@@ -49,7 +49,7 @@ AES_NI_LATENCY = 70
 SIMON_LATENCY = 20
 QARMA_LATENCY = 12
 
-ENC_LATENCY = SIMON_LATENCY
+ENC_LATENCY = QARMA_LATENCY
 
 #### BEGIN EMTD
 class Encrypt(FUDesc):
@@ -65,14 +65,14 @@ class Encrypt(FUDesc):
                 OpDesc(opClass='Encrypt9',  opLat=ENC_LATENCY-9,  pipelined=True),        
                 OpDesc(opClass='Encrypt10', opLat=ENC_LATENCY-10, pipelined=True),         
                 OpDesc(opClass='Encrypt11', opLat=ENC_LATENCY-11,  pipelined=True),
-                OpDesc(opClass='Encrypt12', opLat=ENC_LATENCY-12,  pipelined=True),
-                OpDesc(opClass='Encrypt13', opLat=ENC_LATENCY-13,  pipelined=True),
-                OpDesc(opClass='Encrypt14', opLat=ENC_LATENCY-14,  pipelined=True),
-                OpDesc(opClass='Encrypt15', opLat=ENC_LATENCY-15,  pipelined=True),
-                OpDesc(opClass='Encrypt16', opLat=ENC_LATENCY-16,  pipelined=True),
-                OpDesc(opClass='Encrypt17', opLat=ENC_LATENCY-17,  pipelined=True),
-                OpDesc(opClass='Encrypt18', opLat=ENC_LATENCY-18,  pipelined=True),
-                OpDesc(opClass='Encrypt19', opLat=ENC_LATENCY-19,  pipelined=True),        
+                # OpDesc(opClass='Encrypt12', opLat=ENC_LATENCY-12,  pipelined=True),
+                # OpDesc(opClass='Encrypt13', opLat=ENC_LATENCY-13,  pipelined=True),
+                # OpDesc(opClass='Encrypt14', opLat=ENC_LATENCY-14,  pipelined=True),
+                # OpDesc(opClass='Encrypt15', opLat=ENC_LATENCY-15,  pipelined=True),
+                # OpDesc(opClass='Encrypt16', opLat=ENC_LATENCY-16,  pipelined=True),
+                # OpDesc(opClass='Encrypt17', opLat=ENC_LATENCY-17,  pipelined=True),
+                # OpDesc(opClass='Encrypt18', opLat=ENC_LATENCY-18,  pipelined=True),
+                # OpDesc(opClass='Encrypt19', opLat=ENC_LATENCY-19,  pipelined=True),        
                 #OpDesc(opClass='Encrypt20', opLat=ENC_LATENCY-20, pipelined=True),   
                 #OpDesc(opClass='Encrypt21', opLat=ENC_LATENCY-21,  pipelined=True),
                 #OpDesc(opClass='Encrypt22', opLat=ENC_LATENCY-22,  pipelined=True),
