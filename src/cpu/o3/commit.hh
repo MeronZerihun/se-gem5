@@ -52,9 +52,9 @@
 #include "cpu/timebuf.hh"
 #include "enums/CommitPolicy.hh"
 #include "sim/probe/probe.hh"
-//EMTD
+// BEGIN EMTD
 #include "emtd/Metadata.hh"
-
+// END EMTD
 struct DerivO3CPUParams;
 
 template <class>

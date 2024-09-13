@@ -50,61 +50,63 @@ SIMON128_LATENCY  = 20
 QARMA128_LATENCY  = 12
 QARMA192_LATENCY  = 14
 QARMA256_LATENCY  = 16
-HASH_LATENCY      = 0 #No added exposed latency because 1c hash is run in parallel with op computation
+HASH_LATENCY      = 1
 
-ENC_LATENCY = QARMA128_LATENCY + HASH_LATENCY
+ENC_LATENCY = QARMA128_LATENCY
+# DEC_LATENCY = 2 * QARMA128_LATENCY
 
 #### BEGIN EMTD
 class Encrypt(FUDesc):
-    opList = [  OpDesc(opClass='Encrypt',   opLat=ENC_LATENCY, pipelined=True),
-                OpDesc(opClass='Encrypt1',  opLat=ENC_LATENCY-1,  pipelined=True),
-                OpDesc(opClass='Encrypt2',  opLat=ENC_LATENCY-2,  pipelined=True),
-                OpDesc(opClass='Encrypt3',  opLat=ENC_LATENCY-3,  pipelined=True),
-                OpDesc(opClass='Encrypt4',  opLat=ENC_LATENCY-4,  pipelined=True),
-                OpDesc(opClass='Encrypt5',  opLat=ENC_LATENCY-5,  pipelined=True),
-                OpDesc(opClass='Encrypt6',  opLat=ENC_LATENCY-6,  pipelined=True),
-                OpDesc(opClass='Encrypt7',  opLat=ENC_LATENCY-7,  pipelined=True),
-                OpDesc(opClass='Encrypt8',  opLat=ENC_LATENCY-8,  pipelined=True),
-                OpDesc(opClass='Encrypt9',  opLat=ENC_LATENCY-9,  pipelined=True),        
-                OpDesc(opClass='Encrypt10', opLat=ENC_LATENCY-10, pipelined=True),         
-                OpDesc(opClass='Encrypt11', opLat=ENC_LATENCY-11,  pipelined=True),
-                # OpDesc(opClass='Encrypt12', opLat=ENC_LATENCY-12,  pipelined=True),
-                # OpDesc(opClass='Encrypt13', opLat=ENC_LATENCY-13,  pipelined=True),
-                # OpDesc(opClass='Encrypt14', opLat=ENC_LATENCY-14,  pipelined=True),
-                # OpDesc(opClass='Encrypt15', opLat=ENC_LATENCY-15,  pipelined=True),
-                # OpDesc(opClass='Encrypt16', opLat=ENC_LATENCY-16,  pipelined=True),
-                # OpDesc(opClass='Encrypt17', opLat=ENC_LATENCY-17,  pipelined=True),
-                # OpDesc(opClass='Encrypt18', opLat=ENC_LATENCY-18,  pipelined=True),
-                # OpDesc(opClass='Encrypt19', opLat=ENC_LATENCY-19,  pipelined=True),        
-                #OpDesc(opClass='Encrypt20', opLat=ENC_LATENCY-20, pipelined=True),   
-                #OpDesc(opClass='Encrypt21', opLat=ENC_LATENCY-21,  pipelined=True),
-                #OpDesc(opClass='Encrypt22', opLat=ENC_LATENCY-22,  pipelined=True),
-                #OpDesc(opClass='Encrypt23', opLat=ENC_LATENCY-23,  pipelined=True),
-                #OpDesc(opClass='Encrypt24', opLat=ENC_LATENCY-24,  pipelined=True),
-                #OpDesc(opClass='Encrypt25', opLat=ENC_LATENCY-25,  pipelined=True),
-                #OpDesc(opClass='Encrypt26', opLat=ENC_LATENCY-26,  pipelined=True),
-                #OpDesc(opClass='Encrypt27', opLat=ENC_LATENCY-27,  pipelined=True),
-                #OpDesc(opClass='Encrypt28', opLat=ENC_LATENCY-28,  pipelined=True),
-                #OpDesc(opClass='Encrypt29', opLat=ENC_LATENCY-29,  pipelined=True),        
-                #OpDesc(opClass='Encrypt30', opLat=ENC_LATENCY-30, pipelined=True),   
-                #OpDesc(opClass='Encrypt31', opLat=ENC_LATENCY-31,  pipelined=True),
-                #OpDesc(opClass='Encrypt32', opLat=ENC_LATENCY-32,  pipelined=True),
-                #OpDesc(opClass='Encrypt33', opLat=ENC_LATENCY-33,  pipelined=True),
-                #OpDesc(opClass='Encrypt34', opLat=ENC_LATENCY-34,  pipelined=True),
-                #OpDesc(opClass='Encrypt35', opLat=ENC_LATENCY-35,  pipelined=True),
-                #OpDesc(opClass='Encrypt36', opLat=ENC_LATENCY-36,  pipelined=True),
-                #OpDesc(opClass='Encrypt37', opLat=ENC_LATENCY-37,  pipelined=True),
-                #OpDesc(opClass='Encrypt38', opLat=ENC_LATENCY-38,  pipelined=True),
-                #OpDesc(opClass='Encrypt39', opLat=ENC_LATENCY-39,  pipelined=True),
-                OpDesc(opClass='EncryptNone',  opLat=1,             pipelined=True) 
-    ]    
+    opList = [ OpDesc(opClass='Encrypt', opLat=ENC_LATENCY, pipelined=True),
+    OpDesc(opClass='Encrypt1', opLat=ENC_LATENCY-1, pipelined=True),
+    OpDesc(opClass='Encrypt2', opLat=ENC_LATENCY-2,  pipelined=True),
+    OpDesc(opClass='Encrypt3', opLat=ENC_LATENCY-3,  pipelined=True),
+    OpDesc(opClass='Encrypt4', opLat=ENC_LATENCY-4,  pipelined=True),
+    OpDesc(opClass='Encrypt5', opLat=ENC_LATENCY-5,  pipelined=True),
+    OpDesc(opClass='Encrypt6', opLat=ENC_LATENCY-6,  pipelined=True),
+    OpDesc(opClass='Encrypt7', opLat=ENC_LATENCY-7,  pipelined=True),
+    OpDesc(opClass='Encrypt8', opLat=ENC_LATENCY-8,  pipelined=True),
+    OpDesc(opClass='Encrypt9', opLat=ENC_LATENCY-9,  pipelined=True),
+    OpDesc(opClass='Encrypt10', opLat=ENC_LATENCY-10, pipelined=True),
+    OpDesc(opClass='Encrypt11', opLat=ENC_LATENCY-11,  pipelined=True),
+    # OpDesc(opClass='Encrypt12', opLat=ENC_LATENCY-12,  pipelined=True),
+    # OpDesc(opClass='Encrypt13', opLat=ENC_LATENCY-13,  pipelined=True),
+    # OpDesc(opClass='Encrypt14', opLat=ENC_LATENCY-14,  pipelined=True),
+    # OpDesc(opClass='Encrypt15', opLat=ENC_LATENCY-15,  pipelined=True),
+    # OpDesc(opClass='Encrypt16', opLat=ENC_LATENCY-16,  pipelined=True),
+    # OpDesc(opClass='Encrypt17', opLat=ENC_LATENCY-17,  pipelined=True),
+    # OpDesc(opClass='Encrypt18', opLat=ENC_LATENCY-18,  pipelined=True),
+    # OpDesc(opClass='Encrypt19', opLat=ENC_LATENCY-19,  pipelined=True),
+    #OpDesc(opClass='Encrypt20', opLat=ENC_LATENCY-20, pipelined=True),
+    #OpDesc(opClass='Encrypt21', opLat=ENC_LATENCY-21,  pipelined=True),
+    #OpDesc(opClass='Encrypt22', opLat=ENC_LATENCY-22,  pipelined=True),
+    #OpDesc(opClass='Encrypt23', opLat=ENC_LATENCY-23,  pipelined=True),
+    #OpDesc(opClass='Encrypt24', opLat=ENC_LATENCY-24,  pipelined=True),
+    #OpDesc(opClass='Encrypt25', opLat=ENC_LATENCY-25,  pipelined=True),
+    #OpDesc(opClass='Encrypt26', opLat=ENC_LATENCY-26,  pipelined=True),
+    #OpDesc(opClass='Encrypt27', opLat=ENC_LATENCY-27,  pipelined=True),
+    #OpDesc(opClass='Encrypt28', opLat=ENC_LATENCY-28,  pipelined=True),
+    #OpDesc(opClass='Encrypt29', opLat=ENC_LATENCY-29,  pipelined=True),
+    #OpDesc(opClass='Encrypt30', opLat=ENC_LATENCY-30, pipelined=True),
+    #OpDesc(opClass='Encrypt31', opLat=ENC_LATENCY-31,  pipelined=True),
+    #OpDesc(opClass='Encrypt32', opLat=ENC_LATENCY-32,  pipelined=True),
+    #OpDesc(opClass='Encrypt33', opLat=ENC_LATENCY-33,  pipelined=True),
+    #OpDesc(opClass='Encrypt34', opLat=ENC_LATENCY-34,  pipelined=True),
+    #OpDesc(opClass='Encrypt35', opLat=ENC_LATENCY-35,  pipelined=True),
+    #OpDesc(opClass='Encrypt36', opLat=ENC_LATENCY-36,  pipelined=True),
+    #OpDesc(opClass='Encrypt37', opLat=ENC_LATENCY-37,  pipelined=True),
+    #OpDesc(opClass='Encrypt38', opLat=ENC_LATENCY-38,  pipelined=True),
+    #OpDesc(opClass='Encrypt39', opLat=ENC_LATENCY-39,  pipelined=True),
+    OpDesc(opClass='EncryptNone',  opLat=1, pipelined=True)
+    ]
 
     count = 1
 
 class Decrypt(FUDesc):
-    opList = [  OpDesc(opClass='Decrypt',    opLat=ENC_LATENCY,   pipelined=True),
-                OpDesc(opClass='DecryptHit', opLat=1,             pipelined=True)
-    ]    
+    opList = [
+    OpDesc(opClass='Decrypt', opLat=ENC_LATENCY, pipelined=True),
+    OpDesc(opClass='DecryptHit', opLat=1,             pipelined=True)
+    ]
 
     count = 1
 #### END EMTD
@@ -113,9 +115,9 @@ class IntALU(FUDesc):
     opList = [  OpDesc(opClass='IntAlu') ]
     count = 6
 
-# class ENC_IntALU(FUDesc):
-#     opList = [  OpDesc(opClass='EncIntAlu', opLat=1 + 2*ENC_LATENCY) ]
-#     count = 6
+class Enc_IntALU(FUDesc):
+    opList = [  OpDesc(opClass='EncIntAlu', opLat=max(1, HASH_LATENCY)) ]
+    count = 6
 
 class IntMultDiv(FUDesc):
     opList = [ OpDesc(opClass='IntMult', opLat=3),
@@ -126,14 +128,15 @@ class IntMultDiv(FUDesc):
     # one (or a small number) cycle each since each of these computes one bit
     # of the quotient.
     if buildEnv['TARGET_ISA'] in ('x86'):
-        opList[1].opLat=1
+        opList[1].opLat=max(1, HASH_LATENCY)
 
     count=2
 
-# class ENC_IntMultDiv(FUDesc):
-#     opList = [ OpDesc(opClass='EncIntMult', opLat=3 + 2*ENC_LATENCY),
-#                OpDesc(opClass='EncIntDiv',  opLat=20 + 2*ENC_LATENCY, pipelined=False) ]
-#     count=2
+class Enc_IntMultDiv(FUDesc):
+    opList = [
+    OpDesc(opClass='EncIntMult', opLat=max(3, HASH_LATENCY)),
+    OpDesc(opClass='EncIntDiv', opLat=max(20, HASH_LATENCY), pipelined=False) ]
+    count=2
 
 
 class FP_ALU(FUDesc):
@@ -142,27 +145,28 @@ class FP_ALU(FUDesc):
                OpDesc(opClass='FloatCvt',    opLat=2)]
     count = 4
 
-# class ENC_FP_ALU(FUDesc):
-#     opList = [ OpDesc(opClass='EncFloatAdd', opLat=2 + 2*ENC_LATENCY),
-#                OpDesc(opClass='EncFloatCmp', opLat=2 + 2*ENC_LATENCY),
-#                OpDesc(opClass='EncFloatCvt', opLat=2 + 2*ENC_LATENCY)  ]
-#     count = 4
+class Enc_FP_ALU(FUDesc):
+    opList = [ OpDesc(opClass='EncFloatAdd', opLat=max(2, HASH_LATENCY)),
+               OpDesc(opClass='EncFloatCmp', opLat=max(2, HASH_LATENCY)),
+               OpDesc(opClass='EncFloatCvt', opLat=max(2, HASH_LATENCY))  ]
+    count = 4
 
 class FP_MultDiv(FUDesc):
-    opList = [ OpDesc(opClass='FloatMult',       opLat=4),
-               OpDesc(opClass='FloatMultAcc',    opLat=5),
-               OpDesc(opClass='FloatMisc',       opLat=3),
-               OpDesc(opClass='FloatDiv',        opLat=12, pipelined=False),
-               OpDesc(opClass='FloatSqrt',       opLat=24, pipelined=False) ]
+    opList = [ OpDesc(opClass='FloatMult', opLat=4),
+               OpDesc(opClass='FloatMultAcc', opLat=5),
+               OpDesc(opClass='FloatMisc', opLat=3),
+               OpDesc(opClass='FloatDiv', opLat=12, pipelined=False),
+               OpDesc(opClass='FloatSqrt', opLat=24, pipelined=False) ]
     count = 2
 
-# class ENC_FP_MultDiv(FUDesc):
-#     opList = [ OpDesc(opClass='EncFloatMult',    opLat=4 + 2*ENC_LATENCY),
-#                OpDesc(opClass='EncFloatMultAcc', opLat=5 + 2*ENC_LATENCY),
-#                OpDesc(opClass='EncFloatMisc',    opLat=3 + 2*ENC_LATENCY),
-#                OpDesc(opClass='EncFloatDiv',     opLat=12 + 2*ENC_LATENCY, pipelined=False),
-#                OpDesc(opClass='EncFloatSqrt',    opLat=24 + 2*ENC_LATENCY, pipelined=False)]
-#     count = 2
+class Enc_FP_MultDiv(FUDesc):
+    opList = [
+    OpDesc(opClass='EncFloatMult', opLat=max(4, HASH_LATENCY)),
+    OpDesc(opClass='EncFloatMultAcc', opLat=max(5, HASH_LATENCY)),
+    OpDesc(opClass='EncFloatMisc', opLat=max(3, HASH_LATENCY)),
+    OpDesc(opClass='EncFloatDiv', opLat=max(12, HASH_LATENCY),pipelined=False),
+    OpDesc(opClass='EncFloatSqrt',opLat=max(24, HASH_LATENCY),pipelined=False)]
+    count = 2
 
 
 class SIMD_Unit(FUDesc):
@@ -195,35 +199,36 @@ class SIMD_Unit(FUDesc):
                ]
     count = 4
 
-# class ENC_SIMD_Unit(FUDesc):       
-#     opList = [ OpDesc(opClass='EncSimdAdd',            opLat=1 + 2*ENC_LATENCY),
-#                OpDesc(opClass='EncSimdAddAcc',         opLat=1 + 2*ENC_LATENCY),
-#                OpDesc(opClass='EncSimdAlu',            opLat=1 + 2*ENC_LATENCY),
-#                OpDesc(opClass='EncSimdCmp',            opLat=1 + 2*ENC_LATENCY),
-#                OpDesc(opClass='EncSimdCvt',            opLat=1 + 2*ENC_LATENCY),
-#                OpDesc(opClass='EncSimdMisc',           opLat=1 + 2*ENC_LATENCY),
-#                OpDesc(opClass='EncSimdMult',           opLat=1 + 2*ENC_LATENCY),
-#                OpDesc(opClass='EncSimdMultAcc',        opLat=1 + 2*ENC_LATENCY),
-#                OpDesc(opClass='EncSimdShift',          opLat=1 + 2*ENC_LATENCY),
-#                OpDesc(opClass='EncSimdShiftAcc',       opLat=1 + 2*ENC_LATENCY),
-#                OpDesc(opClass='EncSimdDiv',            opLat=1 + 2*ENC_LATENCY),
-#                OpDesc(opClass='EncSimdSqrt',           opLat=1 + 2*ENC_LATENCY),
-#                OpDesc(opClass='EncSimdFloatAdd',       opLat=1 + 2*ENC_LATENCY),
-#                OpDesc(opClass='EncSimdFloatAlu',       opLat=1 + 2*ENC_LATENCY),
-#                OpDesc(opClass='EncSimdFloatCmp',       opLat=1 + 2*ENC_LATENCY),
-#                OpDesc(opClass='EncSimdFloatCvt',       opLat=1 + 2*ENC_LATENCY),
-#                OpDesc(opClass='EncSimdFloatDiv',       opLat=1 + 2*ENC_LATENCY),
-#                OpDesc(opClass='EncSimdFloatMisc',      opLat=1 + 2*ENC_LATENCY),
-#                OpDesc(opClass='EncSimdFloatMult',      opLat=1 + 2*ENC_LATENCY),
-#                OpDesc(opClass='EncSimdFloatMultAcc',   opLat=1 + 2*ENC_LATENCY),
-#                OpDesc(opClass='EncSimdFloatSqrt',      opLat=1 + 2*ENC_LATENCY),
-#                OpDesc(opClass='EncSimdReduceAdd',      opLat=1 + 2*ENC_LATENCY),
-#                OpDesc(opClass='EncSimdReduceAlu',      opLat=1 + 2*ENC_LATENCY),
-#                OpDesc(opClass='EncSimdReduceCmp',      opLat=1 + 2*ENC_LATENCY),
-#                OpDesc(opClass='EncSimdFloatReduceAdd', opLat=1 + 2*ENC_LATENCY),
-#                OpDesc(opClass='EncSimdFloatReduceCmp', opLat=1 + 2*ENC_LATENCY)
-#                ]
-#     count = 4
+class Enc_SIMD_Unit(FUDesc):
+    opList = [
+        OpDesc(opClass='EncSimdAdd', opLat=max(1, HASH_LATENCY)),
+        OpDesc(opClass='EncSimdAddAcc', opLat=max(1, HASH_LATENCY)),
+        OpDesc(opClass='EncSimdAlu', opLat=max(1, HASH_LATENCY)),
+        OpDesc(opClass='EncSimdCmp', opLat=max(1, HASH_LATENCY)),
+        OpDesc(opClass='EncSimdCvt', opLat=max(1, HASH_LATENCY)),
+        OpDesc(opClass='EncSimdMisc', opLat=max(1, HASH_LATENCY)),
+        OpDesc(opClass='EncSimdMult', opLat=max(1, HASH_LATENCY)),
+        OpDesc(opClass='EncSimdMultAcc', opLat=max(1, HASH_LATENCY)),
+        OpDesc(opClass='EncSimdShift', opLat=max(1, HASH_LATENCY)),
+        OpDesc(opClass='EncSimdShiftAcc', opLat=max(1, HASH_LATENCY)),
+        OpDesc(opClass='EncSimdDiv', opLat=max(1, HASH_LATENCY)),
+        OpDesc(opClass='EncSimdSqrt', opLat=max(1, HASH_LATENCY)),
+        OpDesc(opClass='EncSimdFloatAdd', opLat=max(1, HASH_LATENCY)),
+        OpDesc(opClass='EncSimdFloatAlu', opLat=max(1, HASH_LATENCY)),
+        OpDesc(opClass='EncSimdFloatCmp', opLat=max(1, HASH_LATENCY)),
+        OpDesc(opClass='EncSimdFloatCvt', opLat=max(1, HASH_LATENCY)),
+        OpDesc(opClass='EncSimdFloatDiv', opLat=max(1, HASH_LATENCY)),
+        OpDesc(opClass='EncSimdFloatMisc', opLat=max(1, HASH_LATENCY)),
+        OpDesc(opClass='EncSimdFloatMult', opLat=max(1, HASH_LATENCY)),
+        OpDesc(opClass='EncSimdFloatMultAcc', opLat=max(1, HASH_LATENCY)),
+        OpDesc(opClass='EncSimdFloatSqrt', opLat=max(1, HASH_LATENCY)),
+        OpDesc(opClass='EncSimdReduceAdd', opLat=max(1, HASH_LATENCY)),
+        OpDesc(opClass='EncSimdReduceAlu', opLat=max(1, HASH_LATENCY)),
+        OpDesc(opClass='EncSimdReduceCmp', opLat=max(1, HASH_LATENCY)),
+        OpDesc(opClass='EncSimdFloatReduceAdd', opLat=max(1, HASH_LATENCY)),
+        OpDesc(opClass='EncSimdFloatReduceCmp', opLat=max(1, HASH_LATENCY))
+        ]
+    count = 4
 
 
 
@@ -247,6 +252,5 @@ class RdWrPort(FUDesc):
     count = 4
 
 class IprPort(FUDesc):
-    opList = [ OpDesc(opClass='IprAccess', opLat = 3, pipelined = False) ]
+    opList = [ OpDesc(opClass='IprAccess', pipelined = False) ]
     count = 1
-
