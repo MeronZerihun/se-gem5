@@ -47,9 +47,9 @@ MacroopBase::countLoadMicros (StaticInstPtr load_microop){
 		ptr = InstRegIndex(load_microop->srcRegIdx(1).index());
 	}
 
-	if (dest == ptr) {return 3;}
+	if (dest == ptr) {return 3 + 1;} //Updating to 192, inject 1 more load micro
 
-	return 2;
+	return 2 + 1; //Updating to 192, inject 1 more load micro
 }
 
 std::vector<StaticInstPtr>
@@ -85,6 +85,23 @@ MacroopBase::injectLoadMicros (StaticInstPtr load_microop){
 	
 	if(opName.compare("ld")==0){
 		//LOAD constructor originates from microldstop.hh::100
+		StaticInstPtr inj_load_2 = new X86ISAInst::Ld(
+				machInst, 							//ExtMachInst _machInst
+				"INJ_LD", 							//const char * instMnem
+				(1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, //uint64_t setFlags
+				env.scale, 							// uint8_t _scale
+				InstRegIndex(env.index), 			//InstRegIndex _index
+				ptr, 								//InstRegIndex _base
+				load_microop->getDisp() + 16,	// uint64_t _disp
+				InstRegIndex(env.seg), 				//InstRegIndex _segment
+				dest,								// InstRegIndex _data
+				env.dataSize, 						//uint8_t _dataSize
+				env.addressSize, 					//uint8_t _addressSize
+				0); 								//Request::FlagsType _memFlags
+		inj_load_2->setInjected();
+		inj_load_2->clearLastMicroop();
+		result.push_back(inj_load_2);
+
 		StaticInstPtr inj_load = new X86ISAInst::Ld(
 				machInst, 							//ExtMachInst _machInst
 				"INJ_LD", 							//const char * instMnem
@@ -134,6 +151,23 @@ MacroopBase::injectLoadMicros (StaticInstPtr load_microop){
 	}
 	else if(opName.compare("ldfp")==0){
 		//LOAD constructor originates from microldstop.hh::100
+		StaticInstPtr inj_load_2 = new X86ISAInst::Ldfp(
+				machInst, 							//ExtMachInst _machInst
+				"INJ_LD", 							//const char * instMnem
+				(1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, //uint64_t setFlags
+				env.scale, 							// uint8_t _scale
+				InstRegIndex(env.index), 			//InstRegIndex _index
+				ptr, 								//InstRegIndex _base
+				load_microop->getDisp() + 16,		// uint64_t _disp
+				InstRegIndex(env.seg), 				//InstRegIndex _segment
+				dest,								// InstRegIndex _data
+				8, 									//uint8_t _dataSize
+				env.addressSize, 					//uint8_t _addressSize
+				0); 								//Request::FlagsType _memFlags
+		inj_load_2->setInjected();
+		inj_load_2->clearLastMicroop();
+		result.push_back(inj_load_2);
+
 		StaticInstPtr inj_load = new X86ISAInst::Ldfp(
 				machInst, 							//ExtMachInst _machInst
 				"INJ_LD", 							//const char * instMnem
@@ -206,7 +240,7 @@ MacroopBase::injectLoadMicros (StaticInstPtr load_microop){
 /***************************************************************/
 int 
 MacroopBase::countStoreMicros (StaticInstPtr store_microop){
-	return 2;
+	return 2 + 1; //Updating to 192, inject 1 more store micro
 }
 
 StaticInstPtr MacroopBase::getInjInsn_Enc(InstRegIndex dest, Metadata* metadata){
@@ -443,6 +477,23 @@ MacroopBase::injectStoreMicros (StaticInstPtr store_microop, Metadata* metadata)
 		inj_enc->clearLastMicroop();
 		result.push_back(inj_enc);
 
+		StaticInstPtr inj_load_2 = new X86ISAInst::Ld(
+				machInst, 							//ExtMachInst _machInst
+				"INJ_FAUX_ST", 						//const char * instMnem
+				(1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, //uint64_t setFlags
+				env.scale, 							// uint8_t _scale
+				InstRegIndex(env.index), 			//InstRegIndex _index
+				ptr, 								//InstRegIndex _base
+				store_microop->getDisp() + 16,		// uint64_t _disp
+				InstRegIndex(env.seg), 				//InstRegIndex _segment
+				InstRegIndex(NUM_INTREGS),			// InstRegIndex _data //dest,
+				env.dataSize, 						//uint8_t _dataSize
+				env.addressSize, 					//uint8_t _addressSize
+				0); 								//Request::FlagsType _memFlags
+		inj_load_2->setInjected();
+		inj_load_2->clearLastMicroop();
+		result.push_back(inj_load_2);
+
 		StaticInstPtr inj_load = new X86ISAInst::Ld(
 				machInst, 							//ExtMachInst _machInst
 				"INJ_FAUX_ST", 						//const char * instMnem
@@ -482,6 +533,23 @@ MacroopBase::injectStoreMicros (StaticInstPtr store_microop, Metadata* metadata)
 		inj_enc->setInjected();
 		inj_enc->clearLastMicroop();
 		result.push_back(inj_enc);
+		
+		StaticInstPtr inj_load_2 = new X86ISAInst::Ld(
+				machInst, 							//ExtMachInst _machInst
+				"INJ_FAUX_ST",						//const char * instMnem
+				(1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, //uint64_t setFlags
+				env.scale, 							// uint8_t _scale
+				InstRegIndex(env.index), 			//InstRegIndex _index
+				ptr, 								//InstRegIndex _base
+				store_microop->getDisp() + 16,		// uint64_t _disp
+				InstRegIndex(env.seg), 				//InstRegIndex _segment
+				InstRegIndex(NUM_INTREGS),			// InstRegIndex _data //dest,
+				4, 									//uint8_t _dataSize
+				env.addressSize, 					//uint8_t _addressSize
+				0); 								//Request::FlagsType _memFlags
+        inj_load_2->setInjected();
+        inj_load_2->clearLastMicroop();
+        result.push_back(inj_load_2);
 
 		StaticInstPtr inj_load = new X86ISAInst::Ld(
 				machInst, 							//ExtMachInst _machInst
