@@ -50,9 +50,10 @@ SIMON128_LATENCY  = 20
 QARMA128_LATENCY  = 12
 QARMA192_LATENCY  = 14
 QARMA256_LATENCY  = 16
-HASH_LATENCY      = 1
+HASH_LATENCY      = 0
+KCIPHER_LATENCY = 5
 
-ENC_LATENCY = QARMA192_LATENCY
+ENC_LATENCY = KCIPHER_LATENCY
 
 #### BEGIN EMTD
 class Encrypt(FUDesc):
@@ -61,13 +62,13 @@ class Encrypt(FUDesc):
     OpDesc(opClass='Encrypt2', opLat=ENC_LATENCY-2,  pipelined=True),
     OpDesc(opClass='Encrypt3', opLat=ENC_LATENCY-3,  pipelined=True),
     OpDesc(opClass='Encrypt4', opLat=ENC_LATENCY-4,  pipelined=True),
-    OpDesc(opClass='Encrypt5', opLat=ENC_LATENCY-5,  pipelined=True),
-    OpDesc(opClass='Encrypt6', opLat=ENC_LATENCY-6,  pipelined=True),
-    OpDesc(opClass='Encrypt7', opLat=ENC_LATENCY-7,  pipelined=True),
-    OpDesc(opClass='Encrypt8', opLat=ENC_LATENCY-8,  pipelined=True),
-    OpDesc(opClass='Encrypt9', opLat=ENC_LATENCY-9,  pipelined=True),
-    OpDesc(opClass='Encrypt10', opLat=ENC_LATENCY-10, pipelined=True),
-    OpDesc(opClass='Encrypt11', opLat=ENC_LATENCY-11,  pipelined=True),
+    # OpDesc(opClass='Encrypt5', opLat=ENC_LATENCY-5,  pipelined=True),
+    # OpDesc(opClass='Encrypt6', opLat=ENC_LATENCY-6,  pipelined=True),
+    # OpDesc(opClass='Encrypt7', opLat=ENC_LATENCY-7,  pipelined=True),
+    # OpDesc(opClass='Encrypt8', opLat=ENC_LATENCY-8,  pipelined=True),
+    # OpDesc(opClass='Encrypt9', opLat=ENC_LATENCY-9,  pipelined=True),
+    # OpDesc(opClass='Encrypt10', opLat=ENC_LATENCY-10, pipelined=True),
+    # OpDesc(opClass='Encrypt11', opLat=ENC_LATENCY-11,  pipelined=True),
     # OpDesc(opClass='Encrypt12', opLat=ENC_LATENCY-12,  pipelined=True),
     # OpDesc(opClass='Encrypt13', opLat=ENC_LATENCY-13,  pipelined=True),
     # OpDesc(opClass='Encrypt14', opLat=ENC_LATENCY-14,  pipelined=True),
