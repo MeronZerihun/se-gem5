@@ -51,17 +51,18 @@ QARMA128_LATENCY  = 12
 QARMA192_LATENCY  = 14
 QARMA256_LATENCY  = 16
 HASH_LATENCY      = 0
-KCIPHER_LATENCY = 5
+# K-CIPHER for 128-bit block
+KCIPHER128_LATENCY = 3  
 
-ENC_LATENCY = KCIPHER_LATENCY
+ENC_LATENCY = KCIPHER128_LATENCY
 
 #### BEGIN EMTD
 class Encrypt(FUDesc):
     opList = [ OpDesc(opClass='Encrypt', opLat=ENC_LATENCY, pipelined=True),
     OpDesc(opClass='Encrypt1', opLat=ENC_LATENCY-1, pipelined=True),
     OpDesc(opClass='Encrypt2', opLat=ENC_LATENCY-2,  pipelined=True),
-    OpDesc(opClass='Encrypt3', opLat=ENC_LATENCY-3,  pipelined=True),
-    OpDesc(opClass='Encrypt4', opLat=ENC_LATENCY-4,  pipelined=True),
+    # OpDesc(opClass='Encrypt3', opLat=ENC_LATENCY-3,  pipelined=True),
+    # OpDesc(opClass='Encrypt4', opLat=ENC_LATENCY-4,  pipelined=True),
     # OpDesc(opClass='Encrypt5', opLat=ENC_LATENCY-5,  pipelined=True),
     # OpDesc(opClass='Encrypt6', opLat=ENC_LATENCY-6,  pipelined=True),
     # OpDesc(opClass='Encrypt7', opLat=ENC_LATENCY-7,  pipelined=True),
