@@ -55,8 +55,20 @@ from caches import *
 # import the SimpleOpts module
 from common import SimpleOpts
 
+# Set encryption latency
+AES128_LATENCY    = 40
+AES128_NI_LATENCY = 70
+SIMON128_LATENCY  = 20
+QARMA128_LATENCY  = 12
+QARMA192_LATENCY  = 14
+QARMA256_LATENCY  = 16
+KCIPHER128_LATENCY = 3  
+
+ENC_LATENCY = KCIPHER128_LATENCY
+
 # Set the usage message to display
 SimpleOpts.set_usage("usage: %prog [options] <binary to execute>")
+
 
 # Finalize the arguments and grab the opts so we can pass it on to our objects
 (opts, args) = SimpleOpts.parse_args()
@@ -101,6 +113,7 @@ system.metadata.filename = binary[0] + '.metadata.bin'
 system.metadata.insfilename = binary[0] + '.taints'
 system.metadata.progname = 'bubble-sort.enc'
 system.metadata.libc_start = 0x0016704c
+system.metadata.enc_latency = ENC_LATENCY
 system.cpu.metadata = system.metadata
 
 # Create an L1 instruction and data cache

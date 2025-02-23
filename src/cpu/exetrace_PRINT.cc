@@ -62,150 +62,170 @@
 using namespace std;
 using namespace TheISA;
 
-namespace Trace {
-
-void
-Trace::ExeTracerRecord::traceInst(const StaticInstPtr &inst, bool ran)
+namespace Trace
 {
-    std::stringstream outs;
 
-    if (!Debug::ExecUser || !Debug::ExecKernel) {
-        bool in_user_mode = TheISA::inUserMode(thread);
-        if (in_user_mode && !Debug::ExecUser) return;
-        if (!in_user_mode && !Debug::ExecKernel) return;
-    }
+    void
+    Trace::ExeTracerRecord::traceInst(const StaticInstPtr &inst, bool ran)
+    {
+        std::stringstream outs;
 
-    
-    if (Debug::ExecAsid)
-        outs << "A" << dec << TheISA::getExecutingAsid(thread) << " ";
+        if (!Debug::ExecUser || !Debug::ExecKernel)
+        {
+            bool in_user_mode = TheISA::inUserMode(thread);
+            if (in_user_mode && !Debug::ExecUser)
+                return;
+            if (!in_user_mode && !Debug::ExecKernel)
+                return;
+        }
 
-    if (Debug::ExecThread)
-        outs << "T" << thread->threadId() << " : ";
+        if (Debug::ExecAsid)
+            outs << "A" << dec << TheISA::getExecutingAsid(thread) << " ";
 
-    std::string sym_str;
-    Addr sym_addr;
-    Addr cur_pc = pc.instAddr();
-    if (debugSymbolTable && Debug::ExecSymbol &&
+        if (Debug::ExecThread)
+            outs << "T" << thread->threadId() << " : ";
+
+        std::string sym_str;
+        Addr sym_addr;
+        Addr cur_pc = pc.instAddr();
+        if (debugSymbolTable && Debug::ExecSymbol &&
             (!FullSystem || !inUserMode(thread)) &&
-            debugSymbolTable->findNearestSymbol(cur_pc, sym_str, sym_addr)) {
-        if (cur_pc != sym_addr)
-            sym_str += csprintf("+%d",cur_pc - sym_addr);
-        outs << "@" << sym_str;
-    } else {
-        outs << "0x" << hex << cur_pc;
-    }
+            debugSymbolTable->findNearestSymbol(cur_pc, sym_str, sym_addr))
+        {
+            if (cur_pc != sym_addr)
+                sym_str += csprintf("+%d", cur_pc - sym_addr);
+            outs << "@" << sym_str;
+        }
+        else
+        {
+            outs << "0x" << hex << cur_pc;
+        }
 
-    outs << "::PC 0x" << hex << cur_pc << "::";
+        outs << "::PC 0x" << hex << cur_pc << "::";
 
-    if (inst->isMicroop()) {
-        outs << "." << setw(2) << dec << pc.microPC();
-    } else {
-        outs << "   ";
-    }
+        if (inst->isMicroop())
+        {
+            outs << "." << setw(2) << dec << pc.microPC();
+        }
+        else
+        {
+            outs << "   ";
+        }
 
-    outs << " : ";
-
-    //
-    //  Print decoded instruction
-    //
-
-    outs << setw(26) << left;
-    outs << inst->disassemble(cur_pc, debugSymbolTable);
-    
-    if (ran) {
         outs << " : ";
 
-        if (Debug::ExecOpClass) {
-            outs << Enums::OpClassStrings[inst->opClass()] << " : ";
-        }
+        //
+        //  Print decoded instruction
+        //
 
-        if (Debug::ExecResult && !predicate) {
-            outs << "Predicated False";
-        }
+        outs << setw(26) << left;
+        outs << inst->disassemble(cur_pc, debugSymbolTable);
 
-        if (Debug::ExecResult && data_status != DataInvalid) {
-            switch (data_status) {
-              case DataVec:
+        if (ran)
+        {
+            outs << " : ";
+
+            if (Debug::ExecOpClass)
+            {
+                outs << Enums::OpClassStrings[inst->opClass()] << " : ";
+            }
+
+            if (Debug::ExecResult && !predicate)
+            {
+                outs << "Predicated False";
+            }
+
+            if (Debug::ExecResult && data_status != DataInvalid)
+            {
+                switch (data_status)
+                {
+                case DataVec:
                 {
                     ccprintf(outs, " D=0x[");
                     auto dv = data.as_vec->as<uint32_t>();
                     for (int i = TheISA::VecRegSizeBytes / 4 - 1; i >= 0;
-                         i--) {
+                         i--)
+                    {
                         ccprintf(outs, "%08x", dv[i]);
-                        if (i != 0) {
+                        if (i != 0)
+                        {
                             ccprintf(outs, "_");
                         }
                     }
                     ccprintf(outs, "]");
                 }
                 break;
-              case DataVecPred:
+                case DataVecPred:
                 {
                     ccprintf(outs, " D=0b[");
                     auto pv = data.as_pred->as<uint8_t>();
-                    for (int i = TheISA::VecPredRegSizeBits - 1; i >= 0; i--) {
+                    for (int i = TheISA::VecPredRegSizeBits - 1; i >= 0; i--)
+                    {
                         ccprintf(outs, pv[i] ? "1" : "0");
-                        if (i != 0 && i % 4 == 0) {
+                        if (i != 0 && i % 4 == 0)
+                        {
                             ccprintf(outs, "_");
                         }
                     }
                     ccprintf(outs, "]");
                 }
                 break;
-              default:
-                ccprintf(outs, " D=%#018x", data.as_int);
-                break;
+                default:
+                    ccprintf(outs, " D=%#018x", data.as_int);
+                    break;
+                }
+            }
+
+            if (Debug::ExecEffAddr && getMemValid())
+                outs << " A=0x" << hex << addr;
+
+            if (Debug::ExecFetchSeq && fetch_seq_valid)
+                outs << "  FetchSeq=" << dec << fetch_seq;
+
+            if (Debug::ExecCPSeq && cp_seq_valid)
+                outs << "  CPSeq=" << dec << cp_seq;
+
+            if (Debug::ExecFlags)
+            {
+                outs << "  flags=(";
+                inst->printFlags(outs, "|");
+                outs << ")";
             }
         }
-	
-	
-        if (Debug::ExecEffAddr && getMemValid())
-            outs << " A=0x" << hex << addr;
 
-        if (Debug::ExecFetchSeq && fetch_seq_valid)
-            outs << "  FetchSeq=" << dec << fetch_seq;
+        //
+        //  End of line...
+        //
+        outs << endl;
 
-        if (Debug::ExecCPSeq && cp_seq_valid)
-            outs << "  CPSeq=" << dec << cp_seq;
+        Trace::getDebugLogger()->dprintf_flag(
+            when, thread->getCpuPtr()->name(), "ExecEnable", outs.str().c_str());
+    }
 
-        if (Debug::ExecFlags) {
-            outs << "  flags=(";
-            inst->printFlags(outs, "|");
-            outs << ")";
+    void
+    Trace::ExeTracerRecord::dump()
+    {
+        /*
+         * The behavior this check tries to achieve is that if ExecMacro is on,
+         * the macroop will be printed. If it's on and microops are also on, it's
+         * printed before the microops start printing to give context. If the
+         * microops aren't printed, then it's printed only when the final microop
+         * finishes. Macroops then behave like regular instructions and don't
+         * complete/print when they fault.
+         */
+        if (Debug::ExecMacro && staticInst->isMicroop() &&
+            ((Debug::ExecMicro &&
+              macroStaticInst && staticInst->isFirstMicroop()) ||
+             (!Debug::ExecMicro &&
+              macroStaticInst && staticInst->isLastMicroop())))
+        {
+            traceInst(macroStaticInst, false);
+        }
+        if (Debug::ExecMicro || !staticInst->isMicroop())
+        {
+            traceInst(staticInst, true);
         }
     }
-
-    //
-    //  End of line...
-    //
-    outs << endl;
-
-    Trace::getDebugLogger()->dprintf_flag(
-        when, thread->getCpuPtr()->name(), "ExecEnable", outs.str().c_str());
-}
-
-void
-Trace::ExeTracerRecord::dump()
-{
-    /*
-     * The behavior this check tries to achieve is that if ExecMacro is on,
-     * the macroop will be printed. If it's on and microops are also on, it's
-     * printed before the microops start printing to give context. If the
-     * microops aren't printed, then it's printed only when the final microop
-     * finishes. Macroops then behave like regular instructions and don't
-     * complete/print when they fault.
-     */
-    if (Debug::ExecMacro && staticInst->isMicroop() &&
-        ((Debug::ExecMicro &&
-            macroStaticInst && staticInst->isFirstMicroop()) ||
-            (!Debug::ExecMicro &&
-             macroStaticInst && staticInst->isLastMicroop()))) {
-        traceInst(macroStaticInst, false);
-    }
-    if (Debug::ExecMicro || !staticInst->isMicroop()) {
-        traceInst(staticInst, true);
-    }
-}
 
 } // namespace Trace
 

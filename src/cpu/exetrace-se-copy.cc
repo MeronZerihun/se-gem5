@@ -68,7 +68,7 @@ namespace Trace
     void
     Trace::ExeTracerRecord::traceInst(const StaticInstPtr &inst, bool ran)
     {
-        std::stringstream outs;
+        // std::stringstream outs;
 
         if (!Debug::ExecUser || !Debug::ExecKernel)
         {
@@ -79,11 +79,12 @@ namespace Trace
                 return;
         }
 
+        /*
         if (Debug::ExecAsid)
             outs << "A" << dec << TheISA::getExecutingAsid(thread) << " ";
 
         if (Debug::ExecThread)
-            outs << "T" << thread->threadId() << " : ";
+            outs << "T" << thread->threadId() << " : ";*/
 
         std::string sym_str;
         Addr sym_addr;
@@ -94,88 +95,78 @@ namespace Trace
         {
             if (cur_pc != sym_addr)
                 sym_str += csprintf("+%d", cur_pc - sym_addr);
-            outs << "@" << sym_str;
+            // outs << "@" << sym_str;
         }
         else
         {
-            outs << "0x" << hex << cur_pc;
+            // outs << "0x" << hex << cur_pc;
         }
-
-        outs << "::PC 0x" << hex << cur_pc << "::";
 
         if (inst->isMicroop())
         {
-            outs << "." << setw(2) << dec << pc.microPC();
+            // outs << "." << setw(2) << dec << pc.microPC();
         }
         else
         {
-            outs << "   ";
+            // outs << "   ";
         }
 
-        outs << " : ";
+        // outs << " : ";
 
         //
         //  Print decoded instruction
         //
 
-        outs << setw(26) << left;
-        outs << inst->disassemble(cur_pc, debugSymbolTable);
+        // outs << setw(26) << left;
+        // outs << inst->disassemble(cur_pc, debugSymbolTable);
+        /*
+        if (ran) {
+            //outs << " : ";
 
-        if (ran)
-        {
-            outs << " : ";
-
-            if (Debug::ExecOpClass)
-            {
-                outs << Enums::OpClassStrings[inst->opClass()] << " : ";
+            if (Debug::ExecOpClass) {
+                //outs << Enums::OpClassStrings[inst->opClass()] << " : ";
             }
 
-            if (Debug::ExecResult && !predicate)
-            {
-                outs << "Predicated False";
+            if (Debug::ExecResult && !predicate) {
+                //outs << "Predicated False";
             }
 
-            if (Debug::ExecResult && data_status != DataInvalid)
-            {
-                switch (data_status)
-                {
-                case DataVec:
-                {
-                    ccprintf(outs, " D=0x[");
-                    auto dv = data.as_vec->as<uint32_t>();
-                    for (int i = TheISA::VecRegSizeBytes / 4 - 1; i >= 0;
-                         i--)
+            if (Debug::ExecResult && data_status != DataInvalid) {
+                switch (data_status) {
+                  case DataVec:
                     {
-                        ccprintf(outs, "%08x", dv[i]);
-                        if (i != 0)
-                        {
-                            ccprintf(outs, "_");
+                        //ccprintf(outs, " D=0x[");
+                        auto dv = data.as_vec->as<uint32_t>();
+                        for (int i = TheISA::VecRegSizeBytes / 4 - 1; i >= 0;
+                             i--) {
+                            //ccprintf(outs, "%08x", dv[i]);
+                            if (i != 0) {
+                                //ccprintf(outs, "_");
+                            }
                         }
+                        //ccprintf(outs, "]");
                     }
-                    ccprintf(outs, "]");
-                }
-                break;
-                case DataVecPred:
-                {
-                    ccprintf(outs, " D=0b[");
-                    auto pv = data.as_pred->as<uint8_t>();
-                    for (int i = TheISA::VecPredRegSizeBits - 1; i >= 0; i--)
+                    break;
+                  case DataVecPred:
                     {
-                        ccprintf(outs, pv[i] ? "1" : "0");
-                        if (i != 0 && i % 4 == 0)
-                        {
-                            ccprintf(outs, "_");
+                        //ccprintf(outs, " D=0b[");
+                        auto pv = data.as_pred->as<uint8_t>();
+                        for (int i = TheISA::VecPredRegSizeBits - 1; i >= 0; i--) {
+                            //ccprintf(outs, pv[i] ? "1" : "0");
+                            if (i != 0 && i % 4 == 0) {
+                                //ccprintf(outs, "_");
+                            }
                         }
+                        //ccprintf(outs, "]");
                     }
-                    ccprintf(outs, "]");
-                }
-                break;
-                default:
-                    ccprintf(outs, " D=%#018x", data.as_int);
+                    break;
+                  default:
+                    //ccprintf(outs, " D=%#018x", data.as_int);
                     break;
                 }
             }
-
+        */
+        /*
             if (Debug::ExecEffAddr && getMemValid())
                 outs << " A=0x" << hex << addr;
 
@@ -185,21 +176,20 @@ namespace Trace
             if (Debug::ExecCPSeq && cp_seq_valid)
                 outs << "  CPSeq=" << dec << cp_seq;
 
-            if (Debug::ExecFlags)
-            {
+            if (Debug::ExecFlags) {
                 outs << "  flags=(";
                 inst->printFlags(outs, "|");
                 outs << ")";
-            }
-        }
+            }*/
+        //}
 
         //
         //  End of line...
         //
-        outs << endl;
+        // outs << endl;
 
-        Trace::getDebugLogger()->dprintf_flag(
-            when, thread->getCpuPtr()->name(), "ExecEnable", outs.str().c_str());
+        // Trace::getDebugLogger()->dprintf_flag(
+        //     when, thread->getCpuPtr()->name(), "ExecEnable", outs.str().c_str());
     }
 
     void
