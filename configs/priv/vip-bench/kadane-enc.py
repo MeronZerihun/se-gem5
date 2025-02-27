@@ -55,14 +55,7 @@ from caches import *
 # import the SimpleOpts module
 from common import SimpleOpts
 
-# Set encryption latency
-AES128_LATENCY    = 40
-AES128_NI_LATENCY = 70
-SIMON128_LATENCY  = 20
-QARMA128_LATENCY  = 12
-QARMA192_LATENCY  = 14
-QARMA256_LATENCY  = 16
-KCIPHER128_LATENCY = 3  
+enc_latency = 0 
 
 ENC_LATENCY = KCIPHER128_LATENCY
 
@@ -84,7 +77,8 @@ output_file = 'kadane.enc.out'
 # Check if there was a binary passed in via the command line and error if
 # there are too many arguments
 if len(args) == 1:
-    binary = args[0]
+    enc_latency = args[0]
+
 elif len(args) > 1:
     SimpleOpts.print_help()
     m5.fatal("Expected a binary to execute as positional argument")
@@ -112,7 +106,7 @@ system.metadata.filename = binary[0] + '.metadata.bin'
 system.metadata.insfilename = binary[0] + '.taints'
 system.metadata.progname = 'kadane.enc'
 system.metadata.libc_start = 0x0016704c
-system.metadata.enc_latency = ENC_LATENCY
+system.metadata.enc_latency = enc_latency = ENC_LATENCY
 system.cpu.metadata = system.metadata
 
 # Create an L1 instruction and data cache
