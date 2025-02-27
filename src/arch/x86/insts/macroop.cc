@@ -217,7 +217,7 @@ namespace X86ISA
 		StaticInstPtr inj_enc;
 		uint64_t update_time = metadata->get_reg_update_time_cycles(dest, false);
 
-		DPRINTF(csd, "--------- R%d Elapsed Cycles is %d - Enc latency: %d\n", dest.index(), update_time, metadata->get_enc_latency());
+		DPRINTF(csd, "--------- R%d Elapsed Cycles is %d Enc_latency: %d\n", dest.index(), update_time, metadata->get_enc_latency());
 
 		if (update_time >= metadata->get_enc_latency())
 		{

@@ -79,6 +79,7 @@ output_file = 'bubble-sort.enc.out'
 # there are too many arguments
 if len(args) == 1:
     enc_latency = args[0]
+    print("Encrypted latency: " + enc_latency)
 
 elif len(args) > 1:
     SimpleOpts.print_help()
