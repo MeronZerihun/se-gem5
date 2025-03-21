@@ -100,6 +100,10 @@ void Metadata::regStats()
         .name(name() + ".committedTaintedLoadsStoreOps")
         .desc("Number of committed load/store ops that are tainted")
         .prereq(committedTaintedLoadsStoreOps);
+    committedTaintedLoadOps
+        .name(name() + ".committedTaintedLoadOps")
+        .desc("Number of committed load ops that are tainted")
+        .prereq(committedTaintedLoadOps);
     committedEncryptDecryptOps
         .name(name() + ".committedEncryptDecryptOps")
         .desc("Number of committed encrypt/decrypt ops")
@@ -733,6 +737,7 @@ void Metadata::commit_insn(ThreadContext *tc, StaticInstPtr inst, Addr pc, Trace
                 if (is_tainted)
                 {
                     committedTaintedLoadsStoreOps++;
+                    committedTaintedLoadOps++;
                 }
 
                 if (diss.find(" t") != std::string::npos)

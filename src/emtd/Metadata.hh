@@ -27,14 +27,13 @@
 #include <vector>
 #include <unordered_set>
 
-
-//Define size of SHADOW CACHE
+// Define size of SHADOW CACHE
 #define CACHE_LINES 4
 #define CACHE_WAYS 4
 #define LRU_REPLACEMENT true
 
-//Define how many bytes get a single tag
-//It is assumed that the metadata generator gives us metadata properly aligned
+// Define how many bytes get a single tag
+// It is assumed that the metadata generator gives us metadata properly aligned
 #define EMTD_CODE_TAG_GRANULARITY 4
 #define EMTD_DATA_TAG_GRANULARITY 8
 
@@ -60,18 +59,23 @@ typedef struct
 	uint8_t tagbyte;	  // Tag stored in lower 2 bits of last byte
 } Emtd_MetadataEntry;
 
-
 // Define a struct that describes how instuction taint entries are stored in the binary file
 typedef struct Emtd_InsnTaintEntry
 {
-	memaddr_t insn_addr;  
-	bool arith_tainted;	  
-	bool mem_tainted; 
-	Emtd_InsnTaintEntry(){
-                insn_addr = 0; arith_tainted = false; mem_tainted = false;
-        }
-	Emtd_InsnTaintEntry(memaddr_t insn, bool arith, bool mem){
-		insn_addr = insn; arith_tainted = arith; mem_tainted = mem;
+	memaddr_t insn_addr;
+	bool arith_tainted;
+	bool mem_tainted;
+	Emtd_InsnTaintEntry()
+	{
+		insn_addr = 0;
+		arith_tainted = false;
+		mem_tainted = false;
+	}
+	Emtd_InsnTaintEntry(memaddr_t insn, bool arith, bool mem)
+	{
+		insn_addr = insn;
+		arith_tainted = arith;
+		mem_tainted = mem;
 	}
 } Emtd_InsnTaintEntry;
 
@@ -81,7 +85,7 @@ enum Emtd_tag : uint8_t
 	DATA = 0,
 	CIPHERTEXT = 1,
 	UNTAGGED = 2,
-	CODE_PTR = 3, //Unused
+	CODE_PTR = 3, // Unused
 	Count
 };
 
@@ -102,7 +106,7 @@ enum Emtd_tag_type : uint8_t
 class Metadata : public SimObject
 {
 public:
-	//Metadata();
+	// Metadata();
 	Metadata(MetadataParams *params);
 	//~Metadata();
 
@@ -135,72 +139,64 @@ public:
 	Emtd_InsnTaintEntry getInsnTaintEntry(Addr pc);
 
 	// Encryption Helper Functions
-	uint64_t 	get_enc_latency();
-	void 		record_reg_update(RegId regIdx, bool is_fp_op, bool is_tainted, bool is_load);
-	void  		void_reg_update(RegId regIdx, bool is_fp_op);
-	uint64_t 	get_reg_update_time_cycles(RegId regIdx, bool is_fp_op);
-
+	uint64_t get_enc_latency();
+	void record_reg_update(RegId regIdx, bool is_fp_op, bool is_tainted, bool is_load);
+	void void_reg_update(RegId regIdx, bool is_fp_op);
+	uint64_t get_reg_update_time_cycles(RegId regIdx, bool is_fp_op);
 
 private:
 	std::string filename;
 	std::string insfilename;
 	std::string progname;
-	uint64_t	clock_period;
-	uint64_t 	enc_latency;
+	uint64_t clock_period;
+	uint64_t enc_latency;
 	// Addr libc_start;
-
 
 	// Shadow Cache/CAM Helper Functions
 private:
-	std::map<memaddr_t, uint64_t> 	memory_counters;		// Current state of memory counters 
-	uint64_t 	global_counter = 1; 
-	uint64_t 	shadow_cache[CACHE_LINES][CACHE_WAYS];
-	uint64_t 	shadow_cache_update_times[CACHE_LINES][CACHE_WAYS];
-	uint64_t 	shadow_cam[CACHE_LINES];
-	int			get_shadow_cache_line_no(uint64_t counter);	//Returns line in cache
-	int			get_cache_way_to_evict(int cache_line_no );	//Returns line in cache
-	void		update_shadow_cache(uint64_t counter); 		//Adds counter to Cache
-	void		update_shadow_cam(uint64_t counter);		//Adds counter to CAM
-	bool		index_shadow_cache(uint64_t counter); 		//Checks if counter is in Cache
-	bool		index_shadow_cam(uint64_t counter);			//Checks if counter is in CAM
+	std::map<memaddr_t, uint64_t> memory_counters; // Current state of memory counters
+	uint64_t global_counter = 1;
+	uint64_t shadow_cache[CACHE_LINES][CACHE_WAYS];
+	uint64_t shadow_cache_update_times[CACHE_LINES][CACHE_WAYS];
+	uint64_t shadow_cam[CACHE_LINES];
+	int get_shadow_cache_line_no(uint64_t counter); // Returns line in cache
+	int get_cache_way_to_evict(int cache_line_no);	// Returns line in cache
+	void update_shadow_cache(uint64_t counter);		// Adds counter to Cache
+	void update_shadow_cam(uint64_t counter);		// Adds counter to CAM
+	bool index_shadow_cache(uint64_t counter);		// Checks if counter is in Cache
+	bool index_shadow_cam(uint64_t counter);		// Checks if counter is in CAM
 public:
-	bool		access_shadow_cache(memaddr_t eff_addr);	//Retrieves counter from memory_counters, indexes/updates Cache using counter, Returns hit
-	bool		access_shadow_cam(memaddr_t eff_addr);		//Retrieves counter from memory_counters, indexes/updates CAM using counter, Returns hit
-
-
-
+	bool access_shadow_cache(memaddr_t eff_addr); // Retrieves counter from memory_counters, indexes/updates Cache using counter, Returns hit
+	bool access_shadow_cam(memaddr_t eff_addr);	  // Retrieves counter from memory_counters, indexes/updates CAM using counter, Returns hit
 
 private:
 	// Some nice string representations of tags
 	std::array<std::string, 5> EMTD_TAG_NAMES{{"DATA(0)", "CIPHERTEXT(1)", "UNTAGGED(2)"}};
-	std::map<memaddr_t, Emtd_tag> memory_tags;		 // Current state of memory tags
-													 // NOTE: Register's hold their own tags (in regfile)
+	std::map<memaddr_t, Emtd_tag> memory_tags; // Current state of memory tags
+											   // NOTE: Register's hold their own tags (in regfile)
 
 	// Representation of insn taints / "enc_ins"
-	std::map<memaddr_t, Emtd_InsnTaintEntry> insn_tags;  // Unordered_set chosen for efficiency 
+	std::map<memaddr_t, Emtd_InsnTaintEntry> insn_tags; // Unordered_set chosen for efficiency
 
 	// // TODO:: Remove insns_consts_tags
 	// std::map<memaddr_t, Emtd_tag> insns_consts_tags; // Used to find tag of destination register in insns
 
-	std::map<uint16_t, uint64_t> int_reg_updates_ticks;	
-	std::map<uint16_t, uint64_t> fp_reg_updates_ticks;	
+	std::map<uint16_t, uint64_t> int_reg_updates_ticks;
+	std::map<uint16_t, uint64_t> fp_reg_updates_ticks;
 
-
-	std::map<RegId, Emtd_tag> reg_tags;				  	// Register file tag
-	std::map<RegId, Emtd_status_tag> reg_tags_status; 	// Register file tag
+	std::map<RegId, Emtd_tag> reg_tags;				  // Register file tag
+	std::map<RegId, Emtd_status_tag> reg_tags_status; // Register file tag
 
 	std::map<Addr, int> pc_violation_counts;	   // Violation count
 	std::map<Addr, std::string> pc_violation_type; // Violation descriptions
 
-	void load_metadata_binary(const char *filename);				   // Populate initial mem tags and insns_const_tags
+	void load_metadata_binary(const char *filename); // Populate initial mem tags and insns_const_tags
 	void load_ins_taints(const char *filename);
-
 
 	memaddr_t convert_byte_array_to_addr(uint8_t *byte_array);
 	Emtd_tag convert_tagbyte_to_tag(uint8_t tagbyte);			// Helper function to mask bits in tagbyte
 	Emtd_tag_type convert_tagbyte_to_tag_type(uint8_t tagbyte); // Helper function to get tag's type
 	void initialize_reg_tags();									// Initialize tags for registers
-
 
 	// Variables used to keep track of
 	// stack frame size
@@ -221,16 +217,14 @@ private:
 	uint8_t tag_bits_mask;
 	uint8_t tag_type_bits_mask;
 
-
-
-
 	/** Total number of instructions committed. */
-    Stats::Scalar shadowCacheHits;
+	Stats::Scalar shadowCacheHits;
 	Stats::Scalar shadowCacheMisses;
 	Stats::Scalar shadowCacheAccesses;
 	Stats::Scalar shadowCacheEvictions;
 	Stats::Scalar committedTaintedInsns;
 	Stats::Scalar committedTaintedLoadsStoreOps;
+	Stats::Scalar committedTaintedLoadOps;
 	Stats::Scalar committedEncryptDecryptOps;
 };
 
