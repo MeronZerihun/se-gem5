@@ -84,7 +84,8 @@ namespace X86ISA
 			ptr = InstRegIndex(NUM_INTREGS + 1); // New ptr is temp register
 		}
 
-		if (opName.compare("ld") == 0)
+		// if (opName.compare("ld") == 0)
+		if (opName.compare("ld") == 0 || opName.compare("ldis") == 0)
 		{
 			// LOAD constructor originates from microldstop.hh::100
 			StaticInstPtr inj_load = new X86ISAInst::Ld(
@@ -530,7 +531,8 @@ namespace X86ISA
 		std::string opName = store_microop->getName();
 
 		// STORE constructor originates from microldstop.hh::100
-		if (opName.compare("st") == 0)
+		// if (opName.compare("st") == 0)
+		if (opName.compare("st") == 0 || opName.compare("stis") == 0)
 		{
 			StaticInstPtr inj_enc = getInjInsn_Enc(dest, metadata);
 			inj_enc->setInjected();
@@ -631,7 +633,7 @@ namespace X86ISA
 			int num_inj_microops = 0;
 			for (int i = 0; i < numMicroops; i++)
 			{
-				DPRINTF(csd, "(OLD %d)-- %s\n", i, microops[i]->generateDisassembly(0, NULL));
+				DPRINTF(csd, "(OLD %d)-- %s OpClass -- %d\n", i, microops[i]->generateDisassembly(0, NULL), microops[i]->opClass());
 				if (microops[i]->isLoad() && mem_tainted)
 				{
 					num_inj_microops += countLoadMicros(microops[i]);
@@ -806,7 +808,7 @@ namespace X86ISA
 
 			for (int i = 0; i < numMicroops; i++)
 			{
-				DPRINTF(csd, "(NEW %d)-- %s\n", i, microops[i]->generateDisassembly(0, NULL));
+				DPRINTF(csd, "(NEW %d)-- %s OpClass -- %d\n", i, microops[i]->generateDisassembly(0, NULL), microops[i]->opClass());
 			}
 		}
 
@@ -822,7 +824,7 @@ namespace X86ISA
 			// between now (the FETCH stage) and the EX/WB stage of this insn. We assume
 			// this case is infrequent so we ignore its influence...
 
-			// DPRINTF(csd, "MacroopBase::cTXAlterMicroops():: Modifying microops of tainted instruction 0x%x\n", pc);
+			DPRINTF(csd, "MacroopBase::cTXAlterMicroops():: Modifying microops of tainted instruction 0x%x\n", pc);
 
 			for (int i = 0; i < numMicroops; i++)
 			{
