@@ -85,7 +85,7 @@ namespace X86ISA
 		}
 
 		// if (opName.compare("ld") == 0)
-		if (opName.compare("ld") == 0 || opName.compare("ldis") == 0)
+		if (opName.compare("ld") == 0)
 		{
 			// LOAD constructor originates from microldstop.hh::100
 			StaticInstPtr inj_load = new X86ISAInst::Ld(
@@ -107,6 +107,56 @@ namespace X86ISA
 
 			// LOAD constructor originates from microldstop.hh::100
 			StaticInstPtr existing_load = new X86ISAInst::Ld(
+				machInst,																// ExtMachInst _machInst
+				"MOV_M_R",																// const char * instMnem
+				(1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, // uint64_t setFlags
+				env.scale,																// uint8_t _scale
+				InstRegIndex(env.index),												// InstRegIndex _index
+				ptr,																	// InstRegIndex _base
+				load_microop->getDisp(),												// uint64_t _disp
+				InstRegIndex(env.seg),													// InstRegIndex _segment
+				dest,																	// InstRegIndex _data
+				env.dataSize,															// uint8_t _dataSize
+				env.addressSize,														// uint8_t _addressSize
+				0);																		// Request::FlagsType _memFlags
+			existing_load->clearLastMicroop();
+			result.push_back(existing_load);
+
+			StaticInstPtr inj_dec = new X86ISAInst::Dec(
+				machInst,																// ExtMachInst _machInst
+				"INJ_DEC",																// const char * instMnem
+				(1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, // uint64_t setFlags
+				dest,																	// InstRegIndex _src1
+				dest,																	// InstRegIndex _src2
+				dest,																	// InstRegIndex _dest
+				8,																		// uint8_t _dataSize
+				0);																		// uint16_t _ext
+			inj_dec->setInjected();
+			inj_dec->clearLastMicroop();
+			result.push_back(inj_dec);
+		}
+		else if (opName.compare("ldis") == 0)
+		{
+			// LOAD constructor originates from microldstop.hh::100
+			StaticInstPtr inj_load = new X86ISAInst::Ld(
+				machInst,																// ExtMachInst _machInst
+				"INJ_LD",																// const char * instMnem
+				(1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, // uint64_t setFlags
+				env.scale,																// uint8_t _scale
+				InstRegIndex(env.index),												// InstRegIndex _index
+				ptr,																	// InstRegIndex _base
+				load_microop->getDisp() + 8,											// uint64_t _disp
+				InstRegIndex(env.seg),													// InstRegIndex _segment
+				dest,																	// InstRegIndex _data
+				env.dataSize,															// uint8_t _dataSize
+				env.addressSize,														// uint8_t _addressSize
+				0);																		// Request::FlagsType _memFlags
+			inj_load->setInjected();
+			inj_load->clearLastMicroop();
+			result.push_back(inj_load);
+
+			// LOAD constructor originates from microldstop.hh::100
+			StaticInstPtr existing_load = new X86ISAInst::Ldis(
 				machInst,																// ExtMachInst _machInst
 				"MOV_M_R",																// const char * instMnem
 				(1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, // uint64_t setFlags
@@ -532,7 +582,7 @@ namespace X86ISA
 
 		// STORE constructor originates from microldstop.hh::100
 		// if (opName.compare("st") == 0)
-		if (opName.compare("st") == 0 || opName.compare("stis") == 0)
+		if (opName.compare("st") == 0)
 		{
 			StaticInstPtr inj_enc = getInjInsn_Enc(dest, metadata);
 			inj_enc->setInjected();
@@ -557,6 +607,47 @@ namespace X86ISA
 			result.push_back(inj_load);
 
 			StaticInstPtr existing_store = new X86ISAInst::St(
+				machInst,																// ExtMachInst _machInst
+				"MOV_R_M",																// const char * instMnem
+				(1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, // uint64_t setFlags
+				env.scale,																// uint8_t _scale
+				InstRegIndex(env.index),												// InstRegIndex _index
+				ptr,																	// InstRegIndex _base
+				store_microop->getDisp(),												// uint64_t _disp
+				InstRegIndex(env.seg),													// InstRegIndex _segment
+				dest,																	// InstRegIndex _data
+				env.dataSize,															// uint8_t _dataSize
+				env.addressSize,														// uint8_t _addressSize
+				0);																		// Request::FlagsType _memFlags
+			existing_store->setInjected();
+			existing_store->clearLastMicroop();
+			result.push_back(existing_store);
+		}
+		else if (opName.compare("stis") == 0)
+		{
+			StaticInstPtr inj_enc = getInjInsn_Enc(dest, metadata);
+			inj_enc->setInjected();
+			inj_enc->clearLastMicroop();
+			result.push_back(inj_enc);
+
+			StaticInstPtr inj_load = new X86ISAInst::Ld(
+				machInst,																// ExtMachInst _machInst
+				"INJ_FAUX_ST",															// const char * instMnem
+				(1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, // uint64_t setFlags
+				env.scale,																// uint8_t _scale
+				InstRegIndex(env.index),												// InstRegIndex _index
+				ptr,																	// InstRegIndex _base
+				store_microop->getDisp() + 8,											// uint64_t _disp
+				InstRegIndex(env.seg),													// InstRegIndex _segment
+				InstRegIndex(NUM_INTREGS),												// InstRegIndex _data //dest,
+				env.dataSize,															// uint8_t _dataSize
+				env.addressSize,														// uint8_t _addressSize
+				0);																		// Request::FlagsType _memFlags
+			inj_load->setInjected();
+			inj_load->clearLastMicroop();
+			result.push_back(inj_load);
+
+			StaticInstPtr existing_store = new X86ISAInst::Stis(
 				machInst,																// ExtMachInst _machInst
 				"MOV_R_M",																// const char * instMnem
 				(1ULL << StaticInst::IsInjected) | (1ULL << StaticInst::IsMicroop) | 0, // uint64_t setFlags
@@ -644,118 +735,161 @@ namespace X86ISA
 				}
 				else if (arith_tainted)
 				{
+					// [MZD] rdip copies the instruction pointer to a register. Its OpClass is an IntALU but it should never be tainted
+					// Reference: https://www.gem5.org/documentation/general_docs/architecture_support/x86_microop_isa/
+					if ((microops[i]->getName()).compare("rdip") == 0)
+					{
+						continue;
+					}
 					switch (microops[i]->opClass())
 					{
 					case OpClass::IntAlu:
 						microops[i]->setOpClass(OpClass::EncIntAlu);
+						DPRINTF(csd, "Converting to EncIntALU\n");
 						break;
 					case OpClass::IntMult:
 						microops[i]->setOpClass(OpClass::EncIntMult);
+						DPRINTF(csd, "Converting to EncIntMult\n");
 						break;
 					case OpClass::IntDiv:
 						microops[i]->setOpClass(OpClass::EncIntDiv);
+						DPRINTF(csd, "Converting to EncIntDiv\n");
 						break;
 					case OpClass::FloatAdd:
 						microops[i]->setOpClass(OpClass::EncFloatAdd);
+						DPRINTF(csd, "Converting to EncFloatAdd\n");
 						break;
 					case OpClass::FloatCmp:
 						microops[i]->setOpClass(OpClass::EncFloatCmp);
+						DPRINTF(csd, "Converting to EncFloatCmp\n");
 						break;
 					case OpClass::FloatCvt:
 						microops[i]->setOpClass(OpClass::EncFloatCvt);
+						DPRINTF(csd, "Converting to EncFloatCvt\n");
 						break;
 					case OpClass::FloatMult:
 						microops[i]->setOpClass(OpClass::EncFloatMult);
+						DPRINTF(csd, "Converting to EncFloatMult\n");
 						break;
 					case OpClass::FloatMultAcc:
 						microops[i]->setOpClass(OpClass::EncFloatMultAcc);
+						DPRINTF(csd, "Converting to EncFloatMultAcc\n");
 						break;
 					case OpClass::FloatDiv:
 						microops[i]->setOpClass(OpClass::EncFloatDiv);
+						DPRINTF(csd, "Converting to EncFloatDiv\n");
 						break;
 					case OpClass::FloatMisc:
 						microops[i]->setOpClass(OpClass::EncFloatMisc);
+						DPRINTF(csd, "Converting to EncFloatMisc\n");
 						break;
 					case OpClass::FloatSqrt:
 						microops[i]->setOpClass(OpClass::EncFloatSqrt);
+						DPRINTF(csd, "Converting to EncFloatSqrt\n");
 						break;
 					case OpClass::SimdAdd:
 						microops[i]->setOpClass(OpClass::EncSimdAdd);
+						DPRINTF(csd, "Converting to EncSimdAdd\n");
 						break;
 					case OpClass::SimdAddAcc:
 						microops[i]->setOpClass(OpClass::EncSimdAddAcc);
+						DPRINTF(csd, "Converting to EncSimdAddAcc\n");
 						break;
 					case OpClass::SimdAlu:
 						microops[i]->setOpClass(OpClass::EncSimdAlu);
+						DPRINTF(csd, "Converting to EncSimdAlu\n");
 						break;
 					case OpClass::SimdCmp:
 						microops[i]->setOpClass(OpClass::EncSimdCmp);
+						DPRINTF(csd, "Converting to EncSimdCmp\n");
 						break;
 					case OpClass::SimdCvt:
 						microops[i]->setOpClass(OpClass::EncSimdCvt);
+						DPRINTF(csd, "Converting to EncSimdCvt\n");
 						break;
 					case OpClass::SimdMisc:
 						microops[i]->setOpClass(OpClass::EncSimdMisc);
+						DPRINTF(csd, "Converting to EncSimdMisc\n");
 						break;
 					case OpClass::SimdMult:
 						microops[i]->setOpClass(OpClass::EncSimdMult);
+						DPRINTF(csd, "Converting to EncSimdMult\n");
 						break;
 					case OpClass::SimdMultAcc:
 						microops[i]->setOpClass(OpClass::EncSimdMultAcc);
+						DPRINTF(csd, "Converting to EncSimdMultAcc\n");
 						break;
 					case OpClass::SimdShift:
 						microops[i]->setOpClass(OpClass::EncSimdShift);
+						DPRINTF(csd, "Converting to EncSimdShift\n");
 						break;
 					case OpClass::SimdShiftAcc:
 						microops[i]->setOpClass(OpClass::EncSimdShiftAcc);
+						DPRINTF(csd, "Converting to EncSimdShiftAcc\n");
 						break;
 					case OpClass::SimdDiv:
 						microops[i]->setOpClass(OpClass::EncSimdDiv);
+						DPRINTF(csd, "Converting to EncSimdDiv\n");
 						break;
 					case OpClass::SimdSqrt:
 						microops[i]->setOpClass(OpClass::EncSimdSqrt);
+						DPRINTF(csd, "Converting to EncSimdSqrt\n");
 						break;
 					case OpClass::SimdReduceAdd:
 						microops[i]->setOpClass(OpClass::EncSimdReduceAdd);
+						DPRINTF(csd, "Converting to EncSimdReduceAdd\n");
 						break;
 					case OpClass::SimdReduceAlu:
 						microops[i]->setOpClass(OpClass::EncSimdReduceAlu);
+						DPRINTF(csd, "Converting to EncSimdReduceAlu\n");
 						break;
 					case OpClass::SimdReduceCmp:
 						microops[i]->setOpClass(OpClass::EncSimdReduceCmp);
+						DPRINTF(csd, "Converting to EncSimdReduceCmp\n");
 						break;
 					case OpClass::SimdFloatAdd:
 						microops[i]->setOpClass(OpClass::EncSimdFloatAdd);
+						DPRINTF(csd, "Converting to EncSimdFloatAdd\n");
 						break;
 					case OpClass::SimdFloatAlu:
 						microops[i]->setOpClass(OpClass::EncSimdFloatAlu);
+						DPRINTF(csd, "Converting to EncSimdFloatAlu\n");
 						break;
 					case OpClass::SimdFloatCmp:
 						microops[i]->setOpClass(OpClass::EncSimdFloatCmp);
+						DPRINTF(csd, "Converting to EncSimdFloatCmp\n");
 						break;
 					case OpClass::SimdFloatCvt:
 						microops[i]->setOpClass(OpClass::EncSimdFloatCvt);
+						DPRINTF(csd, "Converting to EncSimdFloatCvt\n");
 						break;
 					case OpClass::SimdFloatDiv:
 						microops[i]->setOpClass(OpClass::EncSimdFloatDiv);
+						DPRINTF(csd, "Converting to EncSimdFloatDiv\n");
 						break;
 					case OpClass::SimdFloatMisc:
 						microops[i]->setOpClass(OpClass::EncSimdFloatMisc);
+						DPRINTF(csd, "Converting to EncSimdFloatMisc\n");
 						break;
 					case OpClass::SimdFloatMult:
 						microops[i]->setOpClass(OpClass::EncSimdFloatMult);
+						DPRINTF(csd, "Converting to EncSimdFloatMult\n");
 						break;
 					case OpClass::SimdFloatMultAcc:
 						microops[i]->setOpClass(OpClass::EncSimdFloatMultAcc);
+						DPRINTF(csd, "Converting to EncSimdFloatMultAcc\n");
 						break;
 					case OpClass::SimdFloatSqrt:
 						microops[i]->setOpClass(OpClass::EncSimdFloatSqrt);
+						DPRINTF(csd, "Converting to EncSimdFloatSqrt\n");
 						break;
 					case OpClass::SimdFloatReduceCmp:
 						microops[i]->setOpClass(OpClass::EncSimdFloatReduceCmp);
+						DPRINTF(csd, "Converting to EncSimdFloatReduceCmp\n");
 						break;
 					case OpClass::SimdFloatReduceAdd:
 						microops[i]->setOpClass(OpClass::EncSimdFloatReduceAdd);
+						DPRINTF(csd, "Converting to EncSimdFloatReduceAdd\n");
 						break;
 					default:
 						DPRINTF(csd, "WARNING:: OpClass not handled by switch in cTXAlterMicroops(): %d\n %s\n", microops[i]->opClass(), microops[i]->generateDisassembly(0, NULL));
